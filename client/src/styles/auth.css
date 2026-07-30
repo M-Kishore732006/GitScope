@@ -1,11 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 body {
-  margin: 0;
-  font-family: 'Inter', sans-serif;
-  background-color: #F8FAFC; /* Soft, clean light gray background */
-  color: #0F172A; /* Deep slate for maximum readability */
-}
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(to right,#eadfdf, #c1c1f4);
+    color: #0F172A;
+  }
 
 /* Page Layout */
 .auth-layout {
