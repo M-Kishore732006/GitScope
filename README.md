@@ -1,70 +1,144 @@
-# Getting Started with Create React App
+# GitScope
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A MERN Stack web application that helps educational institutions track and analyze students' GitHub open-source contributions.
+Students connect their GitHub account, while teachers and administrators monitor progress through analytics and dashboards.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 🚀 Features
 
-### `npm start`
+* Student login and authentication.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+* Secure GitHub account integration using OAuth.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+* Track commits, push events, and pull requests.
 
-### `npm test`
+* View repository contribution history.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+* Analytics dashboard with contribution insights.
 
-### `npm run build`
+* Visualize coding activity and performance trends.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+* Teachers can monitor individual student progress.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+* Compare contribution statistics across students.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+* Admin manages users and system settings.
 
-### `npm run eject`
+* Role-based access for Students, Teachers, and Admins.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+---
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 👥 User Roles
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Student
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+* Connect GitHub account after login.
+* View personal contributions and analytics.
 
-## Learn More
+### Teacher
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+* Track student GitHub activities.
+* Monitor performance using dashboards.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Admin
 
-### Code Splitting
+* Manage users and permissions.
+* Access institution-wide analytics.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+---
 
-### Analyzing the Bundle Size
+## 📊 Analytics
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+* Commit, push, and pull request statistics.
 
-### Making a Progressive Web App
+* Daily, weekly, and monthly contribution reports.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+* Repository-wise activity tracking.
 
-### Advanced Configuration
+* Student performance comparison.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+---
 
-### Deployment
+## 🛠 Tech Stack
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+### Frontend
 
-### `npm run build` fails to minify
+* React.js
+* Bootstrap 5
+* React Router DOM
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### Backend
+
+* Node.js
+* Express.js
+* JWT Authentication
+* GitHub OAuth
+
+### Database
+
+* MongoDB
+* Mongoose
+
+---
+
+## ⚙️ Installation
+
+```bash
+git clone https://github.com/your-username/gitscope.git
+cd gitscope
+```
+
+```bash
+# Frontend
+cd client
+npm install
+npm start
+```
+
+```bash
+# Backend
+cd server
+npm install
+npm run dev
+```
+
+---
+
+## 🔄 Workflow
+
+* Student logs in to GitScope.
+
+* Connects their GitHub account.
+
+* GitHub activity is synchronized automatically.
+
+* Analytics are generated from contribution data.
+
+* Teachers review student performance.
+
+* Admin oversees the complete platform.
+
+---
+
+## 🔒 Security
+
+* JWT-based authentication.
+
+* Secure GitHub OAuth integration.
+
+* Protected API routes.
+
+* Role-based access control.
+
+---
+
+## 📄 License
+
+MIT License.
+
+---
+
+## ❤️ Built With
+
+React • Node.js • Express.js • MongoDB • Bootstrap • GitHub API
