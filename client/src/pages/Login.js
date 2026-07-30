@@ -1,89 +1,73 @@
-import React from 'react';
-import './Auth.css'; // Importing custom styles for gradients
-import { Link } from 'react-router-dom'; 
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { FaEnvelope, FaLock} from 'react-icons/fa';
+import AuthCard from '../components/AuthCard';
+import AuthInput from '../components/AuthInput';
 
 const Login = () => {
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log('Login submitted:', formData);
+    // Add authentication logic here
+  };
+
   return (
-    <div className="container-fluid vh-100 p-0">
-      <div className="row g-0 h-100">
+    <AuthCard 
+      title="Welcome Back" 
+      subtitle="Sign in to continue to GitScope"
+    >
+      <form onSubmit={handleSubmit}>
+        <AuthInput
+          icon={FaEnvelope}
+          type="email"
+          name="email"
+          placeholder="Email Address"
+          value={formData.email}
+          onChange={handleChange}
+        />
         
-        {/* Left Side: Illustration / Welcome */}
-        <div className="col-md-6 d-none d-md-flex flex-column justify-content-between left-side-bg position-relative">
-          <div className="spacer-top"></div>
-          
-          <div className="text-center text-white z-index-1 mt-5">
-            <h1 className="display-4 fw-normal">Welcome Page</h1>
-            <p className="lead fs-6 text-light opacity-75">Sign In To Your Account</p>
-          </div>
+        <AuthInput
+          icon={FaLock}
+          type="password"
+          name="password"
+          placeholder="Password"
+          value={formData.password}
+          onChange={handleChange}
+        />
 
-          <div className="text-center pb-4 z-index-1 mt-auto bg-white-wave">
-            <span className="text-dark fw-bold tracking-wide small"></span>
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <div className="form-check custom-checkbox">
+            <input className="form-check-input" type="checkbox" id="rememberMe" />
+            <label className="form-check-label" htmlFor="rememberMe">
+              Remember Me
+            </label>
           </div>
+          <Link to="/forgot-password" className="link-primary" style={{ fontSize: '0.9rem' }}>
+            Forgot Password?
+          </Link>
         </div>
 
-        {/* Right Side: Login Form */}
-        <div className="col-md-6 d-flex flex-column justify-content-center p-5 bg-white">
-          <div className="w-100 mx-auto" style={{ maxWidth: '400px' }}>
-            
-            
+        <button type="submit" className="btn-primary-gradient mb-3">
+          Login
+        </button>
+      </form>
 
-            {/* Title */}
-            <h4 className="text-center mb-5 fw-bold text-dark">
-              <span className="text-gradient-purple">Login</span> Your Account
-            </h4>
+      <div className="divider">OR</div>
 
-            {/* Form */}
-            <form>
-              <div className="mb-4">
-                <label className="text-muted small fw-semibold mb-1">Email Address</label>
-                <input 
-                  type="email" 
-                  className="form-control custom-input" 
-                  placeholder="" 
-                />
-              </div>
 
-              <div className="mb-4">
-                <label className="text-muted small fw-semibold mb-1">Password</label>
-                <input 
-                  type="password" 
-                  className="form-control custom-input" 
-                  placeholder="" 
-                />
-              </div>
-
-              {/* Form Options */}
-              <div className="d-flex justify-content-between align-items-center mb-5 small">
-                <div className="form-check">
-                  <input type="checkbox" className="form-check-input shadow-none rounded-0 border-dark" id="rememberMe" />
-                  <label className="form-check-label text-muted fw-semibold" htmlFor="rememberMe">
-                    Remember
-                  </label>
-                </div>
-                <a href="#forgot" className="text-muted text-decoration-none fw-semibold">
-                  Forgot Password ?
-                </a>
-              </div>
-
-              {/* Submit Button */}
-              <button type="submit" className="btn text-white w-100 fw-bold py-2 submit-btn mb-4 tracking-wide">
-                SUBMIT
-              </button>
-
-              <div className="text-center">
-                <span className="text-muted small fw-semibold">If New User </span>
-                {/* 2. Replace <a> tag with <Link> */}
-                <Link to="/signup" className="text-gradient-purple text-decoration-none small fw-bold">
-                  Create Account
-                </Link>
-              </div>
-            </form>
-
-          </div>
-        </div>
-
-      </div>
-    </div>
+      <p className="text-center mt-4 mb-0" style={{ color: '#94A3B8', fontSize: '0.9rem' }}>
+        New to GitScope? <Link to="/signup" className="link-primary fw-medium">Create an Account</Link>
+      </p>
+    </AuthCard>
   );
 };
 
