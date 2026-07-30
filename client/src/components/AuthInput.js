@@ -1,36 +1,18 @@
-import React, { useState } from 'react';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import React from 'react';
 
-const AuthInput = ({ icon: Icon, type, placeholder, name, value, onChange, required = true }) => {
-  const [showPassword, setShowPassword] = useState(false);
-  
-  const isPassword = type === 'password';
-  const inputType = isPassword ? (showPassword ? 'text' : 'password') : type;
-
+const AuthInput = ({ icon: Icon, type, name, placeholder, value, onChange }) => {
   return (
     <div className="auth-input-group">
-      <div className="auth-input-icon">
-        <Icon />
-      </div>
       <input
-        type={inputType}
-        className="auth-input"
-        placeholder={placeholder}
+        type={type}
         name={name}
+        placeholder={placeholder}
         value={value}
         onChange={onChange}
-        required={required}
+        className="auth-input"
+        required
       />
-      {isPassword && (
-        <button
-          type="button"
-          className="toggle-password"
-          onClick={() => setShowPassword(!showPassword)}
-          aria-label="Toggle password visibility"
-        >
-          {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
-        </button>
-      )}
+      {Icon && <Icon className="auth-input-icon" />}
     </div>
   );
 };

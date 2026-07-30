@@ -25,34 +25,34 @@ const Signup = () => {
       return;
     }
     console.log('Signup submitted:', formData);
-    // Add registration logic here
   };
 
   return (
     <AuthCard 
       title="Create Account" 
       subtitle="Start tracking your GitHub contributions"
+      width="min(90vw, 550px)"
     >
-      {/* Removed the inline styles handling the overflow/scroll here */}
       <form onSubmit={handleSubmit}>
         
-        <AuthInput
-          icon={FaUser}
-          type="text"
-          name="fullName"
-          placeholder="Full Name"
-          value={formData.fullName}
-          onChange={handleChange}
-        />
-
-        <AuthInput
-          icon={FaIdBadge}
-          type="text"
-          name="rollNumber"
-          placeholder="Roll Number"
-          value={formData.rollNumber}
-          onChange={handleChange}
-        />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0 1rem' }}>
+          <AuthInput
+            icon={FaUser}
+            type="text"
+            name="fullName"
+            placeholder="Full Name"
+            value={formData.fullName}
+            onChange={handleChange}
+          />
+          <AuthInput
+            icon={FaIdBadge}
+            type="text"
+            name="rollNumber"
+            placeholder="Roll Number"
+            value={formData.rollNumber}
+            onChange={handleChange}
+          />
+        </div>
 
         <AuthInput
           icon={FaEnvelope}
@@ -72,35 +72,35 @@ const Signup = () => {
           onChange={handleChange}
         />
         
-        <AuthInput
-          icon={FaLock}
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-        />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0 1rem' }}>
+          <AuthInput
+            icon={FaLock}
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
+          />
+          <AuthInput
+            icon={FaLock}
+            type="password"
+            name="confirmPassword"
+            placeholder="Confirm Password"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+          />
+        </div>
 
-        <AuthInput
-          icon={FaLock}
-          type="password"
-          name="confirmPassword"
-          placeholder="Confirm Password"
-          value={formData.confirmPassword}
-          onChange={handleChange}
-        />
-
-        <button type="submit" className="btn-primary-gradient mt-2 mb-3">
-          Sign Up
+        <button type="submit" className="btn-primary-solid mt-2 mb-3">
+          Create Account
         </button>
       </form>
 
       <div className="divider">OR</div>
 
-      
-
-      <p className="text-center mt-4 mb-0" style={{ color: '#94A3B8', fontSize: '0.9rem' }}>
-        Already have an account? <Link to="/login" className="link-primary fw-medium">Login</Link>
+      {/* Note the color update here to #64748B */}
+      <p style={{ textAlign: 'center', marginTop: '1.5rem', marginBottom: 0, color: '#64748B', fontSize: '0.9rem' }}>
+        Already have an account? <Link to="/login" className="link-primary">Sign in</Link>
       </p>
     </AuthCard>
   );
