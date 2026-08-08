@@ -33,11 +33,7 @@ const Login = () => {
            // For now just redirect to their dashboard or profile
         }
         
-        if (response.data.role === 'student' && !response.data.profileCompleted) {
-          navigate('/student/profile');
-        } else {
-          navigate(`/${response.data.role}/dashboard`);
-        }
+        navigate(`/${response.data.role}/dashboard`);
       }
     } catch (error) {
       setErrorMsg(error.response?.data?.message || 'Invalid email or password');

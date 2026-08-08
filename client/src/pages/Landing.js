@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaGithub, FaChartLine, FaCode, FaTrophy, FaSyncAlt } from 'react-icons/fa';
+import { FaChartLine, FaCode, FaTrophy, FaSyncAlt } from 'react-icons/fa';
 import '../styles/Landing.css';
 
 const Landing = () => {

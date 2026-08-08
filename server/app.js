@@ -19,9 +19,10 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
-// Placeholder Routes
+// Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/student', require('./routes/studentRoutes'));
+app.use('/api/config', require('./routes/configRoutes'));
 // app.use('/api/teacher', require('./routes/teacherRoutes'));
 // app.use('/api/admin', require('./routes/adminRoutes'));
 

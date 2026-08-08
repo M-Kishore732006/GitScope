@@ -12,12 +12,14 @@ const generateToken = (id, role, profileCompleted) => {
 // @access  Public
 const registerUser = async (req, res) => {
   try {
-    const { username, rollNumber, email, phoneNumber, password, confirmPassword } = req.body;
+    const { username, rollNumber, email, phoneNumber, department, year, password, confirmPassword } = req.body;
 
     // Validate Input Fields mapping to exactly how prompt wants
     if (!username || username.length < 3 || username.length > 30) {
       return res.status(400).json({ message: 'Username must be between 3 and 30 characters.' });
     }
+    if (!department) return res.status(400).json({ message: 'Department is required.' });
+    if (!year) return res.status(400).json({ message: 'Year is required.' });
     
     if (password.length < 6) {
       return res.status(400).json({ message: 'Password must be at least 6 characters long.' });
@@ -56,6 +58,8 @@ const registerUser = async (req, res) => {
       rollNumber,
       email,
       phoneNumber,
+      department,
+      year,
       password,
     });
 

@@ -22,7 +22,9 @@ const seedAdmin = async () => {
       await admin.save();
       console.log('Admin account seeded successfully');
     } else {
-      console.log('Admin account already exists');
+      adminExists.password = process.env.ADMIN_PASSWORD;
+      await adminExists.save();
+      console.log('Admin account already exists. Credentials updated to match .env');
     }
   } catch (error) {
     console.error('Error seeding admin:', error);

@@ -19,6 +19,7 @@ const fetchGraphQLData = async (username) => {
             description
             stargazerCount
             forkCount
+            createdAt
             primaryLanguage {
               name
             }
@@ -60,6 +61,23 @@ const fetchGraphQLData = async (username) => {
   } catch (error) {
     console.error(`Error fetching GitHub data for ${username}:`, error.message);
     return null;
+  }
+};
+
+const fetchRecentEvents = async (username) => {
+  try {
+    const response = await axios.get(`https://api.github.com/users/${username}/events/public?per_page=15`, {
+      headers: { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` }
+    });
+    return response.data.map(ev => ({
+        type: ev.type || 'Event',
+        repoName: ev.repo?.name || 'Unknown',
+        action: ev.payload?.action || '',
+        createdAt: ev.created_at ? new Date(ev.created_at) : new Date()
+    })).slice(0, 10);
+  } catch(e) {
+    console.error(`Error fetching events for ${username}:`, e.message);
+    return [];
   }
 };
 
@@ -110,6 +128,7 @@ const syncUser = async (userId, githubUsername) => {
       stars: repo.stargazerCount,
       forks: repo.forkCount,
       primaryLanguage: repo.primaryLanguage?.name || 'Unknown',
+      createdAt: repo.createdAt,
       languages: []
     };
   });
@@ -127,6 +146,7 @@ const syncUser = async (userId, githubUsername) => {
   });
 
   const contributionStreak = calculateStreak(data.contributionsCollection.contributionCalendar.weeks);
+  const recentActivity = await fetchRecentEvents(githubUsername);
 
   const rawStats = {
      followers: data.followers.totalCount,
@@ -141,7 +161,8 @@ const syncUser = async (userId, githubUsername) => {
      contributionStreak,
      repositoriesList,
      languageUsage,
-     contributionCalendar: calendarDays
+     contributionCalendar: calendarDays,
+     recentActivity
   };
 
   rawStats.contributionScore = calculateContributionScore(rawStats);

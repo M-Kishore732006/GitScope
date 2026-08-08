@@ -50,6 +50,7 @@ const githubStatsSchema = new mongoose.Schema({
     stars: Number,
     forks: Number,
     primaryLanguage: String,
+    createdAt: Date,
     languages: [{
       language: String,
       count: Number
@@ -59,6 +60,13 @@ const githubStatsSchema = new mongoose.Schema({
   contributionCalendar: [{
     date: Date,
     count: Number
+  }],
+
+  recentActivity: [{
+    type: { type: String },
+    repoName: { type: String },
+    action: { type: String },
+    createdAt: { type: Date }
   }],
 
   lastUpdated: {

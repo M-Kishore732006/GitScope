@@ -6,9 +6,6 @@ const PublicRoute = () => {
   const userInfo = userInfoStr ? JSON.parse(userInfoStr) : null;
 
   if (userInfo) {
-     if (userInfo.role === 'student' && !userInfo.profileCompleted) {
-        return <Navigate to="/student/profile" replace />;
-     }
      return <Navigate to={`/${userInfo.role}/dashboard`} replace />;
   }
 

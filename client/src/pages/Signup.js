@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { FaUser, FaEnvelope, FaPhone, FaLock, FaIdBadge } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaPhone, FaLock, FaIdBadge, FaGraduationCap, FaBuilding } from 'react-icons/fa';
 import AuthCard from '../components/AuthCard';
 import AuthInput from '../components/AuthInput';
 
@@ -12,6 +12,8 @@ const Signup = () => {
     rollNumber: '',
     email: '',
     phoneNumber: '',
+    department: '',
+    year: '',
     password: '',
     confirmPassword: ''
   });
@@ -36,11 +38,7 @@ const Signup = () => {
       // Auto login or redirect to login on success
       if (response.data) {
         localStorage.setItem('userInfo', JSON.stringify(response.data));
-        if (response.data.role === 'student' && !response.data.profileCompleted) {
-          navigate('/student/profile');
-        } else {
-          navigate(`/${response.data.role}/dashboard`);
-        }
+        navigate(`/${response.data.role}/dashboard`);
       }
     } catch (error) {
       setErrorMsg(error.response?.data?.message || 'Something went wrong during registration.');
@@ -94,6 +92,27 @@ const Signup = () => {
           value={formData.phoneNumber}
           onChange={handleChange}
         />
+        
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0 1rem' }}>
+          <AuthInput
+            icon={FaBuilding}
+            type="text"
+            name="department"
+            placeholder="Department (e.g. CSE)"
+            value={formData.department}
+            onChange={handleChange}
+          />
+          <div className="auth-input-group mb-3">
+            <span className="auth-input-icon"><FaGraduationCap /></span>
+            <select name="year" value={formData.year} onChange={handleChange} className="auth-input" style={{width: '100%', border: 'none', outline: 'none', background: 'transparent'}} required>
+              <option value="" disabled>Select Year</option>
+              <option value="1st Year">1st Year</option>
+              <option value="2nd Year">2nd Year</option>
+              <option value="3rd Year">3rd Year</option>
+              <option value="4th Year">4th Year</option>
+            </select>
+          </div>
+        </div>
         
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0 1rem' }}>
           <AuthInput

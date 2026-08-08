@@ -1,9 +1,9 @@
+const mongoose = require('mongoose');
+const axios = require('axios');
 const User = require('../models/User');
 const GithubStats = require('../models/GithubStats');
 const githubService = require('../services/githubService');
 const leaderboardService = require('../services/leaderboardService');
-
-// @desc    Update Student Profile
 // @route   PUT /api/student/profile
 // @access  Private/Student
 const updateProfile = async (req, res) => {
@@ -71,7 +71,7 @@ const getDashboardData = async (req, res) => {
        };
     }
 
-    res.json({ user, stats });
+    res.json({ user, stats, clientId: process.env.GITHUB_CLIENT_ID });
   } catch (error) {
      console.error(error);
      res.status(500).json({ message: 'Error fetching dashboard data' });
@@ -101,9 +101,167 @@ const refreshGithubData = async (req, res) => {
         res.status(500).json({ message: 'Error refreshing Github Data' });
     }
 };
+// @desc    Link GitHub Account
+// @route   POST /api/student/github/link
+// @access  Private/Student
+const linkGithub = async (req, res) => {
+    try {
+        const { githubUsername } = req.body;
+        if (!githubUsername) return res.status(400).json({ message: 'GitHub username is required' });
+
+        const user = await User.findById(req.user._id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        user.githubUsername = githubUsername;
+        user.githubLinked = true;
+        await user.save();
+
+        const success = await githubService.syncUser(user._id, user.githubUsername);
+        if (success) {
+            await leaderboardService.updateLeaderboards();
+            return res.status(200).json({ message: 'GitHub linked successfully' });
+        } else {
+            return res.status(502).json({ message: 'Failed to fetch GitHub data. It may be invalid.' });
+        }
+    } catch (error) {
+        console.error('linkGithub ERROR:', error);
+        res.status(500).json({ message: 'Error linking GitHub: ' + (error.message || '') });
+    }
+}
+
+// @desc    Link GitHub via OAuth Code
+// @route   POST /api/student/github/oauth
+// @access  Private/Student
+const linkGithubOauth = async (req, res) => {
+    try {
+        const { code } = req.body;
+        if (!code) return res.status(400).json({ message: 'GitHub OAuth code is required' });
+
+        // 1. Exchange code for access token
+        const tokenResponse = await axios.post('https://github.com/login/oauth/access_token', {
+            client_id: process.env.GITHUB_CLIENT_ID,
+            client_secret: process.env.GITHUB_CLIENT_SECRET,
+            code: code,
+            redirect_uri: req.body.redirectUri || process.env.OAUTH_REDIRECT_URI || 'http://localhost:3000/student/github/callback'
+        }, {
+            headers: { Accept: 'application/json' }
+        });
+
+        const accessToken = tokenResponse.data.access_token;
+        if (!accessToken) {
+            console.error("OAuth Exchange Error:", tokenResponse.data);
+            return res.status(400).json({ message: 'Failed to exchange OAuth code for access token.' });
+        }
+
+        // 2. Fetch authenticated user data from GitHub
+        const githubUserRes = await axios.get('https://api.github.com/user', {
+            headers: { Authorization: `Bearer ${accessToken}` }
+        });
+
+        const githubUsername = githubUserRes.data.login;
+        if (!githubUsername) {
+            return res.status(400).json({ message: 'Could not fetch GitHub user profile' });
+        }
+
+        // 3. Link logic identical to earlier
+        const user = await User.findById(req.user._id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        user.githubUsername = githubUsername;
+        user.githubLinked = true;
+        await user.save();
+
+        const success = await githubService.syncUser(user._id, user.githubUsername);
+        if (success) {
+            await leaderboardService.updateLeaderboards();
+            return res.status(200).json({ message: 'GitHub connected successfully', username: githubUsername });
+        } else {
+            return res.status(502).json({ message: 'Failed to fetch GitHub statistics after linking.' });
+        }
+
+    } catch (error) {
+        console.error('linkGithubOauth ERROR:', error);
+        res.status(500).json({ message: 'Error during GitHub OAuth linking: ' + (error.message || '') });
+    }
+}
+
+// @desc    Get All Repositories
+// @route   GET /api/student/repositories
+// @access  Private/Student
+const getAllRepositories = async (req, res) => {
+    try {
+        const stats = await GithubStats.findOne({ user: req.user._id });
+        res.json(stats ? stats.repositoriesList : []);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error fetching repositories' });
+    }
+}
+
+// @desc    Get Repository By ID (Name)
+// @route   GET /api/student/repository/:id
+// @access  Private/Student
+const getRepositoryById = async (req, res) => {
+    try {
+        const stats = await GithubStats.findOne({ user: req.user._id });
+        if (!stats) return res.status(404).json({ message: 'No stats found' });
+        const repo = stats.repositoriesList.find(r => r.name === req.params.id);
+        if (repo) res.json(repo);
+        else res.status(404).json({ message: 'Repository not found' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error fetching repository details' });
+    }
+}
+
+// @desc    Get Achievements
+// @route   GET /api/student/achievements
+// @access  Private/Student
+const getAchievements = async (req, res) => {
+    try {
+        const stats = await GithubStats.findOne({ user: req.user._id });
+        res.json({ achievements: stats ? stats.achievements : [], level: stats ? stats.level : 'Bronze' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error fetching achievements' });
+    }
+}
+
+// @desc    Get Leaderboard
+// @route   GET /api/student/leaderboard
+// @access  Private/Student
+const getLeaderboards = async (req, res) => {
+    try {
+        const stats = await GithubStats.find().sort({ contributionScore: -1 }).populate('user', 'username fullName department year role');
+        // Filter out those without user or not student
+        const validStats = stats.filter(s => s.user && s.user.role === 'student');
+
+        const overall = validStats.map(s => ({
+            rank: s.overallRank,
+            name: s.user.fullName || s.user.username,
+            department: s.user.department,
+            year: s.user.year,
+            score: s.contributionScore,
+            commits: s.totalCommits,
+            pullRequests: s.mergedPullRequests,
+            level: s.level
+        }));
+
+        res.json(overall); // The frontend can handle department and year-wise grouping if it wants, or we can send grouped object
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error fetching leaderboard' });
+    }
+};
 
 module.exports = {
   updateProfile,
   getDashboardData,
-  refreshGithubData
+  refreshGithubData,
+  linkGithub,
+  linkGithubOauth,
+  getAllRepositories,
+  getRepositoryById,
+  getAchievements,
+  getLeaderboards
 };
