@@ -1,30 +1,52 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { FaUser, FaEnvelope, FaPhone, FaLock, FaIdBadge } from 'react-icons/fa';
 import AuthCard from '../components/AuthCard';
 import AuthInput from '../components/AuthInput';
 
 const Signup = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    fullName: '',
+    username: '',
     rollNumber: '',
     email: '',
     phoneNumber: '',
     password: '',
     confirmPassword: ''
   });
+  const [errorMsg, setErrorMsg] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMsg('');
     if(formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
+      setErrorMsg("Passwords do not match.");
       return;
     }
-    console.log('Signup submitted:', formData);
+    
+    setLoading(true);
+    try {
+      const response = await axios.post('/api/auth/register', formData);
+      // Auto login or redirect to login on success
+      if (response.data) {
+        localStorage.setItem('userInfo', JSON.stringify(response.data));
+        if (response.data.role === 'student' && !response.data.profileCompleted) {
+          navigate('/student/profile');
+        } else {
+          navigate(`/${response.data.role}/dashboard`);
+        }
+      }
+    } catch (error) {
+      setErrorMsg(error.response?.data?.message || 'Something went wrong during registration.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -33,15 +55,16 @@ const Signup = () => {
       subtitle="Start tracking your GitHub contributions"
       width="min(90vw, 550px)"
     >
+      {errorMsg && <div className="alert alert-danger p-2 text-center" style={{fontSize: '0.875rem'}}>{errorMsg}</div>}
       <form onSubmit={handleSubmit}>
         
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0 1rem' }}>
           <AuthInput
             icon={FaUser}
             type="text"
-            name="fullName"
-            placeholder="Full Name"
-            value={formData.fullName}
+            name="username"
+            placeholder="Username"
+            value={formData.username}
             onChange={handleChange}
           />
           <AuthInput
@@ -91,8 +114,8 @@ const Signup = () => {
           />
         </div>
 
-        <button type="submit" className="btn-primary-solid mt-2 mb-3">
-          Create Account
+        <button type="submit" className="btn-primary-solid mt-2 mb-3" disabled={loading}>
+          {loading ? 'Creating Account...' : 'Create Account'}
         </button>
       </form>
 

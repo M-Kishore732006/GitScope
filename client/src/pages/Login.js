@@ -1,22 +1,49 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { FaEnvelope, FaLock } from 'react-icons/fa';
 import AuthCard from '../components/AuthCard';
 import AuthInput from '../components/AuthInput';
 
 const Login = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
+  const [errorMsg, setErrorMsg] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Login submitted:', formData);
+    setErrorMsg('');
+    setLoading(true);
+    
+    try {
+      const response = await axios.post('/api/auth/login', formData);
+      if (response.data) {
+        localStorage.setItem('userInfo', JSON.stringify(response.data));
+        
+        if (response.data.mustChangePassword) {
+           // We could redirect to a change password screen here
+           // For now just redirect to their dashboard or profile
+        }
+        
+        if (response.data.role === 'student' && !response.data.profileCompleted) {
+          navigate('/student/profile');
+        } else {
+          navigate(`/${response.data.role}/dashboard`);
+        }
+      }
+    } catch (error) {
+      setErrorMsg(error.response?.data?.message || 'Invalid email or password');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -24,6 +51,7 @@ const Login = () => {
       title="Welcome Back" 
       subtitle="Sign in to your GitScope account"
     >
+      {errorMsg && <div className="alert alert-danger p-2 text-center" style={{fontSize: '0.875rem'}}>{errorMsg}</div>}
       <form onSubmit={handleSubmit}>
         <AuthInput
           icon={FaEnvelope}
@@ -53,8 +81,8 @@ const Login = () => {
           </Link>
         </div>
 
-        <button type="submit" className="btn-primary-solid mb-3">
-          Sign In
+        <button type="submit" className="btn-primary-solid mb-3" disabled={loading}>
+          {loading ? 'Signing In...' : 'Sign In'}
         </button>
       </form>
 
