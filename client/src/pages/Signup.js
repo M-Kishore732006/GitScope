@@ -1,9 +1,69 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FaUser, FaEnvelope, FaPhone, FaLock, FaIdBadge, FaGraduationCap, FaBuilding } from 'react-icons/fa';
 import AuthCard from '../components/AuthCard';
 import AuthInput from '../components/AuthInput';
+
+const AuthSelect = ({ icon: Icon, name, value, onChange, options, placeholder }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find(opt => opt.value === value);
+
+  return (
+    <div className="auth-input-group mb-3 position-relative" ref={dropdownRef}>
+      <span className="auth-input-icon"><Icon /></span>
+      <div 
+        className="auth-input d-flex align-items-center justify-content-between" 
+        style={{ width: '100%', border: 'none', outline: 'none', background: 'transparent', cursor: 'pointer', paddingRight: '0.75rem' }}
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span style={{ color: selectedOption ? '#1e293b' : '#94a3b8', fontSize: '0.95rem', userSelect: 'none' }}>
+          {selectedOption ? selectedOption.label : placeholder}
+        </span>
+        <span style={{ fontSize: '0.7rem', color: '#94a3b8', transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'rotate(0)' }}>▼</span>
+      </div>
+      
+      {isOpen && (
+        <div className="position-absolute shadow-sm border rounded-3 bg-white w-100 mt-1 py-1" style={{ zIndex: 1050, top: '100%', left: 0, maxHeight: '220px', overflowY: 'auto' }}>
+          {options.map((opt, idx) => (
+            <div 
+              key={idx}
+              className="px-3 py-2"
+              style={{
+                cursor: 'pointer',
+                fontSize: '0.9rem',
+                color: value === opt.value ? '#2563eb' : '#475569',
+                background: value === opt.value ? '#eff6ff' : 'white',
+                fontWeight: value === opt.value ? '600' : '400',
+                transition: 'background 0.1s'
+              }}
+              onClick={() => {
+                onChange({ target: { name, value: opt.value } });
+                setIsOpen(false);
+              }}
+              onMouseEnter={(e) => { if (value !== opt.value) e.target.style.background = '#f8fafc'; }}
+              onMouseLeave={(e) => { if (value !== opt.value) e.target.style.background = 'white'; }}
+            >
+              {opt.label}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -94,24 +154,35 @@ const Signup = () => {
         />
         
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0 1rem' }}>
-          <AuthInput
+          <AuthSelect
             icon={FaBuilding}
-            type="text"
             name="department"
-            placeholder="Department (e.g. CSE)"
             value={formData.department}
             onChange={handleChange}
+            placeholder="Select Department"
+            options={[
+              { value: 'CSE', label: 'CSE (Computer Science)' },
+              { value: 'IT', label: 'IT (Information Technology)' },
+              { value: 'AI&DS', label: 'AI&DS (Artificial Intelligence & Data Science)' },
+              { value: 'ECE', label: 'ECE (Electronics & Communication)' },
+              { value: 'EEE', label: 'EEE (Electrical & Electronics)' },
+              { value: 'MECH', label: 'MECH (Mechanical Engineering)' },
+              { value: 'CIVIL', label: 'CIVIL (Civil Engineering)' }
+            ]}
           />
-          <div className="auth-input-group mb-3">
-            <span className="auth-input-icon"><FaGraduationCap /></span>
-            <select name="year" value={formData.year} onChange={handleChange} className="auth-input" style={{width: '100%', border: 'none', outline: 'none', background: 'transparent'}} required>
-              <option value="" disabled>Select Year</option>
-              <option value="1st Year">1st Year</option>
-              <option value="2nd Year">2nd Year</option>
-              <option value="3rd Year">3rd Year</option>
-              <option value="4th Year">4th Year</option>
-            </select>
-          </div>
+          <AuthSelect
+            icon={FaGraduationCap}
+            name="year"
+            value={formData.year}
+            onChange={handleChange}
+            placeholder="Select Year"
+            options={[
+              { value: '1st Year', label: '1st Year' },
+              { value: '2nd Year', label: '2nd Year' },
+              { value: '3rd Year', label: '3rd Year' },
+              { value: '4th Year', label: '4th Year' }
+            ]}
+          />
         </div>
         
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0 1rem' }}>

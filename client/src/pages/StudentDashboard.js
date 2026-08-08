@@ -1,12 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useOutletContext } from 'react-router-dom';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend, LineChart, Line, XAxis, YAxis, CartesianGrid, AreaChart, Area, BarChart, Bar } from 'recharts';
 import { FaGithub, FaTrophy, FaFire, FaBook, FaCodeBranch, FaStar, FaSyncAlt } from 'react-icons/fa';
-import Sidebar from '../components/dashboard/Sidebar';
-import TopNav from '../components/dashboard/TopNav';
 import ActivityTimeline from '../components/dashboard/ActivityTimeline';
-import ProfileWidget from '../components/dashboard/ProfileWidget';
 import '../styles/dashboard.css';
 
 const COLORS = ['#6D5EF5', '#2563EB', '#16A34A', '#F59E0B', '#EF4444'];
@@ -51,43 +48,12 @@ const ContributionHeatmap = ({ calendar }) => {
 };
 
 const StudentDashboard = () => {
-  const navigate = useNavigate();
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { user, stats, clientId, fetchDashboardData } = useOutletContext();
   const [refreshing, setRefreshing] = useState(false);
-  const [githubInput, setGithubInput] = useState('');
-  const [linking, setLinking] = useState(false);
-  const [clientId, setClientId] = useState('');
 
   const userInfoStr = localStorage.getItem('userInfo');
   const userInfo = userInfoStr ? JSON.parse(userInfoStr) : null;
   const token = userInfo?.token;
-
-  const fetchDashboardData = async () => {
-    try {
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-      const response = await axios.get('/api/student/dashboard', config);
-      setData(response.data);
-      if (response.data.clientId) setClientId(response.data.clientId);
-    } catch (error) {
-       if (error.response?.status === 401) {
-           localStorage.removeItem('userInfo');
-           navigate('/login');
-       }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchDashboardData();
-    // eslint-disable-next-line
-  }, [token]);
-
-  const handleLogout = () => {
-     localStorage.removeItem('userInfo');
-     navigate('/login');
-  };
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -112,7 +78,6 @@ const StudentDashboard = () => {
     window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=read:user,repo`;
   };
 
-  const { user, stats } = data || {};
   const hasGithub = user?.githubLinked;
 
   const monthlyCommits = React.useMemo(() => {
@@ -149,21 +114,11 @@ const StudentDashboard = () => {
     return Object.keys(monthlyGrowth).map(k => ({ date: k, repositories: monthlyGrowth[k] }));
   }, [stats?.repositoriesList]);
 
-  if (loading) {
-    return <div className="d-flex justify-content-center align-items-center min-vh-100 bg-light">Loading Workspace...</div>;
-  }
-
   return (
-    <div className="dashboard-wrapper">
-       <Sidebar handleLogout={handleLogout} />
-       
-       <div className="main-content">
-          <TopNav user={user} stats={stats} />
-          
-          <div className="container-fluid p-4 p-md-5">
-             
-             {/* Hero Section */}
-             <div className="saas-card mb-4 bg-white">
+      <div className="container-fluid p-4 p-md-5">
+         
+         {/* Hero Section */}
+         <div className="saas-card mb-4 bg-white">
                 <div className="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center">
                     <div>
                        <h2 className="fw-bold mb-1">Welcome back, {user?.fullName?.split(' ')[0] || user?.username} 👋</h2>
@@ -283,9 +238,6 @@ const StudentDashboard = () => {
                 </div>
 
                 <div className="col-12 col-xl-4 d-flex flex-column">
-                   <div style={{ flexShrink: 0 }}>
-                       <ProfileWidget user={user} />
-                   </div>
                    <div className="flex-grow-1">
                        <ActivityTimeline recentActivity={stats?.recentActivity} />
                    </div>
@@ -415,9 +367,7 @@ const StudentDashboard = () => {
                 </div>
              </div>
 
-          </div>
-       </div>
-    </div>
+         </div>
   );
 };
 

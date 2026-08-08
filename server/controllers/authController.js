@@ -12,7 +12,7 @@ const generateToken = (id, role, profileCompleted) => {
 // @access  Public
 const registerUser = async (req, res) => {
   try {
-    const { username, rollNumber, email, phoneNumber, department, year, password, confirmPassword } = req.body;
+    let { username, rollNumber, email, phoneNumber, department, year, password, confirmPassword } = req.body;
 
     // Validate Input Fields mapping to exactly how prompt wants
     if (!username || username.length < 3 || username.length > 30) {
@@ -41,10 +41,18 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'Please enter a valid 10-digit phone number.' });
     }
 
+    if (!rollNumber || rollNumber.trim() === '') {
+        return res.status(400).json({ message: 'Roll Number is required.' });
+    }
+    
+    // Normalize rollNumber mapping
+    rollNumber = rollNumber.trim().toUpperCase();
+    email = email.trim().toLowerCase();
+
     // Check Unique Constraints
     const rollNumberExists = await User.findOne({ rollNumber });
     if (rollNumberExists) {
-      return res.status(400).json({ message: 'Roll Number already exists.' });
+      return res.status(400).json({ message: `Roll Number '${rollNumber}' is already registered.` });
     }
 
     const emailExists = await User.findOne({ email });

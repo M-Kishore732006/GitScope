@@ -11,6 +11,8 @@ import Leaderboard from './pages/Leaderboard';
 import RepositoryDetails from './pages/RepositoryDetails';
 import Landing from './pages/Landing';
 import GithubCallback from './pages/GithubCallback';
+import StudentProfile from './pages/StudentProfile';
+import DashboardLayout from './components/dashboard/DashboardLayout';
 
 const handleLogout = () => {
     localStorage.removeItem('userInfo');
@@ -43,10 +45,14 @@ function App() {
 
         {/* Protected Student Routes */}
         <Route element={<ProtectedRoute allowedRoles={['student']} />}>
-          <Route path="/student/dashboard" element={<StudentDashboard />} />
+          <Route element={<DashboardLayout />}>
+             <Route path="/student/dashboard" element={<StudentDashboard />} />
+             <Route path="/student/profile" element={<StudentProfile />} />
+             <Route path="/student/leaderboard" element={<Leaderboard />} />
+             <Route path="/student/repository/:id" element={<RepositoryDetails />} />
+          </Route>
+          {/* Callback shouldn't have sidebar */}
           <Route path="/student/github/callback" element={<GithubCallback />} />
-          <Route path="/student/leaderboard" element={<Leaderboard />} />
-          <Route path="/student/repository/:id" element={<RepositoryDetails />} />
         </Route>
 
         {/* Protected Teacher Routes */}

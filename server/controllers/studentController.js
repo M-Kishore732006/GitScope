@@ -53,6 +53,66 @@ const updateProfile = async (req, res) => {
   }
 };
 
+// @desc    Change User Password
+// @route   PUT /api/student/password
+// @access  Private/Student
+const changePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ message: 'Please provide both current and new passwords.' });
+        }
+        if (newPassword.length < 6) {
+            return res.status(400).json({ message: 'New password must be at least 6 characters.' });
+        }
+
+        const user = await User.findById(req.user._id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        if (!(await user.matchPassword(currentPassword))) {
+            return res.status(401).json({ message: 'Incorrect current password.' });
+        }
+
+        user.password = newPassword;
+        await user.save();
+
+        res.json({ message: 'Password updated successfully. Please log back in.' });
+    } catch (error) {
+        console.error('Error changing password:', error);
+        res.status(500).json({ message: 'Server error updating password' });
+    }
+};
+
+// @desc    Delete Student Account
+// @route   POST /api/student/account/delete
+// @access  Private/Student
+const deleteAccount = async (req, res) => {
+    try {
+        const { password } = req.body;
+        if (!password) {
+            return res.status(400).json({ message: 'Password is required to confirm account deletion.' });
+        }
+
+        const user = await User.findById(req.user._id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        if (!(await user.matchPassword(password))) {
+            return res.status(401).json({ message: 'Incorrect password. Deletion aborted for security.' });
+        }
+
+        // Cascade delete Github Stats
+        await GithubStats.deleteOne({ user: user._id });
+        
+        // Delete User
+        await User.deleteOne({ _id: user._id });
+
+        res.json({ message: 'Account permanently deleted.' });
+    } catch (error) {
+        console.error('Error deleting account:', error);
+        res.status(500).json({ message: 'Server error deleting account' });
+    }
+};
+
 // @desc    Get Student Dashboard Data (Cached from DB)
 // @route   GET /api/student/dashboard
 // @access  Private/Student
@@ -256,6 +316,8 @@ const getLeaderboards = async (req, res) => {
 
 module.exports = {
   updateProfile,
+  changePassword,
+  deleteAccount,
   getDashboardData,
   refreshGithubData,
   linkGithub,

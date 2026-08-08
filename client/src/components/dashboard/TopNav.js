@@ -1,7 +1,22 @@
-import React from 'react';
-import { FaSearch, FaBell, FaMoon, FaSun, FaCloudDownloadAlt } from 'react-icons/fa';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
+import { FaSearch, FaBell, FaMoon, FaSun, FaCloudDownloadAlt, FaChevronDown } from 'react-icons/fa';
 
-const TopNav = ({ user, stats }) => {
+const TopNav = ({ user, stats, handleLogout }) => {
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown if clicked outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
     <div className="topnav">
        <div className="search-bar shadow-sm">
@@ -25,11 +40,26 @@ const TopNav = ({ user, stats }) => {
                <span className="visually-hidden">New alerts</span>
              </span>
           </button>
-          <div className="d-flex align-items-center ms-3 pe-auto cursor-pointer border rounded-pill p-1 ps-3 shadow-sm bg-white">
-             <span className="fw-semibold me-3 small text-dark">{user?.fullName || user?.username}</span>
-             <div className="avatar-circle">
-                {user?.fullName?.charAt(0) || user?.username?.charAt(0) || 'U'}
+          <div className="dropdown ms-3" ref={dropdownRef}>
+             <div 
+                className="d-flex align-items-center pe-auto cursor-pointer border rounded-pill p-1 ps-3 shadow-sm bg-white" 
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+             >
+                <span className="fw-semibold me-3 small text-dark">{user?.fullName || user?.username}</span>
+                <div className="avatar-circle">
+                   {user?.fullName?.charAt(0) || user?.username?.charAt(0) || 'U'}
+                </div>
+                <FaChevronDown className="ms-2 text-muted small" />
              </div>
+             <ul className={`dropdown-menu dropdown-menu-end shadow border-0 mt-2 rounded-3 ${dropdownOpen ? 'show' : ''}`} style={{position: 'absolute', right: 0}}>
+                <li>
+                  <Link className="dropdown-item py-2 fw-medium text-secondary" to="/student/profile" onClick={() => setDropdownOpen(false)}>
+                    My Profile
+                  </Link>
+                </li>
+                <li><hr className="dropdown-divider" /></li>
+                <li><button className="dropdown-item py-2 fw-medium text-danger" onClick={handleLogout}>Logout</button></li>
+             </ul>
           </div>
        </div>
     </div>

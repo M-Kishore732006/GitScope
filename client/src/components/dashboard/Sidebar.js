@@ -29,14 +29,11 @@ const Sidebar = ({ handleLogout }) => {
          </a>
          
          <div className="text-muted small text-uppercase fw-bold mt-4 mb-2 ms-4" style={{fontSize: '0.65rem', letterSpacing: '1px'}}>Preferences</div>
-         <a href="#!" className="sidebar-link">
+         <NavLink to="/student/profile" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
             <FaUser className="icon" /> Profile
-         </a>
+         </NavLink>
          <a href="#!" className="sidebar-link">
             <FaCog className="icon" /> Settings
-         </a>
-         <a href="#!" className="sidebar-link text-danger mt-2" onClick={handleLogout}>
-            <FaSignOutAlt className="icon" /> Logout
          </a>
       </div>
     </div>

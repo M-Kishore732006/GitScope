@@ -48,52 +48,64 @@ const Leaderboard = () => {
     }
 
     return (
-        <div className="bg-light min-vh-100 py-5">
-            <div className="container">
-                <div className="d-flex justify-content-between align-items-center mb-4">
-                    <h2 className="fw-bold mb-0"><FaTrophy className="text-warning me-2"/> Leaderboard</h2>
-                    <div className="btn-group shadow-sm">
-                       <button className={`btn btn-outline-primary ${filter === 'overall' ? 'active' : ''}`} onClick={() => setFilter('overall')}>Overall</button>
-                       <button className={`btn btn-outline-primary ${filter === 'department' ? 'active' : ''}`} onClick={() => setFilter('department')}>Department</button>
-                       <button className={`btn btn-outline-primary ${filter === 'year' ? 'active' : ''}`} onClick={() => setFilter('year')}>Year-wise</button>
-                    </div>
+        <div className="container-fluid p-4 p-md-5">
+            <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-2 border-bottom">
+                <div>
+                    <h2 className="fw-bold mb-1"><FaTrophy className="text-warning me-2"/> Global Leaderboard</h2>
+                    <p className="text-muted mb-3 mb-md-0">See how you rank among other developers in the university.</p>
                 </div>
+                <div className="btn-group shadow-sm bg-white rounded-3">
+                   <button className={`btn  ${filter === 'overall' ? 'btn-primary' : 'btn-light border'} px-4 py-2`} onClick={() => setFilter('overall')}>Overall</button>
+                   <button className={`btn  ${filter === 'department' ? 'btn-primary' : 'btn-light border'} px-4 py-2`} onClick={() => setFilter('department')}>Department</button>
+                   <button className={`btn  ${filter === 'year' ? 'btn-primary' : 'btn-light border'} px-4 py-2`} onClick={() => setFilter('year')}>By Year</button>
+                </div>
+            </div>
 
-                <div className="card shadow-sm border-0">
+            <div className="saas-card overflow-hidden p-0">
                     <div className="table-responsive">
                        <table className="table table-hover align-middle mb-0">
                           <thead className="table-light">
                              <tr>
-                                <th scope="col" className="text-muted text-uppercase small fw-semibold text-center w-auto">Rank</th>
-                                <th scope="col" className="text-muted text-uppercase small fw-semibold">Student Name</th>
-                                <th scope="col" className="text-muted text-uppercase small fw-semibold">Department & Year</th>
-                                <th scope="col" className="text-muted text-uppercase small fw-semibold text-center">Score</th>
-                                <th scope="col" className="text-muted text-uppercase small fw-semibold text-center d-none d-md-table-cell">Commits</th>
-                                <th scope="col" className="text-muted text-uppercase small fw-semibold text-center d-none d-md-table-cell">PRs</th>
-                                <th scope="col" className="text-muted text-uppercase small fw-semibold text-center">Level</th>
+                                <th scope="col" className="text-muted text-uppercase small fw-bold px-4 py-3 border-0">Rank</th>
+                                <th scope="col" className="text-muted text-uppercase small fw-bold py-3 border-0">Developer</th>
+                                <th scope="col" className="text-muted text-uppercase small fw-bold py-3 border-0">Cohort</th>
+                                <th scope="col" className="text-muted text-uppercase small fw-bold text-center py-3 border-0">Score</th>
+                                <th scope="col" className="text-muted text-uppercase small fw-bold text-center d-none d-md-table-cell py-3 border-0">Commits / PRs</th>
+                                <th scope="col" className="text-muted text-uppercase small fw-bold text-center py-3 border-0">Tier</th>
                              </tr>
                           </thead>
                           <tbody>
                              {displayData.length > 0 ? (
                                 displayData.map((entry, idx) => (
-                                   <tr key={idx} className={entry.name === currentUser ? 'table-primary bg-opacity-10' : ''}>
-                                      <td className="text-center fw-bold">
-                                         {entry.displayRank === 1 ? <FaMedal className="text-warning fs-4" /> :
+                                    <tr key={idx} className={`${entry.name === currentUser ? 'table-primary bg-opacity-10' : ''} border-bottom`}>
+                                      <td className="fw-bold px-4 align-middle">
+                                         {entry.displayRank === 1 ? <FaMedal className="text-warning fs-3" /> :
                                           entry.displayRank === 2 ? <FaMedal className="text-secondary fs-4" /> :
-                                          entry.displayRank === 3 ? <FaMedal className="text-danger fs-4" style={{color: '#cd7f32'}} /> : `#${entry.displayRank}`}
+                                          entry.displayRank === 3 ? <FaMedal className="text-danger fs-4" style={{color: '#cd7f32'}} /> : <span className="text-muted ms-2 ps-1">#{entry.displayRank}</span>}
                                       </td>
-                                      <td className="fw-semibold">
-                                          {entry.name} {entry.name === currentUser && <span className="badge bg-primary ms-1">You</span>}
+                                      <td className="fw-bold align-middle text-dark">
+                                          <div className="d-flex align-items-center">
+                                              <div className="avatar-circle me-3 bg-primary text-white" style={{width: 35, height: 35, fontSize: '0.9rem'}}>
+                                                  {entry.name.charAt(0)}
+                                              </div>
+                                              <div>
+                                                  {entry.name}
+                                                  {entry.name === currentUser && <span className="badge bg-primary text-white ms-2 px-2 py-1" style={{fontSize: '0.65rem'}}>YOU</span>}
+                                              </div>
+                                          </div>
                                       </td>
-                                      <td className="text-muted">
-                                          <span className="badge bg-light text-dark border me-1">{entry.department || 'N/A'}</span>
-                                          <span className="badge bg-light text-dark border">{entry.year || 'N/A'} Year</span>
+                                      <td className="align-middle">
+                                          <div className="d-flex flex-column">
+                                             <span className="text-dark fw-medium small">{entry.department || 'Unknown'}</span>
+                                             <span className="text-muted small" style={{fontSize: '0.75rem'}}>Year {entry.year || '?'}</span>
+                                          </div>
                                       </td>
-                                      <td className="text-center fw-bold text-primary">{entry.score}</td>
-                                      <td className="text-center d-none d-md-table-cell">{entry.commits}</td>
-                                      <td className="text-center d-none d-md-table-cell">{entry.pullRequests}</td>
-                                      <td className="text-center">
-                                          <span className={`badge ${entry.level==='Legend'?'bg-danger':entry.level==='Diamond'?'bg-info':entry.level==='Platinum'?'bg-dark':'bg-warning'}`}>
+                                      <td className="text-center fw-bold text-primary align-middle fs-5">{entry.score}</td>
+                                      <td className="text-center align-middle d-none d-md-table-cell">
+                                          <span className="fw-bold text-dark">{entry.commits}</span> <span className="text-muted small mx-1">/</span> <span className="fw-bold text-success">{entry.pullRequests}</span>
+                                      </td>
+                                      <td className="text-center align-middle">
+                                          <span className={`badge px-3 py-2 rounded-pill fw-bold ${entry.level==='Legend'?'bg-danger':entry.level==='Diamond'?'bg-info text-dark':entry.level==='Platinum'?'bg-dark':'bg-warning text-dark'}`}>
                                               {entry.level}
                                           </span>
                                       </td>
@@ -101,7 +113,7 @@ const Leaderboard = () => {
                                 ))
                              ) : (
                                 <tr>
-                                   <td colSpan="7" className="text-center py-5 text-muted">No students found in this category.</td>
+                                   <td colSpan="6" className="text-center py-5 text-muted border-0">No developers found in this category.</td>
                                 </tr>
                              )}
                           </tbody>
@@ -109,7 +121,6 @@ const Leaderboard = () => {
                     </div>
                 </div>
             </div>
-        </div>
     );
 };
 

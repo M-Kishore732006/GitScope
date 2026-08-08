@@ -23,7 +23,7 @@ const ActivityTimeline = ({ recentActivity }) => {
   return (
     <div className="card saas-card">
        <h5 className="fw-bold mb-4">Recent Activity Timeline</h5>
-       <div className="timeline-container px-2">
+       <div className="timeline-container px-2 custom-scrollbar" style={{ maxHeight: '420px', overflowY: 'auto' }}>
           {recentActivity.map((activity, idx) => {
              const details = getEventDetails(activity);
              const Icon = details.icon;

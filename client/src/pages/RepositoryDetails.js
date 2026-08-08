@@ -42,8 +42,8 @@ const RepositoryDetails = () => {
     }
 
     return (
-        <div className="bg-light min-vh-100 py-5">
-            <div className="container">
+        <div className="container-fluid p-4 p-md-5">
+            <div className="max-w-7xl mx-auto">
                 <Link to="/student/dashboard" className="text-decoration-none text-muted mb-4 d-inline-block p-2">
                     <FaArrowLeft className="me-2"/> Back to Dashboard
                 </Link>
