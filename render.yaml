@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: gitscope-backend
+    env: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Note: Make sure to define PORT, MONGO_URI, JWT_SECRET, 
+      # GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, FRONTEND_URL 
+      # in the Render dashboard manually for security.
