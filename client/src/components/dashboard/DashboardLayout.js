@@ -10,6 +10,10 @@ const DashboardLayout = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [clientId, setClientId] = useState('');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => setSidebarOpen(prev => !prev);
+  const closeSidebar = () => setSidebarOpen(false);
 
   const userInfoStr = localStorage.getItem('userInfo');
   const userInfo = userInfoStr ? JSON.parse(userInfoStr) : null;
@@ -48,10 +52,6 @@ const DashboardLayout = () => {
   if (loading) {
     return <div className="d-flex justify-content-center align-items-center min-vh-100 bg-light">Loading Workspace...</div>;
   }
-
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const toggleSidebar = () => setSidebarOpen(prev => !prev);
-  const closeSidebar = () => setSidebarOpen(false);
 
   const { user, stats } = data || {};
 
