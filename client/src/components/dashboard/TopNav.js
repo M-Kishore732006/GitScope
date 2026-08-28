@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { FaSearch, FaBell, FaMoon, FaSun, FaCloudDownloadAlt, FaChevronDown } from 'react-icons/fa';
+import { FaSearch, FaBell, FaMoon, FaSun, FaCloudDownloadAlt, FaChevronDown, FaBars } from 'react-icons/fa';
 
-const TopNav = ({ user, stats, handleLogout }) => {
+const TopNav = ({ user, stats, handleLogout, toggleSidebar }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -18,8 +18,20 @@ const TopNav = ({ user, stats, handleLogout }) => {
   }, []);
 
   return (
-    <div className="topnav">
-       <div className="search-bar shadow-sm">
+    <div className="topnav px-3 px-md-4 py-2 border-bottom bg-white sticky-top d-flex align-items-center justify-content-between flex-wrap gap-2">
+       {/* Mobile Hamburger Button */}
+       <div className="d-flex align-items-center me-2">
+         <button 
+           className="btn btn-light border p-2 rounded-3 me-3 d-lg-none shadow-sm text-dark d-flex align-items-center"
+           onClick={toggleSidebar}
+           aria-label="Toggle Navigation"
+         >
+           <FaBars className="fs-5" />
+         </button>
+         <span className="fw-extrabold text-dark d-lg-none" style={{ letterSpacing: '-0.5px' }}>GitScope</span>
+       </div>
+
+       <div className="search-bar shadow-sm flex-grow-1 search-wrapper" style={{ maxWidth: '380px', minWidth: '200px' }}>
           <FaSearch className="text-muted" />
           <input type="text" placeholder="Search repositories, achievements..." />
        </div>

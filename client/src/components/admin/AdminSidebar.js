@@ -13,17 +13,18 @@ import {
   FaFileAlt, 
   FaHistory, 
   FaCog,
-  FaSignOutAlt
+  FaSignOutAlt,
+  FaTimes
 } from 'react-icons/fa';
 
-const AdminSidebar = () => {
+const AdminSidebar = ({ mobileOpen, closeSidebar }) => {
   const handleLogout = () => {
     localStorage.removeItem('userInfo');
     window.location.href = '/login';
   };
 
   return (
-    <div className="sidebar shadow-sm" style={{ width: '250px' }}>
+    <div className={`sidebar shadow-sm ${mobileOpen ? 'mobile-open' : ''}`} style={{ width: '250px' }}>
       <div className="sidebar-header d-flex align-items-center justify-content-between">
         <div className="d-flex align-items-center">
           <div className="avatar-circle me-2 bg-dark text-white" style={{ width: 34, height: 34, fontSize: '0.9rem' }}>
@@ -34,9 +35,12 @@ const AdminSidebar = () => {
             <span className="badge bg-danger ms-2 px-2 py-1 small" style={{ fontSize: '0.6rem' }}>ADMIN</span>
           </div>
         </div>
+        <button className="btn btn-sm text-muted d-lg-none p-1 border-0" onClick={closeSidebar}>
+          <FaTimes className="fs-5" />
+        </button>
       </div>
 
-      <div className="sidebar-nav px-2 py-3">
+      <div className="sidebar-nav px-2 py-3" onClick={closeSidebar}>
         <div className="text-muted small text-uppercase fw-bold mb-2 ms-3" style={{ fontSize: '0.65rem', letterSpacing: '1px' }}>
           Overview
         </div>

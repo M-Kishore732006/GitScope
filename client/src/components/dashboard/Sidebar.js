@@ -1,15 +1,20 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaGithub, FaChartPie, FaBook, FaTrophy, FaMedal, FaChartLine, FaUser, FaCog, FaSignOutAlt, FaRocket } from 'react-icons/fa';
+import { FaGithub, FaChartPie, FaBook, FaTrophy, FaMedal, FaChartLine, FaUser, FaCog, FaSignOutAlt, FaRocket, FaTimes } from 'react-icons/fa';
 
-const Sidebar = ({ handleLogout }) => {
+const Sidebar = ({ handleLogout, mobileOpen, closeSidebar }) => {
   return (
-    <div className="sidebar shadow-sm">
-      <div className="sidebar-header">
-         <div className="avatar-circle me-3" style={{width: 32, height: 32, fontSize: '1rem'}}><FaRocket /></div>
-         GitScope
+    <div className={`sidebar shadow-sm ${mobileOpen ? 'mobile-open' : ''}`}>
+      <div className="sidebar-header d-flex align-items-center justify-content-between">
+         <div className="d-flex align-items-center">
+           <div className="avatar-circle me-3" style={{width: 32, height: 32, fontSize: '1rem'}}><FaRocket /></div>
+           GitScope
+         </div>
+         <button className="btn btn-sm text-muted d-lg-none p-1 border-0" onClick={closeSidebar}>
+           <FaTimes className="fs-5" />
+         </button>
       </div>
-      <div className="sidebar-nav">
+      <div className="sidebar-nav" onClick={closeSidebar}>
          <NavLink to="/student/dashboard" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`} end>
             <FaChartPie className="icon" /> Dashboard
          </NavLink>

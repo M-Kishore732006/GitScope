@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { FaSearch, FaBell, FaChevronDown, FaShieldAlt, FaUserTie, FaUserGraduate, FaGithub, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import { FaSearch, FaBell, FaChevronDown, FaShieldAlt, FaUserTie, FaUserGraduate, FaGithub, FaCheckCircle, FaTimesCircle, FaBars } from 'react-icons/fa';
 
-const AdminTopNav = ({ user, handleLogout }) => {
+const AdminTopNav = ({ user, handleLogout, toggleSidebar }) => {
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -65,10 +65,22 @@ const AdminTopNav = ({ user, handleLogout }) => {
   };
 
   return (
-    <div className="topnav px-4 py-2 border-bottom bg-white sticky-top d-flex align-items-center justify-content-between">
+    <div className="topnav px-3 px-md-4 py-2 border-bottom bg-white sticky-top d-flex align-items-center justify-content-between flex-wrap gap-2">
+      {/* Mobile Hamburger & Logo Header */}
+      <div className="d-flex align-items-center me-2">
+        <button 
+          className="btn btn-light border p-2 rounded-3 me-3 d-lg-none shadow-sm text-dark d-flex align-items-center"
+          onClick={toggleSidebar}
+          aria-label="Toggle navigation menu"
+        >
+          <FaBars className="fs-5" />
+        </button>
+        <span className="fw-extrabold text-dark d-lg-none" style={{ letterSpacing: '-0.5px' }}>GitScope</span>
+      </div>
+
       {/* Global Search Component */}
-      <div className="position-relative" ref={searchRef} style={{ width: '380px' }}>
-        <div className="search-bar shadow-sm d-flex align-items-center bg-light px-3 py-2 rounded-3 border">
+      <div className="position-relative flex-grow-1 search-wrapper" ref={searchRef} style={{ maxWidth: '380px', minWidth: '220px' }}>
+        <div className="search-bar shadow-sm d-flex align-items-center bg-light px-3 py-2 rounded-3 border w-100">
           <FaSearch className="text-muted me-2" />
           <input 
             type="text" 

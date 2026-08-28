@@ -29,6 +29,11 @@ const AdminLayout = () => {
     window.location.href = '/login';
   };
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => setSidebarOpen(prev => !prev);
+  const closeSidebar = () => setSidebarOpen(false);
+
   if (loading) {
     return (
       <div className="d-flex justify-content-center align-items-center min-vh-100 bg-light">
@@ -42,10 +47,11 @@ const AdminLayout = () => {
 
   return (
     <div className="dashboard-wrapper">
-      <AdminSidebar />
+      <AdminSidebar mobileOpen={sidebarOpen} closeSidebar={closeSidebar} />
+      {sidebarOpen && <div className="sidebar-backdrop d-lg-none" onClick={closeSidebar}></div>}
       <div className="main-content">
-        <AdminTopNav user={adminUser} handleLogout={handleLogout} />
-        <main className="p-4 p-md-5">
+        <AdminTopNav user={adminUser} handleLogout={handleLogout} toggleSidebar={toggleSidebar} />
+        <main className="p-3 p-md-4 p-lg-5">
           <Outlet context={{ user: adminUser }} />
         </main>
       </div>

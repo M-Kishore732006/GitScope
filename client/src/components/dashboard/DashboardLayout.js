@@ -49,14 +49,19 @@ const DashboardLayout = () => {
     return <div className="d-flex justify-content-center align-items-center min-vh-100 bg-light">Loading Workspace...</div>;
   }
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const toggleSidebar = () => setSidebarOpen(prev => !prev);
+  const closeSidebar = () => setSidebarOpen(false);
+
   const { user, stats } = data || {};
 
   return (
     <div className="dashboard-wrapper">
-       <Sidebar />
+       <Sidebar mobileOpen={sidebarOpen} closeSidebar={closeSidebar} />
+       {sidebarOpen && <div className="sidebar-backdrop d-lg-none" onClick={closeSidebar}></div>}
        
        <div className="main-content">
-          <TopNav user={user} stats={stats} handleLogout={handleLogout} />
+          <TopNav user={user} stats={stats} handleLogout={handleLogout} toggleSidebar={toggleSidebar} />
           
           <Outlet context={{ user, stats, clientId, fetchDashboardData }} />
        </div>
