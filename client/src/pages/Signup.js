@@ -164,8 +164,8 @@ const Signup = () => {
             placeholder="Select Department"
             options={[
               { value: 'CSE', label: 'CSE (Computer Science)' },
+              { value: 'AI & DS', label: 'Artificial Intelligence and Data Science (AI & DS)' },
               { value: 'IT', label: 'IT (Information Technology)' },
-              { value: 'AI&DS', label: 'AI&DS (Artificial Intelligence & Data Science)' },
               { value: 'ECE', label: 'ECE (Electronics & Communication)' },
               { value: 'EEE', label: 'EEE (Electrical & Electronics)' },
               { value: 'MECH', label: 'MECH (Mechanical Engineering)' },
