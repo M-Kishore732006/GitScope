@@ -144,14 +144,16 @@ const Signup = () => {
           onChange={handleChange}
         />
 
-        <AuthInput
-          icon={FaPhone}
-          type="tel"
-          name="phoneNumber"
-          placeholder="Phone Number"
-          value={formData.phoneNumber}
-          onChange={handleChange}
-        />
+<AuthInput
+  icon={FaPhone}
+  type="tel"
+  inputMode="numeric"
+  maxLength={10}
+  name="phoneNumber"
+  placeholder="Phone Number"
+  value={formData.phoneNumber}
+  onChange={handleChange}
+/>
         
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0 1rem' }}>
           <AuthSelect
