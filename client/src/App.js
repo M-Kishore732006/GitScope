@@ -28,40 +28,32 @@ import GithubCallback from './pages/GithubCallback';
 // Dashboard layout
 import DashboardLayout from './components/dashboard/DashboardLayout';
 
+// Admin Layout & Pages
+import AdminLayout from './components/admin/AdminLayout';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import StaffManagement from './pages/admin/StaffManagement';
+import StudentManagement from './pages/admin/StudentManagement';
+import GithubAccounts from './pages/admin/GithubAccounts';
+import GithubAnalytics from './pages/admin/GithubAnalytics';
+import StudentRankings from './pages/admin/StudentRankings';
+import OpenSourceTracking from './pages/admin/OpenSourceTracking';
+import ActivityMonitoring from './pages/admin/ActivityMonitoring';
+import AdminReports from './pages/admin/AdminReports';
+import AuditLogs from './pages/admin/AuditLogs';
+import AdminSettings from './pages/admin/AdminSettings';
+
 // Logout handler
 const handleLogout = () => {
   localStorage.removeItem('userInfo');
   window.location.href = '/login';
 };
 
-// Teacher dashboard
+// Teacher dashboard placeholder
 const TeacherDashboard = () => {
   return (
     <div className="p-5">
       <h1>Teacher Dashboard</h1>
-
-      <button
-        className="btn btn-danger mt-3"
-        onClick={handleLogout}
-      >
-        Log Out
-      </button>
-    </div>
-  );
-};
-
-// Admin dashboard
-const AdminDashboard = () => {
-  return (
-    <div className="p-5">
-      <h1>Admin Dashboard</h1>
-
-      <button
-        className="btn btn-danger mt-3"
-        onClick={handleLogout}
-      >
-        Log Out
-      </button>
+      <button className="btn btn-danger mt-3" onClick={handleLogout}>Log Out</button>
     </div>
   );
 };
@@ -145,10 +137,19 @@ function App() {
             <ProtectedRoute allowedRoles={['admin']} />
           }
         >
-          <Route
-            path="/admin/dashboard"
-            element={<AdminDashboard />}
-          />
+          <Route element={<AdminLayout />}>
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/staff" element={<StaffManagement />} />
+            <Route path="/admin/students" element={<StudentManagement />} />
+            <Route path="/admin/github-accounts" element={<GithubAccounts />} />
+            <Route path="/admin/analytics" element={<GithubAnalytics />} />
+            <Route path="/admin/rankings" element={<StudentRankings />} />
+            <Route path="/admin/open-source" element={<OpenSourceTracking />} />
+            <Route path="/admin/monitoring" element={<ActivityMonitoring />} />
+            <Route path="/admin/reports" element={<AdminReports />} />
+            <Route path="/admin/audit-logs" element={<AuditLogs />} />
+            <Route path="/admin/settings" element={<AdminSettings />} />
+          </Route>
         </Route>
 
 

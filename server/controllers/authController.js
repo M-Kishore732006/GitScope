@@ -98,6 +98,9 @@ const loginUser = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (user && (await user.matchPassword(password))) {
+      user.lastLogin = new Date();
+      await user.save();
+
       res.json({
         _id: user._id,
         email: user.email,

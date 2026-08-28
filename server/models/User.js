@@ -32,6 +32,26 @@ const userSchema = new mongoose.Schema({
     enum: ['student', 'teacher', 'admin'],
     default: 'student'
   },
+  status: {
+    type: String,
+    enum: ['active', 'inactive', 'deactivated'],
+    default: 'active'
+  },
+  emailVerified: {
+    type: Boolean,
+    default: true
+  },
+  assignedStaff: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  assignedStudents: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  lastLogin: {
+    type: Date
+  },
   profileCompleted: {
     type: Boolean,
     default: true

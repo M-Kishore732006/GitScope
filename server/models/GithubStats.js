@@ -69,6 +69,25 @@ const githubStatsSchema = new mongoose.Schema({
     createdAt: { type: Date }
   }],
 
+  syncStatus: {
+    type: String,
+    enum: ['Connected', 'Not Connected', 'Syncing', 'Sync Failed'],
+    default: 'Not Connected'
+  },
+  syncErrorMessage: {
+    type: String,
+    default: ''
+  },
+  externalContributions: [{
+    repoName: String,
+    repoOwner: String,
+    url: String,
+    type: String,
+    title: String,
+    isMerged: Boolean,
+    createdAt: Date
+  }],
+
   lastUpdated: {
     type: Date,
     default: Date.now
