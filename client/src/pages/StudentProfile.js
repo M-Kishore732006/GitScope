@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useOutletContext } from 'react-router-dom';
 import ProfileWidget from '../components/dashboard/ProfileWidget';
-import { FaEye, FaEyeSlash, FaLock, FaExclamationTriangle } from 'react-icons/fa';
+import { FaEye, FaEyeSlash, FaLock, FaExclamationTriangle, FaGithub, FaUnlink, FaSpinner } from 'react-icons/fa';
 import '../styles/dashboard.css';
 
 const StudentProfile = () => {
@@ -23,8 +23,14 @@ const StudentProfile = () => {
     
     const [pwdMsg, setPwdMsg] = useState({ text: '', type: '' });
     const [delMsg, setDelMsg] = useState({ text: '', type: '' });
+    const [unsyncMsg, setUnsyncMsg] = useState({ text: '', type: '' });
+    const [unsyncLoading, setUnsyncLoading] = useState(false);
 
     const token = JSON.parse(localStorage.getItem('userInfo'))?.token;
+    
+    // Track local github state so the card updates immediately without page reload
+    const [githubLinked, setGithubLinked] = useState(user?.githubLinked ?? false);
+    const [githubUsername, setGithubUsername] = useState(user?.githubUsername ?? '');
 
     const handlePasswordChange = async (e) => {
         e.preventDefault();
@@ -55,6 +61,32 @@ const StudentProfile = () => {
         }
     };
 
+    const handleUnsyncGithub = async () => {
+        setUnsyncLoading(true);
+        setUnsyncMsg({ text: '', type: '' });
+        try {
+            const config = { headers: { Authorization: `Bearer ${token}` } };
+            const res = await axios.post('/api/student/github/unlink', {}, config);
+            // Update local state immediately
+            setGithubLinked(false);
+            setGithubUsername('');
+            // Persist the change in localStorage
+            const userInfoStr = localStorage.getItem('userInfo');
+            if (userInfoStr) {
+                const info = JSON.parse(userInfoStr);
+                info.githubLinked = false;
+                info.githubUsername = '';
+                localStorage.setItem('userInfo', JSON.stringify(info));
+            }
+            setUnsyncMsg({ text: res.data.message, type: 'success' });
+            setActiveModal(null);
+        } catch (error) {
+            setUnsyncMsg({ text: error.response?.data?.message || 'Error unlinking GitHub', type: 'danger' });
+        } finally {
+            setUnsyncLoading(false);
+        }
+    };
+
     return (
         <main className="p-4 p-md-5">
             <div className="container-fluid max-w-7xl mx-auto">
@@ -70,14 +102,25 @@ const StudentProfile = () => {
                                 <ProfileWidget user={user} />
                                 
                                 <div className="card saas-card mt-4">
-                                    <h5 className="fw-bold mb-3">GitHub Connection</h5>
-                                    {user?.githubLinked ? (
-                                        <div className="alert alert-success d-flex align-items-center mb-0 p-2 text-center justify-content-center">
-                                            <span className="fw-medium small">Linked to @{user.githubUsername}</span>
+                                    <h5 className="fw-bold mb-3"><FaGithub className="me-2" />GitHub Connection</h5>
+                                    {unsyncMsg.text && (
+                                        <div className={`alert alert-${unsyncMsg.type} small fw-bold py-2 mb-3`}>{unsyncMsg.text}</div>
+                                    )}
+                                    {githubLinked ? (
+                                        <div className="d-flex flex-column gap-2">
+                                            <div className="alert alert-success d-flex align-items-center mb-0 p-2 text-center justify-content-center">
+                                                <span className="fw-medium small">Linked to @{githubUsername}</span>
+                                            </div>
+                                            <button
+                                                className="btn btn-outline-warning fw-bold w-100 d-flex align-items-center justify-content-center gap-2"
+                                                onClick={() => { setUnsyncMsg({ text: '', type: '' }); setActiveModal('unsync'); }}
+                                            >
+                                                <FaUnlink /> Unsync GitHub Account
+                                            </button>
                                         </div>
                                     ) : (
                                         <div className="alert alert-secondary d-flex align-items-center mb-0 p-2 text-center justify-content-center">
-                                            <span className="fw-medium small">Not linked. Go to Dashboard.</span>
+                                            <span className="fw-medium small">Not linked. Go to Dashboard to connect.</span>
                                         </div>
                                     )}
                                 </div>
@@ -167,6 +210,38 @@ const StudentProfile = () => {
                                     </div>
                                     <button type="submit" className="btn btn-dark fw-bold w-100 py-2">Confirm Update</button>
                                 </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Unsync GitHub Confirmation Modal */}
+            {activeModal === 'unsync' && (
+                <div className="modal d-block" tabIndex="-1" style={{ zIndex: 1050, marginTop: '10vh' }}>
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content border-0 shadow-lg border-top border-warning border-4" style={{ borderRadius: '1rem' }}>
+                            <div className="modal-header border-0 pb-0">
+                                <h5 className="modal-title fw-bold text-warning"><FaUnlink className="me-2" /> Unsync GitHub</h5>
+                                <button type="button" className="btn-close" onClick={() => { setActiveModal(null); setUnsyncMsg({ text: '', type: '' }); }}></button>
+                            </div>
+                            <div className="modal-body p-4">
+                                <p className="text-muted small fw-medium mb-4">
+                                    Unsyncing your GitHub account will remove all your GitHub statistics, repositories, and contribution data from GitScope. Your GitHub account itself will not be affected. This action can be reversed by re-linking your account.
+                                </p>
+                                {unsyncMsg.text && <div className={`alert alert-${unsyncMsg.type} small fw-bold py-2`}>{unsyncMsg.text}</div>}
+                                <div className="d-flex justify-content-end gap-2">
+                                    <button type="button" className="btn btn-light fw-bold" onClick={() => setActiveModal(null)} disabled={unsyncLoading}>Cancel</button>
+                                    <button
+                                        type="button"
+                                        className="btn btn-warning fw-bold d-flex align-items-center gap-2"
+                                        onClick={handleUnsyncGithub}
+                                        disabled={unsyncLoading}
+                                    >
+                                        {unsyncLoading ? <FaSpinner className="fa-spin" /> : <FaUnlink />}
+                                        {unsyncLoading ? 'Unlinking...' : 'Confirm Unsync'}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>

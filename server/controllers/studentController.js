@@ -245,6 +245,34 @@ const linkGithubOauth = async (req, res) => {
     }
 }
 
+// @desc    Unlink GitHub Account
+// @route   POST /api/student/github/unlink
+// @access  Private/Student
+const unlinkGithub = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        if (!user.githubLinked) {
+            return res.status(400).json({ message: 'No GitHub account is linked.' });
+        }
+
+        // Clear GitHub fields
+        user.githubUsername = '';
+        user.githubLinked = false;
+        await user.save();
+
+        // Remove stale GitHub stats so dashboard starts fresh
+        await GithubStats.deleteOne({ user: user._id });
+        await leaderboardService.updateLeaderboards();
+
+        return res.status(200).json({ message: 'GitHub account unlinked successfully.' });
+    } catch (error) {
+        console.error('unlinkGithub ERROR:', error);
+        res.status(500).json({ message: 'Error unlinking GitHub: ' + (error.message || '') });
+    }
+};
+
 // @desc    Get All Repositories
 // @route   GET /api/student/repositories
 // @access  Private/Student
@@ -322,6 +350,7 @@ module.exports = {
   refreshGithubData,
   linkGithub,
   linkGithubOauth,
+  unlinkGithub,
   getAllRepositories,
   getRepositoryById,
   getAchievements,

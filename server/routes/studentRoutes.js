@@ -9,6 +9,7 @@ const {
   refreshGithubData,
   linkGithub,
   linkGithubOauth,
+  unlinkGithub,
   getAllRepositories,
   getRepositoryById,
   getAchievements,
@@ -20,6 +21,7 @@ router.put('/password', protect, authorize('student'), changePassword);
 router.post('/account/delete', protect, authorize('student'), deleteAccount);
 router.post('/github/link', protect, authorize('student'), linkGithub);
 router.post('/github/oauth', protect, authorize('student'), linkGithubOauth);
+router.post('/github/unlink', protect, authorize('student'), unlinkGithub);
 router.get('/dashboard', protect, authorize('student'), getDashboardData);
 router.post('/github/refresh', protect, authorize('student'), refreshGithubData);
 router.get('/repositories', protect, authorize('student'), getAllRepositories);

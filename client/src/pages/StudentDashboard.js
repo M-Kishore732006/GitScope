@@ -50,6 +50,7 @@ const ContributionHeatmap = ({ calendar }) => {
 const StudentDashboard = () => {
   const { user, stats, clientId, fetchDashboardData } = useOutletContext();
   const [refreshing, setRefreshing] = useState(false);
+  const [showGithubWarning, setShowGithubWarning] = useState(false);
 
   const userInfoStr = localStorage.getItem('userInfo');
   const userInfo = userInfoStr ? JSON.parse(userInfoStr) : null;
@@ -68,8 +69,7 @@ const StudentDashboard = () => {
     }
   };
 
-  const handleLinkGithub = async (e) => {
-    e.preventDefault();
+  const handleLinkGithub = () => {
     if (!clientId) {
        alert("Error: GitHub OAuth Client ID is missing. Please configure it in your backend .env file.");
        return;
@@ -125,12 +125,39 @@ const StudentDashboard = () => {
                        <p className="text-muted mb-3 mb-lg-0">Here's your open-source journey with GitScope.</p>
                        
                        {!hasGithub && (
-                            <button 
-                               className="btn btn-primary fw-semibold px-4 mt-3 d-flex align-items-center mb-1" 
-                               onClick={handleLinkGithub} 
-                            >
-                               <FaGithub className="me-2 fs-5" /> Connect with GitHub
-                            </button>
+                            <div>
+                              <button 
+                                 className="btn btn-primary fw-semibold px-4 mt-3 d-flex align-items-center mb-1" 
+                                 onClick={() => setShowGithubWarning(v => !v)}
+                              >
+                                 <FaGithub className="me-2 fs-5" /> Connect with GitHub
+                              </button>
+                              {showGithubWarning && (
+                                <div className="alert alert-warning border-warning mt-3 mb-0 p-3" style={{maxWidth: '420px'}}>
+                                  <p className="fw-bold mb-2" style={{fontSize: '0.85rem'}}>⚠️ Important — Before you connect:</p>
+                                  <p className="mb-3" style={{fontSize: '0.82rem'}}>
+                                    GitHub will use whichever account you're <strong>currently logged into</strong> in your browser.
+                                    Make sure you're signed in to your <strong>own GitHub account</strong> before continuing.
+                                  </p>
+                                  <div className="d-flex gap-2 flex-wrap">
+                                    <a 
+                                      href="https://github.com/login" 
+                                      target="_blank" 
+                                      rel="noreferrer"
+                                      className="btn btn-sm btn-outline-dark fw-semibold"
+                                    >
+                                      Switch GitHub Account →
+                                    </a>
+                                    <button 
+                                      className="btn btn-sm btn-dark fw-semibold"
+                                      onClick={handleLinkGithub}
+                                    >
+                                      I'm signed in, Continue
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
                        )}
                     </div>
                     
