@@ -5,7 +5,6 @@ const leaderboardService = require('../services/leaderboardService');
 
 // Helper to pause execution for a small delay
 const delay = ms => new Promise(res => setTimeout(res, ms));
-
 const syncAllLinkedGithubAccounts = async () => {
     console.log('[CRON] Starting GitHub Data Sync for all linked accounts...');
     try {
