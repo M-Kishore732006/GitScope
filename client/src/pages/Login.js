@@ -28,12 +28,8 @@ const Login = () => {
       if (response.data) {
         localStorage.setItem('userInfo', JSON.stringify(response.data));
         
-        if (response.data.mustChangePassword) {
-           // We could redirect to a change password screen here
-           // For now just redirect to their dashboard or profile
-        }
-        
-        navigate(`/${response.data.role}/dashboard`);
+        const targetRole = (response.data.role === 'teacher' || response.data.role === 'staff') ? 'staff' : response.data.role;
+        navigate(`/${targetRole}/dashboard`);
       }
     } catch (error) {
       setErrorMsg(error.response?.data?.message || 'Invalid email or password');

@@ -29,6 +29,7 @@ app.use('/api', limiter);
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/student', require('./routes/studentRoutes'));
+app.use('/api/staff', require('./routes/staffRoutes'));
 app.use('/api/config', require('./routes/configRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 

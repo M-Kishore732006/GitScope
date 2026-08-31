@@ -98,13 +98,24 @@ const loginUser = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (user && (await user.matchPassword(password))) {
+      // Verify account status
+      if (user.status === 'deactivated' || user.status === 'inactive') {
+        return res.status(403).json({ message: 'Your account is currently inactive or deactivated. Please contact the administrator.' });
+      }
+
       user.lastLogin = new Date();
       await user.save();
+
+      const normalizedRole = user.role === 'teacher' ? 'staff' : user.role;
 
       res.json({
         _id: user._id,
         email: user.email,
-        role: user.role,
+        username: user.username,
+        fullName: user.fullName || user.username,
+        department: user.department,
+        role: normalizedRole,
+        dbRole: user.role,
         profileCompleted: user.profileCompleted,
         mustChangePassword: user.mustChangePassword,
         token: generateToken(user._id, user.role, user.profileCompleted),

@@ -25,8 +25,22 @@ import Leaderboard from './pages/Leaderboard';
 import RepositoryDetails from './pages/RepositoryDetails';
 import GithubCallback from './pages/GithubCallback';
 
-// Dashboard layout
+// Student Dashboard layout
 import DashboardLayout from './components/dashboard/DashboardLayout';
+
+// Staff Layout & Pages
+import StaffLayout from './components/staff/StaffLayout';
+import StaffDashboard from './pages/staff/StaffDashboard';
+import MyStudents from './pages/staff/MyStudents';
+import StaffGithubActivity from './pages/staff/StaffGithubActivity';
+import StaffOpenSource from './pages/staff/StaffOpenSource';
+import StaffActivityMonitoring from './pages/staff/StaffActivityMonitoring';
+import StaffStudentComparison from './pages/staff/StaffStudentComparison';
+import StaffStudentRankings from './pages/staff/StaffStudentRankings';
+import StaffAnalytics from './pages/staff/StaffAnalytics';
+import StaffReports from './pages/staff/StaffReports';
+import StaffNotifications from './pages/staff/StaffNotifications';
+import StaffProfile from './pages/staff/StaffProfile';
 
 // Admin Layout & Pages
 import AdminLayout from './components/admin/AdminLayout';
@@ -41,22 +55,6 @@ import ActivityMonitoring from './pages/admin/ActivityMonitoring';
 import AdminReports from './pages/admin/AdminReports';
 import AuditLogs from './pages/admin/AuditLogs';
 import AdminSettings from './pages/admin/AdminSettings';
-
-// Logout handler
-const handleLogout = () => {
-  localStorage.removeItem('userInfo');
-  window.location.href = '/login';
-};
-
-// Teacher dashboard placeholder
-const TeacherDashboard = () => {
-  return (
-    <div className="p-5">
-      <h1>Teacher Dashboard</h1>
-      <button className="btn btn-danger mt-3" onClick={handleLogout}>Log Out</button>
-    </div>
-  );
-};
 
 function App() {
   return (
@@ -115,17 +113,29 @@ function App() {
 
 
         {/* =========================
-            TEACHER ROUTES
+            STAFF / TEACHER ROUTES
         ========================== */}
         <Route
           element={
-            <ProtectedRoute allowedRoles={['teacher']} />
+            <ProtectedRoute allowedRoles={['staff', 'teacher']} />
           }
         >
-          <Route
-            path="/teacher/dashboard"
-            element={<TeacherDashboard />}
-          />
+          <Route element={<StaffLayout />}>
+            <Route path="/staff/dashboard" element={<StaffDashboard />} />
+            <Route path="/staff/students" element={<MyStudents />} />
+            <Route path="/staff/activity" element={<StaffGithubActivity />} />
+            <Route path="/staff/open-source" element={<StaffOpenSource />} />
+            <Route path="/staff/monitoring" element={<StaffActivityMonitoring />} />
+            <Route path="/staff/comparison" element={<StaffStudentComparison />} />
+            <Route path="/staff/rankings" element={<StaffStudentRankings />} />
+            <Route path="/staff/analytics" element={<StaffAnalytics />} />
+            <Route path="/staff/reports" element={<StaffReports />} />
+            <Route path="/staff/notifications" element={<StaffNotifications />} />
+            <Route path="/staff/profile" element={<StaffProfile />} />
+
+            {/* Teacher legacy alias route */}
+            <Route path="/teacher/dashboard" element={<Navigate to="/staff/dashboard" replace />} />
+          </Route>
         </Route>
 
         {/* =========================

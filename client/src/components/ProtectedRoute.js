@@ -9,8 +9,11 @@ const ProtectedRoute = ({ allowedRoles }) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(userInfo.role)) {
-    return <Navigate to="/login" replace />; // or to a specific Access Denied page
+  const userRole = userInfo.role;
+  const expandedAllowedRoles = allowedRoles ? allowedRoles.flatMap(r => r === 'staff' || r === 'teacher' ? ['staff', 'teacher'] : [r]) : null;
+
+  if (expandedAllowedRoles && !expandedAllowedRoles.includes(userRole)) {
+    return <Navigate to="/login" replace />;
   }
 
   return <Outlet />;

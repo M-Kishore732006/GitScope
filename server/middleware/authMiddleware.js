@@ -22,6 +22,10 @@ const protect = async (req, res, next) => {
          return res.status(401).json({ message: 'User not found' });
       }
 
+      if (req.user.status === 'deactivated' || req.user.status === 'inactive') {
+        return res.status(403).json({ message: 'Your account is deactivated or inactive. Access denied.' });
+      }
+
       next();
     } catch (error) {
       console.error(error);
@@ -40,9 +44,13 @@ const authorize = (...roles) => {
       return res.status(401).json({ message: 'Not authenticated' });
     }
     
-    if (!roles.includes(req.user.role)) {
+    // Support both 'staff' and 'teacher' interchangeably for staff role authorization
+    const userRole = req.user.role;
+    const expandedRoles = roles.flatMap(r => r === 'staff' ? ['staff', 'teacher'] : r === 'teacher' ? ['teacher', 'staff'] : [r]);
+
+    if (!expandedRoles.includes(userRole)) {
       return res.status(403).json({ 
-        message: `User role ${req.user.role} is not authorized to access this route` 
+        message: `User role ${userRole} is not authorized to access this route` 
       });
     }
     next();
