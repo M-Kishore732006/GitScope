@@ -50,7 +50,8 @@ const ContributionHeatmap = ({ calendar }) => {
 const StudentDashboard = () => {
   const { user, stats, clientId, fetchDashboardData } = useOutletContext();
   const [refreshing, setRefreshing] = useState(false);
-  const [showGithubWarning, setShowGithubWarning] = useState(false);
+  const [showGithubModal, setShowGithubModal] = useState(false);
+  const [githubUsernameInput, setGithubUsernameInput] = useState('');
 
   const userInfoStr = localStorage.getItem('userInfo');
   const userInfo = userInfoStr ? JSON.parse(userInfoStr) : null;
@@ -74,8 +75,13 @@ const StudentDashboard = () => {
        alert("Error: GitHub OAuth Client ID is missing. Please configure it in your backend .env file.");
        return;
     }
+    const username = githubUsernameInput.trim();
+    if (!username) {
+      alert('Please enter your GitHub username.');
+      return;
+    }
     const redirectUri = encodeURIComponent(`${window.location.origin}/student/github/callback`);
-    window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}`;
+    window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&login=${encodeURIComponent(username)}`;
   };
 
   const hasGithub = user?.githubLinked;
@@ -128,35 +134,10 @@ const StudentDashboard = () => {
                             <div>
                               <button 
                                  className="btn btn-primary fw-semibold px-4 mt-3 d-flex align-items-center mb-1" 
-                                 onClick={() => setShowGithubWarning(v => !v)}
+                                 onClick={() => { setShowGithubModal(true); setGithubUsernameInput(''); }}
                               >
                                  <FaGithub className="me-2 fs-5" /> Connect with GitHub
                               </button>
-                              {showGithubWarning && (
-                                <div className="alert alert-warning border-warning mt-3 mb-0 p-3" style={{maxWidth: '420px'}}>
-                                  <p className="fw-bold mb-2" style={{fontSize: '0.85rem'}}>⚠️ Important — Before you connect:</p>
-                                  <p className="mb-3" style={{fontSize: '0.82rem'}}>
-                                    GitHub will use whichever account you're <strong>currently logged into</strong> in your browser.
-                                    Make sure you're signed in to your <strong>own GitHub account</strong> before continuing.
-                                  </p>
-                                  <div className="d-flex gap-2 flex-wrap">
-                                    <a 
-                                      href="https://github.com/login" 
-                                      target="_blank" 
-                                      rel="noreferrer"
-                                      className="btn btn-sm btn-outline-dark fw-semibold"
-                                    >
-                                      Switch GitHub Account →
-                                    </a>
-                                    <button 
-                                      className="btn btn-sm btn-dark fw-semibold"
-                                      onClick={handleLinkGithub}
-                                    >
-                                      I'm signed in, Continue
-                                    </button>
-                                  </div>
-                                </div>
-                              )}
                             </div>
                        )}
                     </div>
@@ -395,6 +376,77 @@ const StudentDashboard = () => {
              </div>
 
          </div>
+
+      {/* ── GitHub Username Modal ── */}
+      {showGithubModal && (
+        <>
+          <div
+            className="modal-backdrop fade show"
+            style={{ zIndex: 1040 }}
+            onClick={() => setShowGithubModal(false)}
+          />
+          <div
+            className="modal fade show d-block"
+            style={{ zIndex: 1050 }}
+            role="dialog"
+            aria-modal="true"
+          >
+            <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: '440px' }}>
+              <div className="modal-content border-0 shadow-lg rounded-4">
+                <div className="modal-header border-0 pb-0 px-4 pt-4">
+                  <div className="d-flex align-items-center gap-2">
+                    <FaGithub style={{ fontSize: '1.5rem' }} />
+                    <h5 className="modal-title fw-bold mb-0">Connect GitHub Account</h5>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => setShowGithubModal(false)}
+                    aria-label="Close"
+                  />
+                </div>
+                <div className="modal-body px-4 py-3">
+                  <p className="text-muted small mb-3">
+                    Enter your GitHub username. You'll be redirected to GitHub to authorize — make sure you log in with <strong>this exact account</strong>.
+                  </p>
+                  <label className="form-label fw-semibold small text-uppercase text-muted mb-1">
+                    GitHub Username
+                  </label>
+                  <div className="input-group">
+                    <span className="input-group-text bg-light border-end-0 text-muted">
+                      github.com/
+                    </span>
+                    <input
+                      type="text"
+                      className="form-control border-start-0 ps-0"
+                      placeholder="your-username"
+                      value={githubUsernameInput}
+                      onChange={e => setGithubUsernameInput(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && handleLinkGithub()}
+                      autoFocus
+                    />
+                  </div>
+                </div>
+                <div className="modal-footer border-0 px-4 pb-4 pt-1 d-flex gap-2">
+                  <button
+                    className="btn btn-light fw-semibold flex-fill"
+                    onClick={() => setShowGithubModal(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="btn btn-dark fw-semibold flex-fill d-flex align-items-center justify-content-center gap-2"
+                    onClick={handleLinkGithub}
+                    disabled={!githubUsernameInput.trim()}
+                  >
+                    <FaGithub /> Authorize with GitHub
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
   );
 };
 
