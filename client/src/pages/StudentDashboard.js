@@ -81,7 +81,7 @@ const StudentDashboard = () => {
       return;
     }
     const redirectUri = encodeURIComponent(`${window.location.origin}/student/github/callback`);
-    window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&login=${encodeURIComponent(username)}`;
+    window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=read:user,repo&login=${encodeURIComponent(username)}`;
   };
 
   const hasGithub = user?.githubLinked;
