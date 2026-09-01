@@ -121,6 +121,7 @@ const StudentDashboard = () => {
   }, [stats?.repositoriesList]);
 
   return (
+    <>
       <div className="container-fluid p-4 p-md-5">
          
          {/* Hero Section */}
@@ -447,6 +448,7 @@ const StudentDashboard = () => {
           </div>
         </>
       )}
+    </>
   );
 };
 
