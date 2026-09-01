@@ -14,14 +14,22 @@ const registerUser = async (req, res) => {
   try {
     let { username, rollNumber, email, phoneNumber, department, year, password, confirmPassword } = req.body;
 
-    // Validate Input Fields mapping to exactly how prompt wants
+    username = (username || '').trim();
+    rollNumber = (rollNumber || '').trim().toUpperCase();
+    email = (email || '').trim().toLowerCase();
+    let cleanPhone = (phoneNumber || '').toString().trim().replace(/\D/g, '');
+    if (cleanPhone.length > 10 && cleanPhone.startsWith('91')) {
+      cleanPhone = cleanPhone.slice(2);
+    }
+
+    // Validate Input Fields
     if (!username || username.length < 3 || username.length > 30) {
       return res.status(400).json({ message: 'Username must be between 3 and 30 characters.' });
     }
     if (!department) return res.status(400).json({ message: 'Department is required.' });
     if (!year) return res.status(400).json({ message: 'Year is required.' });
     
-    if (password.length < 6) {
+    if (!password || password.length < 6) {
       return res.status(400).json({ message: 'Password must be at least 6 characters long.' });
     }
     
@@ -30,24 +38,19 @@ const registerUser = async (req, res) => {
     }
     
     // Email regex validation
-    const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({ message: 'Please enter a valid email address.' });
     }
 
     // Phone validation
-    const phoneRegex = /^\d{10}$/;
-    if (!phoneRegex.test(phoneNumber)) {
+    if (cleanPhone.length !== 10) {
       return res.status(400).json({ message: 'Please enter a valid 10-digit phone number.' });
     }
 
-    if (!rollNumber || rollNumber.trim() === '') {
-        return res.status(400).json({ message: 'Roll Number is required.' });
+    if (!rollNumber) {
+      return res.status(400).json({ message: 'Roll Number is required.' });
     }
-    
-    // Normalize rollNumber mapping
-    rollNumber = rollNumber.trim().toUpperCase();
-    email = email.trim().toLowerCase();
 
     // Check Unique Constraints
     const rollNumberExists = await User.findOne({ rollNumber });
@@ -57,15 +60,16 @@ const registerUser = async (req, res) => {
 
     const emailExists = await User.findOne({ email });
     if (emailExists) {
-      return res.status(400).json({ message: 'Email is already registered.' });
+      return res.status(400).json({ message: `Email '${email}' is already registered.` });
     }
 
     // Create User (defaults role='student', profileCompleted=false)
     const user = await User.create({
       username,
+      fullName: username,
       rollNumber,
       email,
-      phoneNumber,
+      phoneNumber: cleanPhone,
       department,
       year,
       password,
@@ -75,16 +79,21 @@ const registerUser = async (req, res) => {
       res.status(201).json({
         _id: user._id,
         email: user.email,
+        username: user.username,
+        fullName: user.fullName || user.username,
+        department: user.department,
         role: user.role,
+        dbRole: user.role,
+        profileCompleted: user.profileCompleted,
+        mustChangePassword: user.mustChangePassword,
         token: generateToken(user._id, user.role, user.profileCompleted),
-        mustChangePassword: user.mustChangePassword
       });
     } else {
       res.status(400).json({ message: 'Invalid user data' });
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    console.error('Registration Error:', error);
+    res.status(500).json({ message: error.message || 'Internal Server Error during registration' });
   }
 };
 
@@ -93,9 +102,24 @@ const registerUser = async (req, res) => {
 // @access  Public
 const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Please provide both email/roll number and password.' });
+    }
+
+    const cleanInput = email.trim();
+    const normalizedEmail = cleanInput.toLowerCase();
+    const upperRoll = cleanInput.toUpperCase();
+
+    // Find by email, roll number, or username (case-insensitive)
+    const user = await User.findOne({
+      $or: [
+        { email: normalizedEmail },
+        { rollNumber: upperRoll },
+        { username: new RegExp(`^${cleanInput}$`, 'i') }
+      ]
+    });
 
     if (user && (await user.matchPassword(password))) {
       // Verify account status
@@ -124,8 +148,8 @@ const loginUser = async (req, res) => {
       res.status(401).json({ message: 'Invalid email or password' });
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    console.error('Login Error:', error);
+    res.status(500).json({ message: 'Internal Server Error during login' });
   }
 };
 

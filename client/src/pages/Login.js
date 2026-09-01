@@ -47,9 +47,9 @@ const Login = () => {
       <form onSubmit={handleSubmit}>
         <AuthInput
           icon={FaEnvelope}
-          type="email"
+          type="text"
           name="email"
-          placeholder="Email Address"
+          placeholder="Email Address or Roll Number"
           value={formData.email}
           onChange={handleChange}
         />
