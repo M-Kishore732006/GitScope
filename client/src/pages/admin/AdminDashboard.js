@@ -94,8 +94,8 @@ const AdminDashboard = () => {
         <div className="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center">
           <div>
             <div className="d-flex align-items-center gap-2 mb-1">
-              <h2 className="fw-extrabold mb-0">System Control Center 👋</h2>
-              <span className="badge bg-primary px-3 py-2 rounded-pill small">Admin Access</span>
+              <h2 className="fw-extrabold mb-0">System Control Center</h2>
+              
             </div>
             <p className="text-muted mb-3 mb-lg-0">
               Institution-wide GitHub telemetry, student progress monitoring, and staff governance.

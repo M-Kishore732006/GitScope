@@ -1,0 +1,313 @@
+================================================================================
+                           GITSCOPE - PROJECT ANALYSIS & EXPLANATION
+================================================================================
+
+1. EXECUTIVE SUMMARY & OBJECTIVE
+--------------------------------------------------------------------------------
+GitScope is a comprehensive full-stack MERN (MongoDB, Express.js, React.js, 
+Node.js) web application designed specifically for educational institutions 
+(universities, engineering colleges, and technical academies). 
+
+Its primary purpose is to automate the tracking, evaluation, visualization, 
+and gamification of students' GitHub coding activity and open-source contributions.
+
+In traditional academic environments, student programming assignments and open-source
+work outside the classroom are difficult to verify and evaluate without tedious,
+manual checks of each student's GitHub profile. GitScope solves this by providing:
+- Automated GitHub synchronization via GraphQL and REST APIs.
+- Objective contribution scoring based on customizable institutional weights.
+- Multi-tier gamification (Bronze to Legend) and achievement badges.
+- Supervisory dashboards and side-by-side student comparison tools for teachers.
+- Comprehensive institutional governance, user management, and audit logging for admins.
+
+
+2. ARCHITECTURE & TECHNOLOGY STACK
+--------------------------------------------------------------------------------
+A. Frontend Architecture:
+   - Framework: React.js (v19) SPA (Single Page Application)
+   - Routing: React Router DOM (v7) with nested Protected and Public Route guards
+   - UI Design & Styling: Bootstrap 5, custom SaaS responsive theme, modern CSS
+     variables, and customized component stylesheets (dashboard.css, Landing.css, auth.css)
+   - Data Visualization & Charts: Recharts library
+     * LineChart: Monthly commit trends over time
+     * PieChart: Language usage breakdown
+     * BarChart: Pull request total vs. merged ratio
+     * AreaChart: Cumulative repository growth
+     * SVG Contribution Heatmap: GitHub-style continuous contribution grid
+   - Icons: React Icons (FontAwesome 'Fa', Bootstrap Icons 'Bs')
+   - HTTP Client: Axios with JWT Authorization header interceptors
+   - Deployment Configuration: vercel.json (SPA rewrite rules)
+
+B. Backend Architecture:
+   - Runtime Environment: Node.js
+   - Web Framework: Express.js (v5)
+   - Security & Middleware:
+     * Helmet: Secures HTTP response headers
+     * Express Rate Limit: Throttles API requests (500 requests per 15 minutes)
+     * CORS: Configured for secure frontend cross-origin requests
+     * Bcrypt: 10-round salt hashing for all passwords
+     * JSON Web Tokens (JWT): Stateless authentication with 30-day token lifetime
+   - Scheduled Background Jobs: node-cron (automated 12-hour sync cycles)
+   - Deployment Configuration: render.yaml (Node web service definition)
+
+C. Database & Data Layer:
+   - Database: MongoDB (Atlas Cloud / Local)
+   - Object Data Modeling: Mongoose ODM (v9) with schemas, pre-save hooks, and indexes
+
+D. External Integrations:
+   - GitHub GraphQL API v4: Fetches profile data, repositories, stars, forks, 
+     commit contribution totals, merged PRs, and weekly calendar data in 1 request
+   - GitHub Public Events REST API: Fetches real-time recent public activity feeds
+   - GitHub OAuth 2.0: Secure student account linking without exposing passwords
+
+
+3. USER ROLES & PERMISSIONS (RBAC)
+--------------------------------------------------------------------------------
+GitScope enforces strict Role-Based Access Control across three distinct user roles:
+
+1. STUDENT:
+   - Registers an account with roll number, email, phone, department, year, section.
+   - Securely links their GitHub account via OAuth or direct username submission.
+   - Views personal telemetry: commits, merged PRs, issues, stars, streaks, score.
+   - Inspects interactive graphs: commit history, language distribution, PR metrics.
+   - Monitors contribution calendar and real-time activity stream.
+   - Tracks gamified level progress (Bronze, Silver, Gold, Platinum, Diamond, Legend).
+   - Unlocks milestone badges (e.g., First Commit, 100 Commits, 1-Week Streak).
+   - Views Global, Departmental, and Year-wise leaderboards with personal rank highlighted.
+   - Deep-dives into individual repository statistics (languages, stars, forks).
+   - Updates personal profile, updates password, or performs account deletion with cascade cleanup.
+
+2. STAFF / TEACHER:
+   - Manages assigned students (assigned either directly or by department).
+   - Supervisory Dashboard: Total assigned, GitHub connected/unconnected, active vs. inactive.
+   - Roster Management: Filter students by department, year, section, connection, or activity.
+   - Multi-Student Comparison: Compares up to 4 students side-by-side across key metrics.
+   - Activity Monitoring: Audits real-time commit activity and newly created repositories.
+   - On-Demand Sync: Manually triggers GitHub sync for any student with stale data.
+   - Report Generation: Generates student contribution summaries in JSON preview or downloadable CSV.
+   - Rankings & Analytics: Views performance ranks of assigned students.
+
+3. ADMINISTRATOR:
+   - System Control Center: High-level institutional metrics, aggregate commits/PRs/issues,
+     active vs. inactive students, department contribution breakdowns, and monthly trends.
+   - Staff Management: Creates staff accounts, updates profiles, resets passwords, toggles status,
+     and assigns batches of students to staff members.
+   - Student Management: Manages student profiles, resets passwords, toggles active/deactivated status,
+     and deletes accounts with cascade data cleanup.
+   - GitHub Accounts Central: Oversees all student GitHub connections; features single-click sync,
+     bulk synchronization for all students ('Sync All'), and manual account disconnection.
+   - Scoring Rules Engine: Configures system scoring point weights:
+     * Commits Points Weight
+     * Pull Request Points Weight
+     * Merged PR Points Weight
+     * Issue Points Weight
+     * Code Review Points Weight
+     * Repository Points Weight
+     * Inactivity Threshold (Days)
+   - One-Click Score Recalculation: Batch recalculates all student scores and recomputes leaderboards
+     across the entire institution based on updated weights.
+   - Audit Trail & Governance: Immutable log of administrative events, role changes, status toggles,
+     and sync jobs, including IP addresses and timestamps.
+   - Global Search: Unified search across students, staff, and repositories.
+   - System Notifications: Broadcasts and views system-level alerts and warnings.
+
+
+4. CORE BUSINESS LOGIC & SERVICES
+--------------------------------------------------------------------------------
+A. GitHub Service (server/services/githubService.js):
+   - Constructs and executes an optimized GraphQL query against 'https://api.github.com/graphql'.
+   - Queries follower counts, repository collections (filtered by owner, sorted by stars),
+     primary language statistics, merged PR counts, and full contribution calendars.
+   - Fetches public event logs via REST API for recent activity feeds.
+   - Calculates consecutive daily contribution streaks with a smart grace period for the current day.
+   - Persists all parsed data into the GithubStats MongoDB document.
+
+B. Scoring Service (server/services/scoreService.js):
+   - Computes student Contribution Score dynamically:
+     Score = (Commits * W_commit) + 
+             (Merged PRs * W_mergedPR) + 
+             (Open PRs * W_openPR) + 
+             (Issues * W_issue) + 
+             (Reviews * W_review) + 
+             (Repositories * W_repo) + 
+             (Total Stars * 2) + 
+             (Streak Days * 2)
+   - Weights default to institutional defaults if not customized by an Administrator.
+   - Recalculates scores across all student records on demand or upon configuration updates.
+
+C. Achievement & Tier Engine (server/services/achievementService.js):
+   - Evaluates milestone achievements:
+     * Commits: "First Commit", "100 Commits", "500 Commits", "1000 Commits"
+     * Pull Requests: "First Pull Request", "First Merge"
+     * Streaks: "1-Week Streak", "30-Day Streak", "100-Day Streak"
+   - Assigns dynamic badges with earned timestamps.
+   - Determines Tier Level based on score thresholds:
+     * Bronze: < 100 points
+     * Silver: 100 - 499 points
+     * Gold: 500 - 2,499 points
+     * Platinum: 2,500 - 9,999 points
+     * Diamond: 10,000 - 49,999 points
+     * Legend: 50,000+ points
+
+D. Leaderboard Service (server/services/leaderboardService.js):
+   - Queries all GithubStats records sorted descending by contributionScore.
+   - Computes and saves both overallRank and departmentRank directly into each student's record.
+
+E. Background Sync Cron (server/cron/githubCron.js):
+   - Uses node-cron running every 12 hours (0 0,12 * * *).
+   - Iterates through all users where githubLinked is true.
+   - Implements a 2-second rate-limiting delay between accounts to prevent GitHub API rate throttling.
+   - Automatically updates leaderboards upon cycle completion.
+
+F. Audit Service (server/services/auditService.js):
+   - Automatically records actor ID, email, role, action, target entity, description, and IP address.
+
+
+5. DATABASE SCHEMAS (MONGOOSE MODELS)
+--------------------------------------------------------------------------------
+1. User (server/models/User.js):
+   - username, rollNumber (unique, sparse), email (unique), phoneNumber, password (hashed).
+   - role: ['student', 'teacher', 'admin']
+   - status: ['active', 'inactive', 'deactivated']
+   - assignedStaff (Ref to User), assignedStudents (Array of Refs to User).
+   - department, year, section, githubUsername, githubLinked, lastLogin.
+
+2. GithubStats (server/models/GithubStats.js):
+   - user (Ref to User), githubUsername.
+   - followers, following, totalRepositories, totalCommits, totalPullRequests, mergedPullRequests.
+   - totalIssues, totalStars, totalForks, totalOrganizations, reviews, contributionStreak.
+   - contributionScore, overallRank, departmentRank, level.
+   - achievements: [{ name, earnedAt, description }]
+   - languageUsage: [{ language, count }]
+   - repositoriesList: [{ name, url, description, stars, forks, primaryLanguage, createdAt }]
+   - contributionCalendar: [{ date, count }]
+   - recentActivity: [{ type, repoName, action, createdAt }]
+   - syncStatus: ['Connected', 'Not Connected', 'Syncing', 'Sync Failed']
+   - externalContributions: [{ repoName, repoOwner, url, type, title, isMerged, createdAt }]
+
+3. SystemSettings (server/models/SystemSettings.js):
+   - commitPoints, prPoints, mergedPrPoints, issuePoints, reviewPoints, repoPoints.
+   - inactivityThresholdDays (default: 14 days).
+   - autoSyncFrequencyHours (default: 24 hours).
+
+4. AuditLog (server/models/AuditLog.js):
+   - user (Ref), userEmail, userRole, action, target, description, ipAddress, createdAt.
+
+5. Notification (server/models/Notification.js):
+   - title, message, type: ['info', 'warning', 'success', 'danger'], category, isRead, createdAt.
+
+
+6. DIRECTORY STRUCTURE
+--------------------------------------------------------------------------------
+GitScope/
+│
+├── client/                               # Frontend React Application
+│   ├── public/                           # Static assets, index.html
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── admin/                    # AdminLayout, AdminSidebar, AdminTopNav
+│   │   │   ├── dashboard/                # ActivityTimeline, DashboardLayout, ProfileWidget, Sidebar, TopNav
+│   │   │   ├── staff/                    # StaffLayout, StaffSidebar, StaffTopNav
+│   │   │   ├── ProtectedRoute.js         # Role-based route authorization guard
+│   │   │   └── PublicRoute.js            # Guest route redirector
+│   │   ├── pages/
+│   │   │   ├── admin/                    # AdminDashboard, StaffManagement, StudentManagement,
+│   │   │   │                             # GithubAccounts, GithubAnalytics, StudentRankings,
+│   │   │   │                             # OpenSourceTracking, ActivityMonitoring, AdminReports,
+│   │   │   │                             # AuditLogs, AdminSettings
+│   │   │   ├── staff/                    # StaffDashboard, MyStudents, StaffActivityMonitoring,
+│   │   │   │                             # StaffAnalytics, StaffGithubActivity, StaffNotifications,
+│   │   │   │                             # StaffOpenSource, StaffProfile, StaffReports,
+│   │   │   │                             # StaffStudentComparison, StaffStudentProfileModal,
+│   │   │   │                             # StaffStudentRankings
+│   │   │   ├── GithubCallback.js         # OAuth redirect handler
+│   │   │   ├── Landing.js                # Public landing page
+│   │   │   ├── Leaderboard.js            # Global and departmental leaderboards
+│   │   │   ├── Login.js / Signup.js      # Authentication pages
+│   │   │   ├── RepositoryDetails.js      # Individual repository inspection
+│   │   │   ├── StudentDashboard.js       # Main student dashboard
+│   │   │   └── StudentProfile.js         # Student settings and account actions
+│   │   ├── styles/                       # CSS files (dashboard.css, Landing.css, auth.css)
+│   │   ├── App.js                        # Master route configurations
+│   │   └── index.js                      # React application entry point
+│   ├── package.json
+│   └── vercel.json                       # Vercel deployment configuration
+│
+├── server/                               # Backend Node/Express Application
+│   ├── config/
+│   │   └── db.js                         # MongoDB connection logic
+│   ├── controllers/
+│   │   ├── adminController.js            # Admin portal API handlers
+│   │   ├── authController.js             # User login, student registration, JWT issuance
+│   │   ├── staffController.js            # Staff / Teacher management handlers
+│   │   └── studentController.js          # Student telemetry, sync, and profile handlers
+│   ├── cron/
+│   │   └── githubCron.js                 # 12-hour background synchronization job
+│   ├── middleware/
+│   │   └── authMiddleware.js             # JWT verification & role authorization middleware
+│   ├── models/
+│   │   ├── AuditLog.js                   # System audit logs
+│   │   ├── GithubStats.js                # Student GitHub analytics & metrics
+│   │   ├── Notification.js               # System notifications
+│   │   ├── SystemSettings.js             # Scoring weights & platform configurations
+│   │   └── User.js                       # User authentication & profile schema
+│   ├── routes/
+│   │   ├── adminRoutes.js                # Admin endpoints (/api/admin)
+│   │   ├── authRoutes.js                 # Auth endpoints (/api/auth)
+│   │   ├── configRoutes.js               # Public config endpoints (/api/config)
+│   │   ├── staffRoutes.js                # Staff endpoints (/api/staff)
+│   │   └── studentRoutes.js              # Student endpoints (/api/student)
+│   ├── seed/
+│   │   └── seedAdmin.js                  # Automatic admin user bootstrapping
+│   ├── services/
+│   │   ├── achievementService.js         # Milestone badges & level calculation
+│   │   ├── auditService.js               # Audit logging service
+│   │   ├── githubService.js              # GitHub GraphQL & REST API integration
+│   │   ├── leaderboardService.js         # Rank recalculation service
+│   │   ├── notificationService.js        # Notification generation service
+│   │   └── scoreService.js               # Dynamic contribution score algorithm
+│   ├── app.js                            # Express app setup, security middleware, and routes
+│   ├── server.js                         # Server listener and startup sequence
+│   └── package.json
+│
+├── render.yaml                           # Render cloud deployment configuration
+└── README.md                             # Project README documentation
+
+
+7. HOW TO RUN THE APPLICATION LOCALLY
+--------------------------------------------------------------------------------
+Prerequisites:
+  - Node.js (v18 or higher)
+  - MongoDB instance (MongoDB Atlas connection string or local MongoDB)
+  - GitHub Personal Access Token (for backend GraphQL API calls)
+  - GitHub OAuth App (Client ID & Client Secret for OAuth linking)
+
+Step 1: Start the Backend Server
+  $ cd server
+  $ npm install
+  $ npm run dev     (Runs server via nodemon on http://localhost:5000)
+
+Step 2: Start the Frontend Client
+  $ cd client
+  $ npm install
+  $ npm start       (Launches React application on http://localhost:3000)
+
+
+8. FUTURE EXPANSION & RECOMMENDATIONS
+--------------------------------------------------------------------------------
+1. Bulk Student Cohort CSV Import:
+   Enable administrators and teachers to upload a CSV with student roll numbers,
+   names, and email addresses to pre-register entire classes or semesters.
+
+2. Webhook Event Ingestion:
+   Support GitHub Organization Webhooks so that push and pull request events are
+   ingested in real time, eliminating latency between GitHub and GitScope.
+
+3. Anomaly & Plagiarism Detection:
+   Implement anomaly detection to flag automated commit bots, mass meaningless
+   commits, or commit bursts designed to artificially inflate leaderboard standings.
+
+4. Gamified Weekly / Monthly Badges:
+   Introduce "Contributor of the Month" and "Department of the Month" awards to 
+   foster healthy intra-collegiate coding competitions.
+================================================================================
