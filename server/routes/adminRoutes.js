@@ -29,6 +29,7 @@ const {
   getAuditLogs,
   getSettings,
   updateSettings,
+  recalculateAllStudentScores,
   getNotifications,
   globalSearch
 } = require('../controllers/adminController');
@@ -83,6 +84,7 @@ router.get('/audit-logs', getAuditLogs);
 // 11. Settings
 router.get('/settings', getSettings);
 router.put('/settings', updateSettings);
+router.post('/settings/recalculate-scores', recalculateAllStudentScores);
 
 // 12. Global Search & Notifications
 router.get('/notifications', getNotifications);

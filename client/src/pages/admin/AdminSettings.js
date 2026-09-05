@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { FaCog, FaShieldAlt, FaGithub, FaSlidersH, FaSave, FaCheckCircle } from 'react-icons/fa';
+import { FaCog, FaShieldAlt, FaGithub, FaSlidersH, FaSave, FaCheckCircle, FaSyncAlt } from 'react-icons/fa';
 import '../../styles/dashboard.css';
 
 const AdminSettings = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [recalculating, setRecalculating] = useState(false);
 
   // Form states
   const [fullName, setFullName] = useState('');
@@ -13,8 +14,9 @@ const AdminSettings = () => {
 
   // Scoring rules state
   const [commitPoints, setCommitPoints] = useState(1);
+  const [repoPoints, setRepoPoints] = useState(1);
   const [prPoints, setPrPoints] = useState(5);
-  const [mergedPrPoints, setMergedPrPoints] = useState(7);
+  const [mergedPrPoints, setMergedPrPoints] = useState(5);
   const [issuePoints, setIssuePoints] = useState(2);
   const [reviewPoints, setReviewPoints] = useState(3);
   const [inactivityThresholdDays, setInactivityThresholdDays] = useState(14);
@@ -33,12 +35,13 @@ const AdminSettings = () => {
         setEmail(res.data.adminProfile.email || '');
       }
       if (res.data?.settings) {
-        setCommitPoints(res.data.settings.commitPoints || 1);
-        setPrPoints(res.data.settings.prPoints || 5);
-        setMergedPrPoints(res.data.settings.mergedPrPoints || 7);
-        setIssuePoints(res.data.settings.issuePoints || 2);
-        setReviewPoints(res.data.settings.reviewPoints || 3);
-        setInactivityThresholdDays(res.data.settings.inactivityThresholdDays || 14);
+        setCommitPoints(res.data.settings.commitPoints ?? 1);
+        setRepoPoints(res.data.settings.repoPoints ?? 1);
+        setPrPoints(res.data.settings.prPoints ?? 5);
+        setMergedPrPoints(res.data.settings.mergedPrPoints ?? 5);
+        setIssuePoints(res.data.settings.issuePoints ?? 2);
+        setReviewPoints(res.data.settings.reviewPoints ?? 3);
+        setInactivityThresholdDays(res.data.settings.inactivityThresholdDays ?? 14);
       }
     } catch (error) {
       console.error('Error fetching settings:', error);
@@ -54,13 +57,14 @@ const AdminSettings = () => {
 
   const handleSaveSettings = async (e) => {
     e.preventDefault();
-    setMsg({ text: 'Saving settings...', type: 'info' });
+    setMsg({ text: 'Saving settings and recalculating student scores...', type: 'info' });
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.put('/api/admin/settings', {
+      const res = await axios.put('/api/admin/settings', {
         fullName,
         email,
         commitPoints: Number(commitPoints),
+        repoPoints: Number(repoPoints),
         prPoints: Number(prPoints),
         mergedPrPoints: Number(mergedPrPoints),
         issuePoints: Number(issuePoints),
@@ -68,10 +72,24 @@ const AdminSettings = () => {
         inactivityThresholdDays: Number(inactivityThresholdDays)
       }, config);
 
-      setMsg({ text: 'System settings & scoring rules updated successfully!', type: 'success' });
+      setMsg({ text: res.data.message || 'System settings & scoring rules updated and scores recalculated!', type: 'success' });
       fetchSettings();
     } catch (error) {
       setMsg({ text: error.response?.data?.message || 'Error saving settings', type: 'danger' });
+    }
+  };
+
+  const handleRecalculateScores = async () => {
+    setRecalculating(true);
+    setMsg({ text: 'Recalculating activity scores & updating leaderboards for all students...', type: 'info' });
+    try {
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+      const res = await axios.post('/api/admin/settings/recalculate-scores', {}, config);
+      setMsg({ text: res.data.message || 'Successfully recalculated all student scores & leaderboards!', type: 'success' });
+    } catch (error) {
+      setMsg({ text: error.response?.data?.message || 'Error recalculating scores', type: 'danger' });
+    } finally {
+      setRecalculating(false);
     }
   };
 
@@ -151,78 +169,109 @@ const AdminSettings = () => {
 
           {/* Contribution Scoring & Activity Threshold Rules */}
           <div className="col-12 col-lg-6">
-            <div className="saas-card h-100">
-              <h5 className="fw-bold mb-3 border-bottom pb-2 d-flex align-items-center">
-                <FaSlidersH className="me-2 text-primary" /> Contribution Scoring & Activity Rules
-              </h5>
-
-              <div className="row g-3 mb-3">
-                <div className="col-6">
-                  <label className="form-label text-muted small fw-bold">COMMIT POINTS</label>
-                  <input 
-                    type="number" 
-                    className="form-control bg-light border-0 py-2 fw-bold text-primary"
-                    value={commitPoints}
-                    onChange={(e) => setCommitPoints(e.target.value)}
-                  />
+            <div className="saas-card h-100 d-flex flex-column justify-content-between">
+              <div>
+                <div className="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                  <h5 className="fw-bold mb-0 d-flex align-items-center">
+                    <FaSlidersH className="me-2 text-primary" /> Contribution Scoring & Activity Rules
+                  </h5>
+                  <button 
+                    type="button" 
+                    className="btn btn-sm btn-light border rounded-circle d-inline-flex align-items-center justify-content-center text-primary shadow-xs"
+                    style={{ width: '32px', height: '32px' }}
+                    onClick={handleRecalculateScores}
+                    disabled={recalculating}
+                    title="Recalculate and reload scores"
+                  >
+                    <FaSyncAlt className={recalculating ? 'fa-spin' : ''} style={{ fontSize: '0.85rem' }} />
+                  </button>
                 </div>
 
-                <div className="col-6">
-                  <label className="form-label text-muted small fw-bold">OPEN PR POINTS</label>
-                  <input 
-                    type="number" 
-                    className="form-control bg-light border-0 py-2 fw-bold text-primary"
-                    value={prPoints}
-                    onChange={(e) => setPrPoints(e.target.value)}
-                  />
+                <div className="row g-3 mb-3">
+                  <div className="col-6">
+                    <label className="form-label text-muted small fw-bold">COMMIT POINTS</label>
+                    <input 
+                      type="number" 
+                      className="form-control bg-light border-0 py-2 fw-bold text-primary"
+                      value={commitPoints}
+                      onChange={(e) => setCommitPoints(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="col-6">
+                    <label className="form-label text-muted small fw-bold">REPO POINTS</label>
+                    <input 
+                      type="number" 
+                      className="form-control bg-light border-0 py-2 fw-bold text-primary"
+                      value={repoPoints}
+                      onChange={(e) => setRepoPoints(e.target.value)}
+                    />
+                  </div>
                 </div>
+
+                <div className="row g-3 mb-3">
+                  <div className="col-6">
+                    <label className="form-label text-muted small fw-bold">OPEN PR POINTS</label>
+                    <input 
+                      type="number" 
+                      className="form-control bg-light border-0 py-2 fw-bold text-primary"
+                      value={prPoints}
+                      onChange={(e) => setPrPoints(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="col-6">
+                    <label className="form-label text-muted small fw-bold">MERGED PR POINTS</label>
+                    <input 
+                      type="number" 
+                      className="form-control bg-light border-0 py-2 fw-bold text-success"
+                      value={mergedPrPoints}
+                      onChange={(e) => setMergedPrPoints(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="row g-3 mb-3">
+                  <div className="col-6">
+                    <label className="form-label text-muted small fw-bold">ISSUE POINTS</label>
+                    <input 
+                      type="number" 
+                      className="form-control bg-light border-0 py-2 fw-bold text-warning"
+                      value={issuePoints}
+                      onChange={(e) => setIssuePoints(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="col-6">
+                    <label className="form-label text-muted small fw-bold">CODE REVIEW POINTS</label>
+                    <input 
+                      type="number" 
+                      className="form-control bg-light border-0 py-2 fw-bold text-info"
+                      value={reviewPoints}
+                      onChange={(e) => setReviewPoints(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="row g-3 mb-3">
+                  <div className="col-12">
+                    <label className="form-label text-muted small fw-bold">INACTIVITY THRESHOLD (DAYS)</label>
+                    <input 
+                      type="number" 
+                      className="form-control bg-light border-0 py-2 fw-bold text-danger"
+                      value={inactivityThresholdDays}
+                      onChange={(e) => setInactivityThresholdDays(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <p className="text-muted small mb-3" style={{ fontSize: '0.78rem' }}>
+                  <FaCheckCircle className="text-success me-1" />
+                  Saving or reloading recomputes all student activity scores, achievement tiers, and leaderboard rankings across GitScope.
+                </p>
               </div>
 
-              <div className="row g-3 mb-3">
-                <div className="col-6">
-                  <label className="form-label text-muted small fw-bold">MERGED PR POINTS</label>
-                  <input 
-                    type="number" 
-                    className="form-control bg-light border-0 py-2 fw-bold text-success"
-                    value={mergedPrPoints}
-                    onChange={(e) => setMergedPrPoints(e.target.value)}
-                  />
-                </div>
-
-                <div className="col-6">
-                  <label className="form-label text-muted small fw-bold">ISSUE POINTS</label>
-                  <input 
-                    type="number" 
-                    className="form-control bg-light border-0 py-2 fw-bold text-warning"
-                    value={issuePoints}
-                    onChange={(e) => setIssuePoints(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="row g-3 mb-4">
-                <div className="col-6">
-                  <label className="form-label text-muted small fw-bold">CODE REVIEW POINTS</label>
-                  <input 
-                    type="number" 
-                    className="form-control bg-light border-0 py-2 fw-bold text-info"
-                    value={reviewPoints}
-                    onChange={(e) => setReviewPoints(e.target.value)}
-                  />
-                </div>
-
-                <div className="col-6">
-                  <label className="form-label text-muted small fw-bold">INACTIVITY THRESHOLD (DAYS)</label>
-                  <input 
-                    type="number" 
-                    className="form-control bg-light border-0 py-2 fw-bold text-danger"
-                    value={inactivityThresholdDays}
-                    onChange={(e) => setInactivityThresholdDays(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="text-end">
+              <div className="text-end pt-3 border-top">
                 <button type="submit" className="btn btn-primary fw-bold px-4 py-2 d-inline-flex align-items-center">
                   <FaSave className="me-2" /> Save System Settings
                 </button>

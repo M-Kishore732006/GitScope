@@ -182,16 +182,17 @@ const StudentManagement = () => {
 
       {/* Multi-Filter Toolbar */}
       <div className="saas-card mb-4 p-3 bg-white">
-        <form onSubmit={handleSearchSubmit} className="row g-2 align-items-center">
+        <form onSubmit={handleSearchSubmit} className="row g-2 g-xl-3 align-items-center">
           <div className="col-12 col-md-3">
-            <div className="search-bar d-flex align-items-center bg-light px-3 py-2 rounded-3 border">
-              <FaSearch className="text-muted me-2" />
+            <div className="search-bar d-flex align-items-center bg-light px-3 py-2 rounded-3 border w-100">
+              <FaSearch className="text-muted me-2 flex-shrink-0" />
               <input 
                 type="text" 
                 placeholder="Search Name, Roll No, GitHub ID..." 
                 value={search} 
                 onChange={(e) => setSearch(e.target.value)}
-                className="border-0 bg-transparent flex-grow-1 outline-none small"
+                className="border-0 bg-transparent flex-grow-1 outline-none small w-100"
+                style={{ outline: 'none', minWidth: 0 }}
               />
             </div>
           </div>
@@ -310,7 +311,8 @@ const StudentManagement = () => {
                       <td className="text-end px-4">
                         <div className="d-flex justify-content-end gap-2">
                           <button 
-                            className="btn btn-sm btn-light border text-dark" 
+                            className="btn btn-sm btn-light border text-secondary d-inline-flex align-items-center justify-content-center rounded-2" 
+                            style={{ width: '32px', height: '32px' }}
                             title="View Full Profile & GitHub Stats"
                             onClick={() => handleViewStudent(st)}
                           >
@@ -318,7 +320,8 @@ const StudentManagement = () => {
                           </button>
 
                           <button 
-                            className="btn btn-sm btn-light border text-primary" 
+                            className="btn btn-sm btn-light border text-primary d-inline-flex align-items-center justify-content-center rounded-2" 
+                            style={{ width: '32px', height: '32px' }}
                             title="Edit Student Profile"
                             onClick={() => {
                               setSelectedStudent(st);
@@ -338,7 +341,8 @@ const StudentManagement = () => {
                           </button>
 
                           <button 
-                            className="btn btn-sm btn-light border text-warning" 
+                            className="btn btn-sm btn-light border text-warning d-inline-flex align-items-center justify-content-center rounded-2" 
+                            style={{ width: '32px', height: '32px' }}
                             title="Reset Password"
                             onClick={() => { setSelectedStudent(st); setActiveModal('resetPwd'); }}
                           >
@@ -346,7 +350,8 @@ const StudentManagement = () => {
                           </button>
 
                           <button 
-                            className={`btn btn-sm ${st.status === 'deactivated' ? 'btn-outline-success' : 'btn-outline-warning'}`}
+                            className={`btn btn-sm btn-light border ${st.status === 'deactivated' ? 'text-success' : 'text-warning'} d-inline-flex align-items-center justify-content-center rounded-2`}
+                            style={{ width: '32px', height: '32px' }}
                             title={st.status === 'deactivated' ? 'Activate Student' : 'Deactivate Student'}
                             onClick={() => handleToggleStatus(st)}
                           >
@@ -354,7 +359,8 @@ const StudentManagement = () => {
                           </button>
 
                           <button 
-                            className="btn btn-sm btn-outline-danger" 
+                            className="btn btn-sm btn-light border text-danger d-inline-flex align-items-center justify-content-center rounded-2" 
+                            style={{ width: '32px', height: '32px' }}
                             title="Delete Student Account"
                             onClick={() => { setSelectedStudent(st); setActiveModal('delete'); }}
                           >

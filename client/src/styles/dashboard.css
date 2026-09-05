@@ -114,7 +114,9 @@ body {
   background-color: var(--bg-color);
   border-radius: 0.5rem;
   padding: 0.5rem 1rem;
-  width: 300px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .search-bar input {
@@ -124,6 +126,7 @@ body {
   margin-left: 0.5rem;
   font-size: 0.875rem;
   width: 100%;
+  min-width: 0;
 }
 
 .topnav-actions {

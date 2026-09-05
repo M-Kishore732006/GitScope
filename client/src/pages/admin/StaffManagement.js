@@ -295,7 +295,8 @@ const StaffManagement = () => {
                       <td className="text-end px-4">
                         <div className="d-flex justify-content-end gap-2">
                           <button 
-                            className="btn btn-sm btn-light border text-primary" 
+                            className="btn btn-sm btn-light border text-primary d-inline-flex align-items-center justify-content-center rounded-2" 
+                            style={{ width: '32px', height: '32px' }}
                             title="Edit Staff"
                             onClick={() => {
                               setSelectedStaff(staff);
@@ -312,7 +313,8 @@ const StaffManagement = () => {
                           </button>
 
                           <button 
-                            className="btn btn-sm btn-light border text-warning" 
+                            className="btn btn-sm btn-light border text-warning d-inline-flex align-items-center justify-content-center rounded-2" 
+                            style={{ width: '32px', height: '32px' }}
                             title="Reset Password"
                             onClick={() => { setSelectedStaff(staff); setActiveModal('resetPwd'); }}
                           >
@@ -320,7 +322,8 @@ const StaffManagement = () => {
                           </button>
 
                           <button 
-                            className={`btn btn-sm ${staff.status === 'deactivated' ? 'btn-outline-success' : 'btn-outline-warning'}`}
+                            className={`btn btn-sm btn-light border ${staff.status === 'deactivated' ? 'text-success' : 'text-warning'} d-inline-flex align-items-center justify-content-center rounded-2`}
+                            style={{ width: '32px', height: '32px' }}
                             title={staff.status === 'deactivated' ? 'Activate Staff' : 'Deactivate Staff'}
                             onClick={() => handleToggleStatus(staff)}
                           >
@@ -328,7 +331,8 @@ const StaffManagement = () => {
                           </button>
 
                           <button 
-                            className="btn btn-sm btn-outline-danger" 
+                            className="btn btn-sm btn-light border text-danger d-inline-flex align-items-center justify-content-center rounded-2" 
+                            style={{ width: '32px', height: '32px' }}
                             title="Delete Staff"
                             onClick={() => { setSelectedStaff(staff); setActiveModal('delete'); }}
                           >
@@ -520,32 +524,42 @@ const StaffManagement = () => {
                   Select students to assign to this staff member for monitoring and review.
                 </p>
 
-                <div className="mb-3 border rounded p-3 bg-light" style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                <div className="mb-3 border rounded-3 p-2 bg-light" style={{ maxHeight: '320px', overflowY: 'auto' }}>
                   {studentList.length > 0 ? (
                     studentList.map(st => {
                       const isChecked = selectedStudentIds.includes(st._id);
                       return (
-                        <div key={st._id} className="form-check d-flex align-items-center justify-content-between p-2 border-bottom">
-                          <div>
+                        <label 
+                          key={st._id} 
+                          htmlFor={`st-${st._id}`}
+                          className={`d-flex align-items-center justify-content-between p-2 px-3 mb-1 rounded-2 border bg-white cursor-pointer ${isChecked ? 'border-primary bg-primary-subtle' : 'border-light'}`}
+                          style={{ cursor: 'pointer', transition: 'all 0.15s ease' }}
+                        >
+                          <div className="d-flex align-items-center gap-3">
                             <input 
                               type="checkbox" 
-                              className="form-check-input me-3" 
+                              className="form-check-input m-0" 
                               id={`st-${st._id}`}
+                              style={{ width: '1.15rem', height: '1.15rem', cursor: 'pointer' }}
                               checked={isChecked}
                               onChange={(e) => {
                                 if (e.target.checked) setSelectedStudentIds([...selectedStudentIds, st._id]);
                                 else setSelectedStudentIds(selectedStudentIds.filter(id => id !== st._id));
                               }}
                             />
-                            <label className="form-check-label fw-bold text-dark" htmlFor={`st-${st._id}`}>
-                              {st.fullName || st.username}
-                            </label>
-                            <div className="text-muted small ms-4">
-                              {st.rollNumber} • {st.department} (Year {st.year})
+                            <div>
+                              <div className="fw-bold text-dark" style={{ fontSize: '0.9rem' }}>
+                                {st.fullName || st.username}
+                              </div>
+                              <div className="text-muted small" style={{ fontSize: '0.78rem' }}>
+                                {st.rollNumber} • {st.department} (Year {st.year})
+                              </div>
                             </div>
                           </div>
-                          <span className="badge bg-white text-dark border">{st.department}</span>
-                        </div>
+                          <span className="badge bg-light text-secondary border px-2 py-1" style={{ fontSize: '0.72rem' }}>
+                            {st.department}
+                          </span>
+                        </label>
                       );
                     })
                   ) : (

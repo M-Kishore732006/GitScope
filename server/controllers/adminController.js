@@ -6,6 +6,7 @@ const Notification = require('../models/Notification');
 const githubService = require('../services/githubService');
 const leaderboardService = require('../services/leaderboardService');
 const { logAuditAction } = require('../services/auditService');
+const { recalculateAllScores } = require('../services/scoreService');
 
 // Helper to get or create settings
 const getSystemSettingsDoc = async () => {
@@ -971,7 +972,7 @@ const getSettings = async (req, res) => {
 
 const updateSettings = async (req, res) => {
   try {
-    const { commitPoints, prPoints, mergedPrPoints, issuePoints, reviewPoints, inactivityThresholdDays, fullName, email } = req.body;
+    const { commitPoints, prPoints, mergedPrPoints, issuePoints, reviewPoints, repoPoints, inactivityThresholdDays, fullName, email } = req.body;
 
     const settings = await getSystemSettingsDoc();
     if (commitPoints !== undefined) settings.commitPoints = commitPoints;
@@ -979,6 +980,7 @@ const updateSettings = async (req, res) => {
     if (mergedPrPoints !== undefined) settings.mergedPrPoints = mergedPrPoints;
     if (issuePoints !== undefined) settings.issuePoints = issuePoints;
     if (reviewPoints !== undefined) settings.reviewPoints = reviewPoints;
+    if (repoPoints !== undefined) settings.repoPoints = repoPoints;
     if (inactivityThresholdDays !== undefined) settings.inactivityThresholdDays = inactivityThresholdDays;
     settings.updatedAt = new Date();
     await settings.save();
@@ -988,17 +990,46 @@ const updateSettings = async (req, res) => {
     if (email) admin.email = email;
     await admin.save();
 
+    // Automatically recalculate all student scores with the new rules
+    const recalculatedCount = await recalculateAllScores(settings);
+
     await logAuditAction({
       req,
       action: 'UPDATE_SETTINGS',
       target: 'System Settings',
-      description: 'Updated scoring rules and inactivity thresholds'
+      description: `Updated scoring rules and automatically recalculated scores for ${recalculatedCount} students`
     });
 
-    res.json({ message: 'Settings updated successfully', settings });
+    res.json({ 
+      message: `Settings updated and activity scores recalculated for ${recalculatedCount} students!`, 
+      settings,
+      recalculatedCount 
+    });
   } catch (error) {
     console.error('Error updating settings:', error);
     res.status(500).json({ message: 'Failed to update settings' });
+  }
+};
+
+const recalculateAllStudentScores = async (req, res) => {
+  try {
+    const settings = await getSystemSettingsDoc();
+    const count = await recalculateAllScores(settings);
+
+    await logAuditAction({
+      req,
+      action: 'RECALCULATE_SCORES',
+      target: 'Student Scores',
+      description: `Manually recomputed scores and rankings for ${count} students`
+    });
+
+    res.json({ 
+      message: `Successfully recalculated activity scores & updated rankings for ${count} students.`, 
+      count 
+    });
+  } catch (error) {
+    console.error('Error in recalculateAllStudentScores:', error);
+    res.status(500).json({ message: 'Failed to recalculate scores' });
   }
 };
 
@@ -1068,6 +1099,7 @@ module.exports = {
   getAuditLogs,
   getSettings,
   updateSettings,
+  recalculateAllStudentScores,
   getNotifications,
   globalSearch
 };

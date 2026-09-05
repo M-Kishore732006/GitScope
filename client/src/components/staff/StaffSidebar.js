@@ -14,7 +14,7 @@ import {
   FaUser, 
   FaSignOutAlt,
   FaTimes,
-  FaUserTie
+  FaRocket
 } from 'react-icons/fa';
 
 const StaffSidebar = ({ mobileOpen, closeSidebar }) => {
@@ -27,8 +27,8 @@ const StaffSidebar = ({ mobileOpen, closeSidebar }) => {
     <div className={`sidebar shadow-sm ${mobileOpen ? 'mobile-open' : ''}`} style={{ width: '250px' }}>
       <div className="sidebar-header d-flex align-items-center justify-content-between">
         <div className="d-flex align-items-center">
-          <div className="avatar-circle me-2 bg-primary text-white" style={{ width: 34, height: 34, fontSize: '0.9rem' }}>
-            <FaUserTie />
+          <div className="avatar-circle me-2" style={{ width: 34, height: 34, fontSize: '0.95rem' }}>
+            <FaRocket />
           </div>
           <div>
             <span className="fw-extrabold text-dark" style={{ letterSpacing: '-0.5px' }}>GitScope</span>

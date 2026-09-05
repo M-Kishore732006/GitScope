@@ -1,7 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
-  FaShieldAlt, 
   FaChartPie, 
   FaUserTie, 
   FaUserGraduate, 
@@ -14,7 +13,8 @@ import {
   FaHistory, 
   FaCog,
   FaSignOutAlt,
-  FaTimes
+  FaTimes,
+  FaRocket
 } from 'react-icons/fa';
 
 const AdminSidebar = ({ mobileOpen, closeSidebar }) => {
@@ -27,8 +27,8 @@ const AdminSidebar = ({ mobileOpen, closeSidebar }) => {
     <div className={`sidebar shadow-sm ${mobileOpen ? 'mobile-open' : ''}`} style={{ width: '250px' }}>
       <div className="sidebar-header d-flex align-items-center justify-content-between">
         <div className="d-flex align-items-center">
-          <div className="avatar-circle me-2 bg-dark text-white" style={{ width: 34, height: 34, fontSize: '0.9rem' }}>
-            <FaShieldAlt className="text-warning" />
+          <div className="avatar-circle me-2" style={{ width: 34, height: 34, fontSize: '0.95rem' }}>
+            <FaRocket />
           </div>
           <div>
             <span className="fw-extrabold text-dark" style={{ letterSpacing: '-0.5px' }}>GitScope</span>
