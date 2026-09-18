@@ -3,7 +3,6 @@
 A MERN Stack web application that helps educational institutions track and analyze students' GitHub open-source contributions.
 Students connect their GitHub account, while teachers and administrators monitor progress through analytics and dashboards.
 
----
 
 ## 🚀 Features
 
