@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { FaExchangeAlt, FaUserGraduate, FaCheckSquare } from 'react-icons/fa';
+import { toTitleCase } from '../../utils/formatters';
 
 const StaffStudentComparison = () => {
   const [assignedStudents, setAssignedStudents] = useState([]);
@@ -86,7 +87,7 @@ const StaffStudentComparison = () => {
                 onClick={() => toggleSelectStudent(st._id)}
               >
                 {selectedIds.includes(st._id) && <FaCheckSquare className="me-1" />}
-                {st.fullName} ({st.department})
+                {toTitleCase(st.fullName || st.username)} ({st.department})
               </button>
             ))}
           </div>
@@ -106,7 +107,7 @@ const StaffStudentComparison = () => {
                   <th className="text-start" style={{ width: '220px' }}>Metric</th>
                   {comparisonData.map((st, idx) => (
                     <th key={idx}>
-                      <div className="fw-bold">{st.name}</div>
+                      <div className="fw-bold">{toTitleCase(st.name)}</div>
                       <div className="extra-small opacity-75">@{st.githubUsername}</div>
                     </th>
                   ))}

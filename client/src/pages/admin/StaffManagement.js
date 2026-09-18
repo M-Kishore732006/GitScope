@@ -13,6 +13,7 @@ import {
   FaExclamationTriangle,
   FaTimes
 } from 'react-icons/fa';
+import { toTitleCase } from '../../utils/formatters';
 import '../../styles/dashboard.css';
 
 const StaffManagement = () => {
@@ -78,7 +79,12 @@ const StaffManagement = () => {
     setMsg({ text: 'Creating staff account...', type: 'info' });
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.post('/api/admin/staff', addForm, config);
+      const formattedData = {
+        ...addForm,
+        username: toTitleCase(addForm.username).trim(),
+        fullName: toTitleCase(addForm.fullName).trim()
+      };
+      await axios.post('/api/admin/staff', formattedData, config);
       setMsg({ text: `Staff account created successfully!`, type: 'success' });
       setActiveModal(null);
       setAddForm({ username: '', fullName: '', email: '', phoneNumber: '', department: '', rollNumber: '', password: '' });
@@ -93,7 +99,11 @@ const StaffManagement = () => {
     e.preventDefault();
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.put(`/api/admin/staff/${selectedStaff._id}`, editForm, config);
+      const formattedData = {
+        ...editForm,
+        fullName: toTitleCase(editForm.fullName).trim()
+      };
+      await axios.put(`/api/admin/staff/${selectedStaff._id}`, formattedData, config);
       setMsg({ text: 'Staff profile updated.', type: 'success' });
       setActiveModal(null);
       fetchStaffAndStudents();
@@ -378,7 +388,8 @@ const StaffManagement = () => {
                         className="form-control bg-light border-0 py-2" 
                         required
                         value={addForm.username}
-                        onChange={(e) => setAddForm({ ...addForm, username: e.target.value })}
+                        onChange={(e) => setAddForm({ ...addForm, username: toTitleCase(e.target.value) })}
+                        onBlur={() => setAddForm(prev => ({ ...prev, username: toTitleCase(prev.username).trim() }))}
                       />
                     </div>
                     <div className="col-12 col-md-6">
@@ -388,7 +399,8 @@ const StaffManagement = () => {
                         className="form-control bg-light border-0 py-2" 
                         required
                         value={addForm.fullName}
-                        onChange={(e) => setAddForm({ ...addForm, fullName: e.target.value })}
+                        onChange={(e) => setAddForm({ ...addForm, fullName: toTitleCase(e.target.value) })}
+                        onBlur={() => setAddForm(prev => ({ ...prev, fullName: toTitleCase(prev.fullName).trim() }))}
                       />
                     </div>
                   </div>
@@ -475,7 +487,8 @@ const StaffManagement = () => {
                       type="text" 
                       className="form-control bg-light border-0 py-2" 
                       value={editForm.fullName}
-                      onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
+                      onChange={(e) => setEditForm({ ...editForm, fullName: toTitleCase(e.target.value) })}
+                      onBlur={() => setEditForm(prev => ({ ...prev, fullName: toTitleCase(prev.fullName).trim() }))}
                     />
                   </div>
 

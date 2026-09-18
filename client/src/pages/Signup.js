@@ -4,6 +4,7 @@ import axios from 'axios';
 import { FaUser, FaEnvelope, FaPhone, FaLock, FaIdBadge, FaGraduationCap, FaBuilding } from 'react-icons/fa';
 import AuthCard from '../components/AuthCard';
 import AuthInput from '../components/AuthInput';
+import { toTitleCase } from '../utils/formatters';
 
 const AuthSelect = ({ icon: Icon, name, value, onChange, options, placeholder }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -81,7 +82,11 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    let { name, value } = e.target;
+    if (name === 'username') {
+      value = toTitleCase(value);
+    }
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleSubmit = async (e) => {
@@ -94,7 +99,11 @@ const Signup = () => {
     
     setLoading(true);
     try {
-      const response = await axios.post('/api/auth/register', formData);
+      const submissionData = {
+        ...formData,
+        username: toTitleCase(formData.username).trim()
+      };
+      const response = await axios.post('/api/auth/register', submissionData);
       // Auto login or redirect to login on success
       if (response.data) {
         localStorage.setItem('userInfo', JSON.stringify(response.data));
@@ -121,9 +130,10 @@ const Signup = () => {
             icon={FaUser}
             type="text"
             name="username"
-            placeholder="Username"
+            placeholder="Full Name"
             value={formData.username}
             onChange={handleChange}
+            onBlur={() => setFormData(prev => ({ ...prev, username: toTitleCase(prev.username).trim() }))}
           />
           <AuthInput
             icon={FaIdBadge}
@@ -213,7 +223,6 @@ const Signup = () => {
 
       <div className="divider">OR</div>
 
-      {/* Note the color update here to #64748B */}
       <p style={{ textAlign: 'center', marginTop: '1.5rem', marginBottom: 0, color: '#64748B', fontSize: '0.9rem' }}>
         Already have an account? <Link to="/login" className="link-primary">Sign in</Link>
       </p>

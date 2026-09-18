@@ -17,6 +17,7 @@ import {
   FaStar,
   FaTimes
 } from 'react-icons/fa';
+import { toTitleCase } from '../../utils/formatters';
 import '../../styles/dashboard.css';
 
 const StudentManagement = () => {
@@ -108,7 +109,11 @@ const StudentManagement = () => {
     e.preventDefault();
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.put(`/api/admin/students/${selectedStudent._id}`, editForm, config);
+      const formattedData = {
+        ...editForm,
+        fullName: toTitleCase(editForm.fullName).trim()
+      };
+      await axios.put(`/api/admin/students/${selectedStudent._id}`, formattedData, config);
       setMsg({ text: 'Student profile updated.', type: 'success' });
       setActiveModal(null);
       fetchStudents();
@@ -522,7 +527,8 @@ const StudentManagement = () => {
                         type="text" 
                         className="form-control bg-light border-0 py-2" 
                         value={editForm.fullName}
-                        onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
+                        onChange={(e) => setEditForm({ ...editForm, fullName: toTitleCase(e.target.value) })}
+                        onBlur={() => setEditForm(prev => ({ ...prev, fullName: toTitleCase(prev.fullName).trim() }))}
                       />
                     </div>
                     <div className="col-12 col-md-6">

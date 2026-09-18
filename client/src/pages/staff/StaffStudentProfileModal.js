@@ -15,6 +15,7 @@ import {
   FaStar,
   FaCode
 } from 'react-icons/fa';
+import { toTitleCase } from '../../utils/formatters';
 
 const StaffStudentProfileModal = ({ studentId, onClose }) => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -65,10 +66,10 @@ const StaffStudentProfileModal = ({ studentId, onClose }) => {
           <div className="modal-header bg-dark text-white rounded-top-4 py-3">
             <div className="d-flex align-items-center">
               <div className="avatar-circle me-3 bg-primary text-white fw-bold fs-5" style={{ width: 44, height: 44 }}>
-                {student?.fullName?.charAt(0) || 'S'}
+                {(student?.fullName || student?.username || 'S').charAt(0).toUpperCase()}
               </div>
               <div>
-                <h5 className="modal-title fw-bold mb-0">{student?.fullName || student?.username}</h5>
+                <h5 className="modal-title fw-bold mb-0">{toTitleCase(student?.fullName || student?.username)}</h5>
                 <small className="text-light opacity-75">
                   Roll: {student?.rollNumber} &bull; {student?.department} (Year {student?.year} - Sec {student?.section})
                 </small>

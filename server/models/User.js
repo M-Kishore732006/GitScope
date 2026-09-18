@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const { toTitleCase } = require('../utils/formatters');
 
 const userSchema = new mongoose.Schema({
   username: {
@@ -88,8 +89,17 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Pre-save hook to hash password before storing
+// Pre-save hook to hash password and format names to Title Case before storing
 userSchema.pre('save', async function() {
+  if (this.username) {
+    this.username = toTitleCase(this.username);
+  }
+  if (this.fullName) {
+    this.fullName = toTitleCase(this.fullName);
+  } else if (this.username) {
+    this.fullName = toTitleCase(this.username);
+  }
+
   if (!this.isModified('password')) {
     return;
   }

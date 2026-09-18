@@ -6,7 +6,6 @@ import '../styles/Landing.css';
 const Landing = () => {
   return (
     <div className="landing-page">
-      {/* Dynamic Navbar */}
       <nav className="landing-navbar">
         <Link to="/" className="landing-brand">
           <FaCode className="text-primary" /> Git<span>Scope</span>
@@ -17,7 +16,7 @@ const Landing = () => {
         </div>
       </nav>
 
-      {/* Hero Section */}
+
       <section className="hero-section">
         <div className="hero-badge">
           ✨ The Student Open Contribution Tracker

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FaSearch, FaBell, FaChevronDown, FaUserTie, FaBars, FaSignOutAlt, FaUser } from 'react-icons/fa';
+import { toTitleCase } from '../../utils/formatters';
 
 const StaffTopNav = ({ user, handleLogout, toggleSidebar }) => {
   const navigate = useNavigate();
@@ -120,7 +121,7 @@ const StaffTopNav = ({ user, handleLogout, toggleSidebar }) => {
             style={{ cursor: 'pointer' }}
           >
             <span className="fw-bold me-2 small text-dark d-none d-sm-inline">
-              {user?.fullName || user?.username || 'Staff'}
+              {toTitleCase(user?.fullName || user?.username || 'Staff')}
             </span>
             <div className="avatar-circle me-1 bg-primary text-white" style={{ width: 32, height: 32, fontSize: '0.85rem' }}>
               {(user?.fullName?.charAt(0) || user?.username?.charAt(0) || 'S').toUpperCase()}

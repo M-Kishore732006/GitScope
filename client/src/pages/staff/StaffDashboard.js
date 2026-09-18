@@ -14,6 +14,7 @@ import {
   FaSync,
   FaArrowRight
 } from 'react-icons/fa';
+import { toTitleCase } from '../../utils/formatters';
 
 const StaffDashboard = () => {
   const [data, setData] = useState(null);
@@ -243,7 +244,7 @@ const StaffDashboard = () => {
                         </td>
                         <td>
                           <Link to={`/staff/students?search=${c.name}`} className="text-decoration-none fw-semibold text-dark">
-                            {c.name}
+                            {toTitleCase(c.name)}
                           </Link>
                           <div className="text-muted extra-small">{c.department}</div>
                         </td>

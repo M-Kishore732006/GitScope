@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { FaSearch, FaBell, FaMoon, FaSun, FaCloudDownloadAlt, FaChevronDown, FaBars } from 'react-icons/fa';
+import { toTitleCase } from '../../utils/formatters';
 
 const TopNav = ({ user, stats, handleLogout, toggleSidebar }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -57,9 +58,9 @@ const TopNav = ({ user, stats, handleLogout, toggleSidebar }) => {
                 className="d-flex align-items-center pe-auto cursor-pointer border rounded-pill p-1 ps-3 shadow-sm bg-white" 
                 onClick={() => setDropdownOpen(!dropdownOpen)}
              >
-                <span className="fw-semibold me-3 small text-dark">{user?.fullName || user?.username}</span>
+                <span className="fw-semibold me-3 small text-dark">{toTitleCase(user?.fullName || user?.username)}</span>
                 <div className="avatar-circle">
-                   {user?.fullName?.charAt(0) || user?.username?.charAt(0) || 'U'}
+                   {(user?.fullName || user?.username || 'U').charAt(0).toUpperCase()}
                 </div>
                 <FaChevronDown className="ms-2 text-muted small" />
              </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FaSearch, FaBell, FaChevronDown, FaShieldAlt, FaUserTie, FaUserGraduate, FaGithub, FaCheckCircle, FaTimesCircle, FaBars } from 'react-icons/fa';
+import { toTitleCase } from '../../utils/formatters';
 
 const AdminTopNav = ({ user, handleLogout, toggleSidebar }) => {
   const navigate = useNavigate();
@@ -112,7 +113,7 @@ const AdminTopNav = ({ user, handleLogout, toggleSidebar }) => {
                         className="d-flex justify-content-between align-items-center p-2 rounded hover-bg-light text-decoration-none text-dark small border-bottom"
                       >
                         <div>
-                          <div className="fw-bold">{s.fullName || s.username}</div>
+                          <div className="fw-bold">{toTitleCase(s.fullName || s.username)}</div>
                           <div className="text-muted" style={{ fontSize: '0.75rem' }}>{s.rollNumber} • {s.department}</div>
                         </div>
                         <span className="badge bg-primary text-white" style={{ fontSize: '0.65rem' }}>Student</span>
@@ -134,7 +135,7 @@ const AdminTopNav = ({ user, handleLogout, toggleSidebar }) => {
                         className="d-flex justify-content-between align-items-center p-2 rounded hover-bg-light text-decoration-none text-dark small border-bottom"
                       >
                         <div>
-                          <div className="fw-bold">{st.fullName || st.username}</div>
+                          <div className="fw-bold">{toTitleCase(st.fullName || st.username)}</div>
                           <div className="text-muted" style={{ fontSize: '0.75rem' }}>{st.email} • {st.department}</div>
                         </div>
                         <span className="badge bg-success text-white" style={{ fontSize: '0.65rem' }}>Staff</span>
@@ -227,7 +228,7 @@ const AdminTopNav = ({ user, handleLogout, toggleSidebar }) => {
             onClick={() => setDropdownOpen(!dropdownOpen)}
             style={{ cursor: 'pointer' }}
           >
-            <span className="fw-bold me-3 small text-dark">{user?.fullName || user?.username || 'Admin User'}</span>
+            <span className="fw-bold me-3 small text-dark">{toTitleCase(user?.fullName || user?.username || 'Admin User')}</span>
             <div className="avatar-circle me-1 bg-dark text-white fw-bold" style={{ width: 34, height: 34, fontSize: '0.85rem' }}>
               <FaShieldAlt className="text-warning" />
             </div>

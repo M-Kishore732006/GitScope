@@ -13,6 +13,7 @@ import {
   FaLayerGroup
 } from 'react-icons/fa';
 import StaffStudentProfileModal from './StaffStudentProfileModal';
+import { toTitleCase } from '../../utils/formatters';
 
 const MyStudents = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -202,10 +203,10 @@ const MyStudents = () => {
                     <td>
                       <div className="d-flex align-items-center">
                         <div className="avatar-circle me-2 bg-primary-subtle text-primary fw-bold" style={{ width: 36, height: 36 }}>
-                          {st.fullName?.charAt(0).toUpperCase() || 'S'}
+                          {(st.fullName || st.username || 'S').charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <div className="fw-bold text-dark">{st.fullName}</div>
+                          <div className="fw-bold text-dark">{toTitleCase(st.fullName || st.username)}</div>
                           <div className="text-muted extra-small">{st.email}</div>
                         </div>
                       </div>
