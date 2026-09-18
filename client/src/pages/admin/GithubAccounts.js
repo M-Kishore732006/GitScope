@@ -11,6 +11,7 @@ import {
   FaCodeBranch, 
   FaSearch
 } from 'react-icons/fa';
+import { toTitleCase } from '../../utils/formatters';
 import '../../styles/dashboard.css';
 
 const GithubAccounts = () => {
@@ -184,7 +185,7 @@ const GithubAccounts = () => {
                     return (
                       <tr key={idx} className="border-bottom">
                         <td className="px-4 py-3">
-                          <div className="fw-bold text-dark">{account.fullName}</div>
+                          <div className="fw-bold text-dark">{toTitleCase(account.fullName || account.username)}</div>
                           <div className="text-muted small">{account.email} • {account.department}</div>
                         </td>
 

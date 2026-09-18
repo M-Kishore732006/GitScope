@@ -7,6 +7,7 @@ const githubService = require('../services/githubService');
 const leaderboardService = require('../services/leaderboardService');
 const { logAuditAction } = require('../services/auditService');
 const { recalculateAllScores } = require('../services/scoreService');
+const { toTitleCase } = require('../utils/formatters');
 
 // Helper to get or create settings
 const getSystemSettingsDoc = async () => {
@@ -166,12 +167,12 @@ const createStaff = async (req, res) => {
     }
 
     const newStaff = await User.create({
-      username: username.trim(),
+      username: toTitleCase(username.trim()),
       rollNumber: rollNumber ? rollNumber.trim().toUpperCase() : `STAFF-${Date.now().toString().slice(-4)}`,
       email: email.trim().toLowerCase(),
       phoneNumber: phoneNumber || '0000000000',
       department: department.trim(),
-      fullName: fullName || username,
+      fullName: toTitleCase(fullName || username),
       password: password,
       role: 'teacher',
       profileCompleted: true,
@@ -208,7 +209,7 @@ const updateStaff = async (req, res) => {
       return res.status(404).json({ message: 'Staff member not found' });
     }
 
-    staff.fullName = fullName || staff.fullName;
+    staff.fullName = fullName ? toTitleCase(fullName) : staff.fullName;
     staff.department = department || staff.department;
     staff.phoneNumber = phoneNumber || staff.phoneNumber;
     staff.rollNumber = rollNumber || staff.rollNumber;
@@ -426,7 +427,7 @@ const updateStudent = async (req, res) => {
       return res.status(404).json({ message: 'Student not found' });
     }
 
-    student.fullName = fullName || student.fullName;
+    student.fullName = fullName ? toTitleCase(fullName) : student.fullName;
     student.department = department || student.department;
     student.year = year || student.year;
     student.section = section || student.section;
@@ -986,7 +987,7 @@ const updateSettings = async (req, res) => {
     await settings.save();
 
     const admin = await User.findById(req.user._id);
-    if (fullName) admin.fullName = fullName;
+    if (fullName) admin.fullName = toTitleCase(fullName);
     if (email) admin.email = email;
     await admin.save();
 

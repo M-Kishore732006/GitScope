@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const { toTitleCase } = require('../utils/formatters');
 
 const generateToken = (id, role, profileCompleted) => {
   return jwt.sign({ id, role, profileCompleted }, process.env.JWT_SECRET, {
@@ -63,10 +64,13 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ message: `Email '${email}' is already registered.` });
     }
 
+    const titleCasedUsername = toTitleCase(username);
+    const titleCasedFullName = toTitleCase(req.body.fullName || username);
+
     // Create User (defaults role='student', profileCompleted=false)
     const user = await User.create({
-      username,
-      fullName: username,
+      username: titleCasedUsername,
+      fullName: titleCasedFullName,
       rollNumber,
       email,
       phoneNumber: cleanPhone,
@@ -79,8 +83,8 @@ const registerUser = async (req, res) => {
       res.status(201).json({
         _id: user._id,
         email: user.email,
-        username: user.username,
-        fullName: user.fullName || user.username,
+        username: toTitleCase(user.username),
+        fullName: toTitleCase(user.fullName || user.username),
         department: user.department,
         role: user.role,
         dbRole: user.role,
@@ -135,8 +139,8 @@ const loginUser = async (req, res) => {
       res.json({
         _id: user._id,
         email: user.email,
-        username: user.username,
-        fullName: user.fullName || user.username,
+        username: toTitleCase(user.username),
+        fullName: toTitleCase(user.fullName || user.username),
         department: user.department,
         role: normalizedRole,
         dbRole: user.role,

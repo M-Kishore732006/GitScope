@@ -4,6 +4,7 @@ const SystemSettings = require('../models/SystemSettings');
 const Notification = require('../models/Notification');
 const githubService = require('../services/githubService');
 const bcrypt = require('bcrypt');
+const { toTitleCase } = require('../utils/formatters');
 
 // Helper to get system settings
 const getSystemSettingsDoc = async () => {
@@ -734,7 +735,7 @@ const updateStaffProfile = async (req, res) => {
 
     if (!staff) return res.status(404).json({ message: 'Staff profile not found' });
 
-    if (fullName) staff.fullName = fullName;
+    if (fullName) staff.fullName = toTitleCase(fullName);
     if (phoneNumber) staff.phoneNumber = phoneNumber;
 
     await staff.save();

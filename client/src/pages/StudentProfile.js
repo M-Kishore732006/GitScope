@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useOutletContext } from 'react-router-dom';
 import ProfileWidget from '../components/dashboard/ProfileWidget';
 import { FaEye, FaEyeSlash, FaLock, FaExclamationTriangle, FaGithub, FaUnlink, FaSpinner } from 'react-icons/fa';
+import { toTitleCase } from '../utils/formatters';
 import '../styles/dashboard.css';
 
 const StudentProfile = () => {
@@ -144,7 +145,7 @@ const StudentProfile = () => {
                                     
                                     <div className="mb-4">
                                         <label className="form-label text-muted small fw-bold">FULL NAME</label>
-                                        <p className="fw-medium text-dark">{user?.fullName || 'Not provided'}</p>
+                                        <p className="fw-medium text-dark">{toTitleCase(user?.fullName || user?.username || 'Not provided')}</p>
                                     </div>
                                     <div className="mb-4">
                                         <label className="form-label text-muted small fw-bold">EMAIL ADDRESS</label>

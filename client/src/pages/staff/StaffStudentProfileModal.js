@@ -15,6 +15,7 @@ import {
   FaStar,
   FaCode
 } from 'react-icons/fa';
+import { toTitleCase } from '../../utils/formatters';
 
 const StaffStudentProfileModal = ({ studentId, onClose }) => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -65,10 +66,10 @@ const StaffStudentProfileModal = ({ studentId, onClose }) => {
           <div className="modal-header bg-dark text-white rounded-top-4 py-3">
             <div className="d-flex align-items-center">
               <div className="avatar-circle me-3 bg-primary text-white fw-bold fs-5" style={{ width: 44, height: 44 }}>
-                {student?.fullName?.charAt(0) || 'S'}
+                {(student?.fullName || student?.username || 'S').charAt(0).toUpperCase()}
               </div>
               <div>
-                <h5 className="modal-title fw-bold mb-0">{student?.fullName || student?.username}</h5>
+                <h5 className="modal-title fw-bold mb-0">{toTitleCase(student?.fullName || student?.username)}</h5>
                 <small className="text-light opacity-75">
                   Roll: {student?.rollNumber} &bull; {student?.department} (Year {student?.year} - Sec {student?.section})
                 </small>
@@ -117,7 +118,8 @@ const StaffStudentProfileModal = ({ studentId, onClose }) => {
                 {/* TAB 1: OVERVIEW */}
                 {activeTab === 'overview' && (
                   <div>
-                    {/* Student Info Card */}
+      
+      
                     <div className="row g-3 mb-4">
                       <div className="col-12 col-md-6">
                         <div className="saas-card h-100">
@@ -189,7 +191,8 @@ const StaffStudentProfileModal = ({ studentId, onClose }) => {
                       </div>
                     </div>
 
-                    {/* Stat Metrics Grid */}
+
+
                     <div className="row g-3">
                       <div className="col-6 col-md-3">
                         <div className="saas-card text-center p-3">
@@ -226,7 +229,7 @@ const StaffStudentProfileModal = ({ studentId, onClose }) => {
                   </div>
                 )}
 
-                {/* TAB 2: ACTIVITY TIMELINE */}
+
                 {activeTab === 'activity' && (
                   <div>
                     <h6 className="fw-bold text-dark mb-3">Chronological Activity History</h6>
@@ -253,7 +256,6 @@ const StaffStudentProfileModal = ({ studentId, onClose }) => {
                   </div>
                 )}
 
-                {/* TAB 3: REPOSITORIES */}
                 {activeTab === 'repositories' && (
                   <div>
                     <h6 className="fw-bold text-dark mb-3">Repositories ({repos.length})</h6>
@@ -289,7 +291,6 @@ const StaffStudentProfileModal = ({ studentId, onClose }) => {
                   </div>
                 )}
 
-                {/* TAB 4: OPEN SOURCE */}
                 {activeTab === 'opensource' && (
                   <div>
                     <div className="alert alert-info border-0 shadow-sm mb-4">

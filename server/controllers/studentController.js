@@ -4,6 +4,8 @@ const User = require('../models/User');
 const GithubStats = require('../models/GithubStats');
 const githubService = require('../services/githubService');
 const leaderboardService = require('../services/leaderboardService');
+const { toTitleCase } = require('../utils/formatters');
+
 // @route   PUT /api/student/profile
 // @access  Private/Student
 const updateProfile = async (req, res) => {
@@ -13,7 +15,9 @@ const updateProfile = async (req, res) => {
     const user = await User.findById(req.user._id);
 
     if (user) {
-      user.fullName = fullName || user.fullName;
+      if (fullName) {
+        user.fullName = toTitleCase(fullName);
+      }
       user.department = department || user.department;
       user.year = year || user.year;
       user.section = section || user.section;

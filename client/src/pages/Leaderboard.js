@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { FaTrophy, FaMedal } from 'react-icons/fa';
+import { toTitleCase } from '../utils/formatters';
 
 const Leaderboard = () => {
     const [leaderboard, setLeaderboard] = useState([]);
@@ -86,10 +87,10 @@ const Leaderboard = () => {
                                       <td className="fw-bold align-middle text-dark">
                                           <div className="d-flex align-items-center">
                                               <div className="avatar-circle me-3 bg-primary text-white" style={{width: 35, height: 35, fontSize: '0.9rem'}}>
-                                                  {entry.name.charAt(0)}
+                                                  {toTitleCase(entry.name).charAt(0)}
                                               </div>
                                               <div>
-                                                  {entry.name}
+                                                  {toTitleCase(entry.name)}
                                                   {entry.name === currentUser && <span className="badge bg-primary text-white ms-2 px-2 py-1" style={{fontSize: '0.65rem'}}>YOU</span>}
                                               </div>
                                           </div>

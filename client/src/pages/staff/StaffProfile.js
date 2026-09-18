@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { FaUser, FaLock, FaSave, FaCheckCircle, FaUserTie, FaShieldAlt } from 'react-icons/fa';
+import { toTitleCase } from '../../utils/formatters';
 
 const StaffProfile = () => {
   const [profile, setProfile] = useState(null);
@@ -41,12 +42,14 @@ const StaffProfile = () => {
     setProfileMsg({ text: '', type: '' });
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.put('/api/staff/profile', { fullName, phoneNumber }, config);
+      const formattedName = toTitleCase(fullName).trim();
+      await axios.put('/api/staff/profile', { fullName: formattedName, phoneNumber }, config);
       setProfileMsg({ text: 'Profile details updated successfully!', type: 'success' });
+      setFullName(formattedName);
       // Update local storage name if present
       const info = JSON.parse(localStorage.getItem('userInfo'));
       if (info) {
-        info.fullName = fullName;
+        info.fullName = formattedName;
         localStorage.setItem('userInfo', JSON.stringify(info));
       }
     } catch (err) {
@@ -117,7 +120,8 @@ const StaffProfile = () => {
                   type="text" 
                   className="form-control bg-light" 
                   value={fullName} 
-                  onChange={(e) => setFullName(e.target.value)} 
+                  onChange={(e) => setFullName(toTitleCase(e.target.value))} 
+                  onBlur={() => setFullName(toTitleCase(fullName).trim())}
                   required 
                 />
               </div>

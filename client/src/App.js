@@ -61,25 +61,17 @@ function App() {
     <Router>
       <Routes>
 
-        {/* =========================
-            PUBLIC ROUTES
-        ========================== */}
         <Route element={<PublicRoute />}>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
         </Route>
 
-
-        {/* =========================
-            STUDENT ROUTES
-        ========================== */}
         <Route
           element={
             <ProtectedRoute allowedRoles={['student']} />
           }
         >
-          {/* Student pages with dashboard layout/sidebar */}
           <Route element={<DashboardLayout />}>
 
             <Route
@@ -104,17 +96,12 @@ function App() {
 
           </Route>
 
-          {/* GitHub callback without dashboard sidebar */}
           <Route
             path="/student/github/callback"
             element={<GithubCallback />}
           />
         </Route>
 
-
-        {/* =========================
-            STAFF / TEACHER ROUTES
-        ========================== */}
         <Route
           element={
             <ProtectedRoute allowedRoles={['staff', 'teacher']} />
@@ -133,14 +120,10 @@ function App() {
             <Route path="/staff/notifications" element={<StaffNotifications />} />
             <Route path="/staff/profile" element={<StaffProfile />} />
 
-            {/* Teacher legacy alias route */}
             <Route path="/teacher/dashboard" element={<Navigate to="/staff/dashboard" replace />} />
           </Route>
         </Route>
 
-        {/* =========================
-            ADMIN ROUTES
-        ========================== */}
         <Route
           element={
             <ProtectedRoute allowedRoles={['admin']} />

@@ -1,5 +1,6 @@
 import React from 'react';
 import { FaEnvelope, FaIdBadge, FaGraduationCap } from 'react-icons/fa';
+import { toTitleCase } from '../../utils/formatters';
 
 const ProfileWidget = ({ user }) => {
   if (!user) return null;
@@ -8,11 +9,11 @@ const ProfileWidget = ({ user }) => {
     <div className="saas-card mb-4 text-center">
        <div className="d-flex justify-content-center mb-3">
           <div className="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center text-primary fw-bold shadow-sm" style={{width: '90px', height: '90px', fontSize: '2.5rem', border: '4px solid white'}}>
-             {user.fullName?.charAt(0) || user.username?.charAt(0) || 'U'}
+             {(user.fullName || user.username || 'U').charAt(0).toUpperCase()}
           </div>
        </div>
-       <h4 className="fw-bold mb-1">{user.fullName || user.username}</h4>
-       <p className="text-muted small mb-3">@{user.username}</p>
+       <h4 className="fw-bold mb-1">{toTitleCase(user.fullName || user.username)}</h4>
+       <p className="text-muted small mb-3">@{toTitleCase(user.username)}</p>
        
        <div className="d-flex flex-column text-start gap-2 pt-3 border-top">
           <div className="d-flex align-items-center text-muted small">

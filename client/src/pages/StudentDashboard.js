@@ -4,6 +4,7 @@ import { useNavigate, Link, useOutletContext } from 'react-router-dom';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend, LineChart, Line, XAxis, YAxis, CartesianGrid, AreaChart, Area, BarChart, Bar } from 'recharts';
 import { FaGithub, FaTrophy, FaFire, FaBook, FaCodeBranch, FaStar, FaSyncAlt } from 'react-icons/fa';
 import ActivityTimeline from '../components/dashboard/ActivityTimeline';
+import { toTitleCase } from '../utils/formatters';
 import '../styles/dashboard.css';
 
 const COLORS = ['#6D5EF5', '#2563EB', '#16A34A', '#F59E0B', '#EF4444'];
@@ -128,7 +129,7 @@ const StudentDashboard = () => {
          <div className="saas-card mb-4 bg-white">
                 <div className="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center">
                     <div>
-                       <h2 className="fw-bold mb-1">Welcome back, {user?.fullName?.split(' ')[0] || user?.username} 👋</h2>
+                       <h2 className="fw-bold mb-1">Welcome back, {toTitleCase(user?.fullName?.split(' ')[0] || user?.username)} 👋</h2>
                        <p className="text-muted mb-3 mb-lg-0">Here's your open-source journey with GitScope.</p>
                        
                        {!hasGithub && (

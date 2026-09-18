@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { FaTrophy, FaMedal, FaFilter, FaInfoCircle } from 'react-icons/fa';
+import { toTitleCase } from '../../utils/formatters';
 
 const StaffStudentRankings = () => {
   const [rankings, setRankings] = useState([]);
@@ -104,7 +105,7 @@ const StaffStudentRankings = () => {
                         #{r.rank}
                       </span>
                     </td>
-                    <td className="fw-bold text-dark">{r.name}</td>
+                    <td className="fw-bold text-dark">{toTitleCase(r.name)}</td>
                     <td className="small text-muted">{r.rollNumber}</td>
                     <td><span className="badge bg-light text-dark border">{r.department}</span></td>
                     <td className="fw-bold">{r.commits}</td>

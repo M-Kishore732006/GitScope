@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { FaTrophy, FaMedal, FaFilter, FaCrown, FaUserGraduate, FaCodeBranch, FaCheckCircle, FaCode } from 'react-icons/fa';
+import { toTitleCase } from '../../utils/formatters';
 import '../../styles/dashboard.css';
 
 const StudentRankings = () => {
@@ -98,11 +99,10 @@ const StudentRankings = () => {
         <div className="row g-3 mb-4">
           {/* Rank 2 */}
           <div className="col-12 col-md-4 order-2 order-md-1">
-            <div className="saas-card text-center p-4 h-100 border-top border-secondary border-4">
-              <div className="avatar-circle mx-auto mb-2 bg-secondary text-white fs-3 fw-bold" style={{ width: 50, height: 50 }}>
-                2
-              </div>
-              <h5 className="fw-bold mb-1">{rankings[1].name}</h5>
+            <div className="podium-card p-3 rounded-4 shadow-sm bg-white border text-center h-100">
+              <FaMedal className="text-secondary fs-1 mb-2" />
+              <div className="badge bg-secondary mb-2">#2 Silver</div>
+              <h5 className="fw-bold mb-1">{toTitleCase(rankings[1].name)}</h5>
               <p className="text-muted small mb-2">{rankings[1].department} • Year {rankings[1].year}</p>
               <span className="badge bg-secondary px-3 py-2 fw-bold fs-6">{rankings[1].score} Pts</span>
             </div>
@@ -110,24 +110,21 @@ const StudentRankings = () => {
 
           {/* Rank 1 */}
           <div className="col-12 col-md-4 order-1 order-md-2">
-            <div className="saas-card text-center p-4 h-100 border-top border-warning border-5 shadow">
-              <FaCrown className="text-warning fs-2 mb-1" />
-              <div className="avatar-circle mx-auto mb-2 bg-warning text-dark fs-2 fw-bold" style={{ width: 60, height: 60 }}>
-                1
-              </div>
-              <h4 className="fw-bold mb-1 text-dark">{rankings[0].name}</h4>
+            <div className="podium-card p-4 rounded-4 shadow-sm bg-white border border-warning text-center h-100 position-relative" style={{ borderTop: '4px solid #f59e0b' }}>
+              <FaCrown className="text-warning display-4 mb-2" />
+              <div className="badge bg-warning text-dark mb-2">#1 Champion</div>
+              <h4 className="fw-bold mb-1">{toTitleCase(rankings[0].name)}</h4>
               <p className="text-muted small mb-2">{rankings[0].department} • Year {rankings[0].year}</p>
-              <span className="badge bg-warning text-dark px-4 py-2 fw-bold fs-5 shadow-sm">{rankings[0].score} Pts</span>
+              <span className="badge bg-warning text-dark px-4 py-2 fw-bold fs-5">{rankings[0].score} Pts</span>
             </div>
           </div>
 
           {/* Rank 3 */}
           <div className="col-12 col-md-4 order-3 order-md-3">
-            <div className="saas-card text-center p-4 h-100 border-top border-danger border-4">
-              <div className="avatar-circle mx-auto mb-2 bg-danger text-white fs-3 fw-bold" style={{ width: 50, height: 50 }}>
-                3
-              </div>
-              <h5 className="fw-bold mb-1">{rankings[2].name}</h5>
+            <div className="podium-card p-3 rounded-4 shadow-sm bg-white border text-center h-100">
+              <FaMedal className="text-danger fs-1 mb-2" style={{ color: '#cd7f32' }} />
+              <div className="badge bg-danger mb-2">#3 Bronze</div>
+              <h5 className="fw-bold mb-1">{toTitleCase(rankings[2].name)}</h5>
               <p className="text-muted small mb-2">{rankings[2].department} • Year {rankings[2].year}</p>
               <span className="badge bg-danger px-3 py-2 fw-bold fs-6">{rankings[2].score} Pts</span>
             </div>
@@ -168,7 +165,7 @@ const StudentRankings = () => {
                       </td>
 
                       <td>
-                        <div className="fw-bold text-dark">{r.name}</div>
+                        <div className="fw-bold text-dark">{toTitleCase(r.name)}</div>
                         <div className="text-muted small">Roll: {r.rollNumber}</div>
                       </td>
 

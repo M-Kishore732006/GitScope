@@ -31,6 +31,7 @@ import {
   FaTrophy,
   FaShieldAlt
 } from 'react-icons/fa';
+import { toTitleCase } from '../../utils/formatters';
 import '../../styles/dashboard.css';
 
 const COLORS = ['#6D5EF5', '#2563EB', '#16A34A', '#F59E0B', '#EF4444', '#8B5CF6'];
@@ -262,10 +263,10 @@ const AdminDashboard = () => {
                     <div className="d-flex align-items-center">
                       <div className="fw-bold me-3 text-muted" style={{ width: '20px' }}>#{i + 1}</div>
                       <div className="avatar-circle me-3 bg-primary text-white" style={{ width: 36, height: 36, fontSize: '0.85rem' }}>
-                        {c.name.charAt(0)}
+                        {toTitleCase(c.name).charAt(0)}
                       </div>
                       <div>
-                        <div className="fw-bold text-dark small">{c.name}</div>
+                        <div className="fw-bold text-dark small">{toTitleCase(c.name)}</div>
                         <div className="text-muted" style={{ fontSize: '0.75rem' }}>
                           @{c.githubUsername} • {c.department || 'N/A'}
                         </div>
