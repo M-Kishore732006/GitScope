@@ -118,7 +118,8 @@ const StaffStudentProfileModal = ({ studentId, onClose }) => {
                 {/* TAB 1: OVERVIEW */}
                 {activeTab === 'overview' && (
                   <div>
-                    {/* Student Info Card */}
+      
+      
                     <div className="row g-3 mb-4">
                       <div className="col-12 col-md-6">
                         <div className="saas-card h-100">
@@ -190,7 +191,8 @@ const StaffStudentProfileModal = ({ studentId, onClose }) => {
                       </div>
                     </div>
 
-                    {/* Stat Metrics Grid */}
+
+
                     <div className="row g-3">
                       <div className="col-6 col-md-3">
                         <div className="saas-card text-center p-3">
@@ -227,7 +229,7 @@ const StaffStudentProfileModal = ({ studentId, onClose }) => {
                   </div>
                 )}
 
-                {/* TAB 2: ACTIVITY TIMELINE */}
+
                 {activeTab === 'activity' && (
                   <div>
                     <h6 className="fw-bold text-dark mb-3">Chronological Activity History</h6>
@@ -254,7 +256,6 @@ const StaffStudentProfileModal = ({ studentId, onClose }) => {
                   </div>
                 )}
 
-                {/* TAB 3: REPOSITORIES */}
                 {activeTab === 'repositories' && (
                   <div>
                     <h6 className="fw-bold text-dark mb-3">Repositories ({repos.length})</h6>
@@ -290,7 +291,6 @@ const StaffStudentProfileModal = ({ studentId, onClose }) => {
                   </div>
                 )}
 
-                {/* TAB 4: OPEN SOURCE */}
                 {activeTab === 'opensource' && (
                   <div>
                     <div className="alert alert-info border-0 shadow-sm mb-4">

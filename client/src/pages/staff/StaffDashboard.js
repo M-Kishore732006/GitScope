@@ -192,7 +192,8 @@ const StaffDashboard = () => {
           </div>
         </div>
 
-        {/* Card 9: Issues */}
+
+
         <div className="col-12 col-sm-6 col-lg-3">
           <div className="saas-card d-flex align-items-center">
             <div className="icon-box warning me-3">
@@ -206,7 +207,8 @@ const StaffDashboard = () => {
         </div>
       </div>
 
-      {/* Main Grid: Top Contributors & Quick Links */}
+  
+  
       <div className="row g-4">
         {/* Top Contributors Table */}
         <div className="col-12 col-lg-8">
@@ -273,7 +275,8 @@ const StaffDashboard = () => {
           </div>
         </div>
 
-        {/* Open-Source Highlight & Quick Actions */}
+
+
         <div className="col-12 col-lg-4">
           <div className="saas-card bg-gradient text-white mb-4" style={{ background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)' }}>
             <div className="d-flex align-items-center mb-3">
