@@ -39,10 +39,11 @@ const Login = () => {
   };
 
   return (
-    <AuthCard 
-      title="Welcome Back" 
-      subtitle="Sign in to your GitScope account"
-    >
+    <AuthCard
+  logo="/git_logo.png"
+  title="Welcome to GitScope"
+  subtitle="Sign in to your GitScope account"
+>
       {errorMsg && <div className="alert alert-danger p-2 text-center" style={{fontSize: '0.875rem'}}>{errorMsg}</div>}
       <form onSubmit={handleSubmit}>
         <AuthInput
@@ -78,10 +79,10 @@ const Login = () => {
         </button>
       </form>
 
-      <div className="divider">OR</div>
+      <div className="d-flex justify-content-center align-items-center">OR</div>
 
       {/* Note the color update here to #64748B */}
-      <p style={{ textAlign: 'center', marginTop: '1.5rem', marginBottom: 0, color: '#64748B', fontSize: '0.9rem' }}>
+      <p style={{ textAlign: 'center', marginTop: '1rem', marginBottom: 0, color: '#64748B', fontSize: '0.9rem' }}>
         New to GitScope? <Link to="/signup" className="link-primary">Create an account</Link>
       </p>
     </AuthCard>

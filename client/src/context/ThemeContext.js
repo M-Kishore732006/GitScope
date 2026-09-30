@@ -6,7 +6,7 @@ export const ThemeProvider = ({ children }) => {
   const [theme, setThemeState] = useState(() => {
     const savedTheme = localStorage.getItem('gitscope_theme');
     if (savedTheme) return savedTheme;
-    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return 'light'; // Light theme by default for new visitors
   });
 
   useEffect(() => {
