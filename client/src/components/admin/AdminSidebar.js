@@ -31,7 +31,7 @@ const AdminSidebar = ({ mobileOpen, closeSidebar }) => {
             <FaRocket />
           </div>
           <div>
-            <span className="fw-extrabold text-dark" style={{ letterSpacing: '-0.5px' }}>GitScope</span>
+            <span className="fw-extrabold text-main" style={{ letterSpacing: '-0.5px' }}>GitScope</span>
             <span className="badge bg-danger ms-2 px-2 py-1 small" style={{ fontSize: '0.6rem' }}>ADMIN</span>
           </div>
         </div>

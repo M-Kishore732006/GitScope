@@ -11,7 +11,7 @@ const Sidebar = ({ handleLogout, mobileOpen, closeSidebar }) => {
              <FaRocket />
            </div>
            <div>
-             <span className="fw-extrabold text-dark" style={{ letterSpacing: '-0.5px' }}>GitScope</span>
+             <span className="fw-extrabold text-main" style={{ letterSpacing: '-0.5px' }}>GitScope</span>
            </div>
          </div>
          <button className="btn btn-sm text-muted d-lg-none p-1 border-0" onClick={closeSidebar}>
@@ -27,23 +27,23 @@ const Sidebar = ({ handleLogout, mobileOpen, closeSidebar }) => {
          </NavLink>
          
          <div className="text-muted small text-uppercase fw-bold mt-4 mb-2 ms-4" style={{fontSize: '0.65rem', letterSpacing: '1px'}}>GitHub Insights</div>
-         <a href="#repositories" className="sidebar-link">
+         <NavLink to="/student/repositories" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
             <FaBook className="icon" /> Repositories
-         </a>
-         <a href="#timeline" className="sidebar-link">
+         </NavLink>
+         <NavLink to="/student/contributions" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
             <FaChartLine className="icon" /> Contributions
-         </a>
-         <a href="#achievements" className="sidebar-link">
+         </NavLink>
+         <NavLink to="/student/achievements" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
             <FaMedal className="icon" /> Achievements
-         </a>
+         </NavLink>
          
          <div className="text-muted small text-uppercase fw-bold mt-4 mb-2 ms-4" style={{fontSize: '0.65rem', letterSpacing: '1px'}}>Preferences</div>
          <NavLink to="/student/profile" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
             <FaUser className="icon" /> Profile
          </NavLink>
-         <a href="#!" className="sidebar-link">
+         <NavLink to="/student/settings" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
             <FaCog className="icon" /> Settings
-         </a>
+         </NavLink>
       </div>
     </div>
   );

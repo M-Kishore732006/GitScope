@@ -30,32 +30,27 @@ const AuthSelect = ({ icon: Icon, name, value, onChange, options, placeholder })
         style={{ width: '100%', border: 'none', outline: 'none', background: 'transparent', cursor: 'pointer', paddingRight: '0.75rem' }}
         onClick={() => setIsOpen(!isOpen)}
       >
-        <span style={{ color: selectedOption ? '#1e293b' : '#94a3b8', fontSize: '0.95rem', userSelect: 'none' }}>
+        <span className={selectedOption ? 'text-main' : 'text-muted'} style={{ fontSize: '0.95rem', userSelect: 'none' }}>
           {selectedOption ? selectedOption.label : placeholder}
         </span>
-        <span style={{ fontSize: '0.7rem', color: '#94a3b8', transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'rotate(0)' }}>▼</span>
+        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted, #94a3b8)', transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'rotate(0)' }}>▼</span>
       </div>
       
       {isOpen && (
-        <div className="position-absolute shadow-sm border rounded-3 bg-white w-100 mt-1 py-1" style={{ zIndex: 1050, top: '100%', left: 0, maxHeight: '220px', overflowY: 'auto' }}>
+        <div className="position-absolute shadow border rounded-3 dropdown-menu show w-100 mt-1 py-1" style={{ zIndex: 1050, top: '100%', left: 0, maxHeight: '220px', overflowY: 'auto' }}>
           {options.map((opt, idx) => (
             <div 
               key={idx}
-              className="px-3 py-2"
+              className={`dropdown-item px-3 py-2 ${value === opt.value ? 'active-option' : ''}`}
               style={{
                 cursor: 'pointer',
                 fontSize: '0.9rem',
-                color: value === opt.value ? '#2563eb' : '#475569',
-                background: value === opt.value ? '#eff6ff' : 'white',
-                fontWeight: value === opt.value ? '600' : '400',
-                transition: 'background 0.1s'
+                fontWeight: value === opt.value ? '600' : '400'
               }}
               onClick={() => {
                 onChange({ target: { name, value: opt.value } });
                 setIsOpen(false);
               }}
-              onMouseEnter={(e) => { if (value !== opt.value) e.target.style.background = '#f8fafc'; }}
-              onMouseLeave={(e) => { if (value !== opt.value) e.target.style.background = 'white'; }}
             >
               {opt.label}
             </div>
@@ -82,10 +77,7 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    let { name, value } = e.target;
-    if (name === 'username') {
-      value = toTitleCase(value);
-    }
+    const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
@@ -101,7 +93,7 @@ const Signup = () => {
     try {
       const submissionData = {
         ...formData,
-        username: toTitleCase(formData.username).trim()
+        username: formData.username.trim()
       };
       const response = await axios.post('/api/auth/register', submissionData);
       // Auto login or redirect to login on success

@@ -13,7 +13,8 @@ const {
   getAllRepositories,
   getRepositoryById,
   getAchievements,
-  getLeaderboards 
+  getLeaderboards,
+  getAICodeHealth
 } = require('../controllers/studentController');
 
 router.put('/profile', protect, authorize('student'), updateProfile);
@@ -28,5 +29,6 @@ router.get('/repositories', protect, authorize('student'), getAllRepositories);
 router.get('/repository/:id', protect, authorize('student'), getRepositoryById);
 router.get('/achievements', protect, authorize('student'), getAchievements);
 router.get('/leaderboard', protect, authorize('student'), getLeaderboards);
+router.get('/ai-code-health', protect, authorize('student'), getAICodeHealth);
 
 module.exports = router;

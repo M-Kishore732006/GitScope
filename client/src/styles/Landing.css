@@ -363,3 +363,95 @@
     max-width: 300px;
   }
 }
+
+/* =========================================================
+   DARK THEME OVERRIDES FOR LANDING PAGE
+========================================================= */
+body.dark-mode .landing-page,
+[data-theme="dark"] .landing-page {
+  background-color: #0F172A !important;
+  color: #F8FAFC !important;
+}
+
+body.dark-mode .landing-navbar,
+[data-theme="dark"] .landing-navbar {
+  background: rgba(15, 23, 42, 0.9) !important;
+  border-bottom-color: #1E293B !important;
+}
+
+body.dark-mode .landing-brand,
+[data-theme="dark"] .landing-brand {
+  color: #F8FAFC !important;
+}
+
+body.dark-mode .nav-link,
+[data-theme="dark"] .nav-link {
+  color: #94A3B8 !important;
+}
+
+body.dark-mode .nav-link:hover,
+[data-theme="dark"] .nav-link:hover {
+  color: #60A5FA !important;
+}
+
+body.dark-mode .hero-badge,
+[data-theme="dark"] .hero-badge {
+  background: rgba(99, 102, 241, 0.15) !important;
+  color: #818CF8 !important;
+  border-color: rgba(99, 102, 241, 0.3) !important;
+}
+
+body.dark-mode .hero-title,
+[data-theme="dark"] .hero-title {
+  color: #F8FAFC !important;
+}
+
+body.dark-mode .hero-subtitle,
+[data-theme="dark"] .hero-subtitle {
+  color: #94A3B8 !important;
+}
+
+body.dark-mode .btn-outline-lg,
+[data-theme="dark"] .btn-outline-lg {
+  background: #1E293B !important;
+  color: #F8FAFC !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .btn-outline-lg:hover,
+[data-theme="dark"] .btn-outline-lg:hover {
+  background: #334155 !important;
+}
+
+body.dark-mode .features-section,
+[data-theme="dark"] .features-section {
+  background: #0F172A !important;
+}
+
+body.dark-mode .section-title,
+[data-theme="dark"] .section-title {
+  color: #F8FAFC !important;
+}
+
+body.dark-mode .section-subtitle,
+[data-theme="dark"] .section-subtitle {
+  color: #94A3B8 !important;
+}
+
+body.dark-mode .feature-card,
+[data-theme="dark"] .feature-card {
+  background: #1E293B !important;
+  border-color: #334155 !important;
+  color: #F8FAFC !important;
+}
+
+body.dark-mode .feature-card h3,
+[data-theme="dark"] .feature-card h3 {
+  color: #F8FAFC !important;
+}
+
+body.dark-mode .feature-card p,
+[data-theme="dark"] .feature-card p {
+  color: #94A3B8 !important;
+}
+

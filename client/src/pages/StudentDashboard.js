@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link, useOutletContext } from 'react-router-dom';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend, LineChart, Line, XAxis, YAxis, CartesianGrid, AreaChart, Area, BarChart, Bar } from 'recharts';
-import { FaGithub, FaTrophy, FaFire, FaBook, FaCodeBranch, FaStar, FaSyncAlt } from 'react-icons/fa';
+import { FaGithub, FaTrophy, FaFire, FaBook, FaCodeBranch, FaStar, FaSyncAlt, FaFilter, FaSearch, FaSortAlphaDown, FaSortAlphaUpAlt, FaCalendarAlt, FaGlobe } from 'react-icons/fa';
 import ActivityTimeline from '../components/dashboard/ActivityTimeline';
+import SkillRadar from '../components/dashboard/SkillRadar';
 import { toTitleCase } from '../utils/formatters';
 import '../styles/dashboard.css';
 
@@ -53,6 +54,50 @@ const StudentDashboard = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [showGithubModal, setShowGithubModal] = useState(false);
   const [githubUsernameInput, setGithubUsernameInput] = useState('');
+
+  // Repository Filtering & Sorting States
+  const [repoSearch, setRepoSearch] = useState('');
+  const [repoLang, setRepoLang] = useState('ALL');
+  const [repoSort, setRepoSort] = useState('name_asc');
+
+  const uniqueLanguages = React.useMemo(() => {
+    if (!stats?.repositoriesList) return [];
+    const langs = new Set();
+    stats.repositoriesList.forEach(r => {
+      if (r.primaryLanguage) langs.add(r.primaryLanguage);
+    });
+    return Array.from(langs).sort();
+  }, [stats?.repositoriesList]);
+
+  const filteredSortedRepos = React.useMemo(() => {
+    if (!stats?.repositoriesList) return [];
+    let list = [...stats.repositoriesList];
+
+    if (repoSearch.trim()) {
+      const q = repoSearch.toLowerCase().trim();
+      list = list.filter(r => 
+        (r.name && r.name.toLowerCase().includes(q)) ||
+        (r.description && r.description.toLowerCase().includes(q)) ||
+        (r.primaryLanguage && r.primaryLanguage.toLowerCase().includes(q))
+      );
+    }
+
+    if (repoLang !== 'ALL') {
+      list = list.filter(r => r.primaryLanguage === repoLang);
+    }
+
+    list.sort((a, b) => {
+      if (repoSort === 'name_asc') return (a.name || '').localeCompare(b.name || '');
+      if (repoSort === 'name_desc') return (b.name || '').localeCompare(a.name || '');
+      if (repoSort === 'date_desc') return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+      if (repoSort === 'date_asc') return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+      if (repoSort === 'stars_desc') return (b.stars || 0) - (a.stars || 0);
+      if (repoSort === 'forks_desc') return (b.forks || 0) - (a.forks || 0);
+      return 0;
+    });
+
+    return list;
+  }, [stats?.repositoriesList, repoSearch, repoLang, repoSort]);
 
   const userInfoStr = localStorage.getItem('userInfo');
   const userInfo = userInfoStr ? JSON.parse(userInfoStr) : null;
@@ -258,6 +303,7 @@ const StudentDashboard = () => {
                 {/* Repositories Growth Chart */}
                 <div className="col-12 col-lg-6">
                    <div className="saas-card">
+
                       <h5 className="fw-bold mb-4">Repository Growth</h5>
                       {repoGrowth.length > 0 ? (
                          <div style={{ height: '250px' }}>
@@ -332,7 +378,109 @@ const StudentDashboard = () => {
              </div>
 
              <div className="saas-card mb-5">
-                <h5 className="fw-bold mb-4">Your Repositories</h5>
+                <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-2">
+                   <div>
+                      <h5 className="fw-bold mb-1 d-flex align-items-center gap-2">
+                        <FaBook className="text-primary" /> Your Repositories
+                        <span className="badge bg-primary bg-opacity-10 text-primary rounded-pill fs-7 fw-semibold ms-2">
+                          {filteredSortedRepos.length} of {stats?.repositoriesList?.length || 0}
+                        </span>
+                      </h5>
+                      <p className="text-muted small mb-0">Search, filter by language, and sort your projects.</p>
+                   </div>
+
+                   {/* Quick Test Sorting Buttons */}
+                   <div className="d-flex flex-wrap align-items-center gap-1">
+                      <span className="small text-muted me-1 fw-bold"><FaFilter className="me-1"/>Test Sorting:</span>
+                      <button 
+                        className={`btn btn-xs btn-sm ${repoSort === 'name_asc' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                        onClick={() => setRepoSort('name_asc')}
+                      >
+                        A &rarr; Z
+                      </button>
+                      <button 
+                        className={`btn btn-xs btn-sm ${repoSort === 'name_desc' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                        onClick={() => setRepoSort('name_desc')}
+                      >
+                        Z &rarr; A
+                      </button>
+                      <button 
+                        className={`btn btn-xs btn-sm ${repoSort === 'date_desc' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                        onClick={() => setRepoSort('date_desc')}
+                      >
+                        Newest
+                      </button>
+                      <button 
+                        className={`btn btn-xs btn-sm ${repoSort === 'date_asc' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                        onClick={() => setRepoSort('date_asc')}
+                      >
+                        Oldest
+                      </button>
+                      <button 
+                        className={`btn btn-xs btn-sm ${repoSort === 'stars_desc' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                        onClick={() => setRepoSort('stars_desc')}
+                      >
+                        Top Stars
+                      </button>
+                      {(repoSearch || repoLang !== 'ALL' || repoSort !== 'name_asc') && (
+                        <button 
+                          className="btn btn-xs btn-sm btn-link text-danger text-decoration-none fw-semibold ms-1"
+                          onClick={() => { setRepoSearch(''); setRepoLang('ALL'); setRepoSort('name_asc'); }}
+                        >
+                          Reset
+                        </button>
+                      )}
+                   </div>
+                </div>
+
+                {/* Filters Row */}
+                <div className="row g-2 mb-4">
+                   <div className="col-12 col-md-5">
+                      <div className="input-group">
+                         <span className="input-group-text bg-light border-end-0 text-muted">
+                            <FaSearch />
+                         </span>
+                         <input 
+                            type="text" 
+                            className="form-control bg-light border-start-0 ps-0 shadow-none"
+                            placeholder="Filter by name or description..."
+                            value={repoSearch}
+                            onChange={e => setRepoSearch(e.target.value)}
+                         />
+                         {repoSearch && (
+                            <button className="btn btn-light border border-start-0 text-muted" onClick={() => setRepoSearch('')}>&times;</button>
+                         )}
+                      </div>
+                   </div>
+
+                   <div className="col-6 col-md-3">
+                      <select 
+                         className="form-select bg-light border shadow-none"
+                         value={repoLang}
+                         onChange={e => setRepoLang(e.target.value)}
+                      >
+                         <option value="ALL">All Languages ({stats?.repositoriesList?.length || 0})</option>
+                         {uniqueLanguages.map((lang, i) => (
+                            <option key={i} value={lang}>{lang}</option>
+                         ))}
+                      </select>
+                   </div>
+
+                   <div className="col-6 col-md-4">
+                      <select 
+                         className="form-select bg-light border shadow-none"
+                         value={repoSort}
+                         onChange={e => setRepoSort(e.target.value)}
+                      >
+                         <option value="name_asc">Sort: Name (A to Z)</option>
+                         <option value="name_desc">Sort: Name (Z to A)</option>
+                         <option value="date_desc">Sort: Date Created (Newest First)</option>
+                         <option value="date_asc">Sort: Date Created (Oldest First)</option>
+                         <option value="stars_desc">Sort: Most Stars</option>
+                         <option value="forks_desc">Sort: Most Forks</option>
+                      </select>
+                   </div>
+                </div>
                 <div className="table-responsive" style={{ maxHeight: '400px', overflowY: 'auto' }}>
                   <table className="table table-hover align-middle mb-0">
                     <thead className="table-light">
@@ -344,8 +492,8 @@ const StudentDashboard = () => {
                       </tr>
                     </thead>
                     <tbody className="border-top-0">
-                       {stats?.repositoriesList?.length > 0 ? (
-                          stats.repositoriesList.map((repo, idx) => (
+                       {filteredSortedRepos?.length > 0 ? (
+                          filteredSortedRepos.map((repo, idx) => (
                              <tr key={idx} className="border-bottom">
                                 <td className="py-3 px-2">
                                   <Link to={`/student/repository/${repo.name}`} className="text-decoration-none fw-bold text-dark">{repo.name}</Link>

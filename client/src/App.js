@@ -13,6 +13,7 @@ import './styles/auth.css';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import PublicPortfolio from './pages/PublicPortfolio';
 
 // Protected routes
 import ProtectedRoute from './components/ProtectedRoute';
@@ -20,7 +21,11 @@ import PublicRoute from './components/PublicRoute';
 
 // Student pages
 import StudentDashboard from './pages/StudentDashboard';
+import StudentRepositories from './pages/StudentRepositories';
+import StudentContributions from './pages/StudentContributions';
+import StudentAchievements from './pages/StudentAchievements';
 import StudentProfile from './pages/StudentProfile';
+import StudentSettings from './pages/StudentSettings';
 import Leaderboard from './pages/Leaderboard';
 import RepositoryDetails from './pages/RepositoryDetails';
 import GithubCallback from './pages/GithubCallback';
@@ -35,6 +40,7 @@ import MyStudents from './pages/staff/MyStudents';
 import StaffGithubActivity from './pages/staff/StaffGithubActivity';
 import StaffOpenSource from './pages/staff/StaffOpenSource';
 import StaffActivityMonitoring from './pages/staff/StaffActivityMonitoring';
+import StaffAtRiskAnalytics from './pages/staff/StaffAtRiskAnalytics';
 import StaffStudentComparison from './pages/staff/StaffStudentComparison';
 import StaffStudentRankings from './pages/staff/StaffStudentRankings';
 import StaffAnalytics from './pages/staff/StaffAnalytics';
@@ -67,6 +73,8 @@ function App() {
           <Route path="/signup" element={<Signup />} />
         </Route>
 
+        <Route path="/portfolio/:username" element={<PublicPortfolio />} />
+
         <Route
           element={
             <ProtectedRoute allowedRoles={['student']} />
@@ -80,8 +88,28 @@ function App() {
             />
 
             <Route
+              path="/student/repositories"
+              element={<StudentRepositories />}
+            />
+
+            <Route
+              path="/student/contributions"
+              element={<StudentContributions />}
+            />
+
+            <Route
+              path="/student/achievements"
+              element={<StudentAchievements />}
+            />
+
+            <Route
               path="/student/profile"
               element={<StudentProfile />}
+            />
+
+            <Route
+              path="/student/settings"
+              element={<StudentSettings />}
             />
 
             <Route
@@ -113,6 +141,7 @@ function App() {
             <Route path="/staff/activity" element={<StaffGithubActivity />} />
             <Route path="/staff/open-source" element={<StaffOpenSource />} />
             <Route path="/staff/monitoring" element={<StaffActivityMonitoring />} />
+            <Route path="/staff/at-risk" element={<StaffAtRiskAnalytics />} />
             <Route path="/staff/comparison" element={<StaffStudentComparison />} />
             <Route path="/staff/rankings" element={<StaffStudentRankings />} />
             <Route path="/staff/analytics" element={<StaffAnalytics />} />

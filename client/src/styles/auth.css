@@ -196,3 +196,98 @@ body {
   font-size: 0.9rem;
   cursor: pointer;
 }
+
+.auth-back-link {
+  color: #64748B;
+  transition: color 0.2s ease;
+}
+
+.auth-back-link:hover {
+  color: #2563EB;
+}
+
+/* =========================================================
+   DARK THEME OVERRIDES FOR AUTH PAGES
+========================================================= */
+body.dark-mode,
+[data-theme="dark"] body {
+  background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%) !important;
+  color: #F8FAFC !important;
+}
+
+body.dark-mode .auth-layout,
+[data-theme="dark"] .auth-layout {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+}
+
+body.dark-mode .solid-card,
+[data-theme="dark"] .solid-card {
+  background-color: #1E293B !important;
+  border-color: #334155 !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5) !important;
+}
+
+body.dark-mode .auth-title,
+[data-theme="dark"] .auth-title {
+  color: #F8FAFC !important;
+}
+
+body.dark-mode .auth-subtitle,
+[data-theme="dark"] .auth-subtitle {
+  color: #94A3B8 !important;
+}
+
+body.dark-mode .auth-back-link,
+[data-theme="dark"] .auth-back-link {
+  color: #94A3B8 !important;
+}
+
+body.dark-mode .auth-back-link:hover,
+[data-theme="dark"] .auth-back-link:hover {
+  color: #818CF8 !important;
+}
+
+body.dark-mode .auth-input,
+[data-theme="dark"] .auth-input {
+  background-color: #0F172A !important;
+  border-color: #475569 !important;
+  color: #F8FAFC !important;
+}
+
+body.dark-mode .auth-input::placeholder,
+[data-theme="dark"] .auth-input::placeholder {
+  color: #64748B !important;
+}
+
+body.dark-mode .auth-input-icon,
+[data-theme="dark"] .auth-input-icon {
+  color: #64748B !important;
+}
+
+body.dark-mode .auth-input:focus ~ .auth-input-icon,
+[data-theme="dark"] .auth-input:focus ~ .auth-input-icon {
+  color: #818CF8 !important;
+}
+
+body.dark-mode .divider,
+[data-theme="dark"] .divider {
+  color: #64748B !important;
+}
+
+body.dark-mode .divider::before,
+body.dark-mode .divider::after,
+[data-theme="dark"] .divider::before,
+[data-theme="dark"] .divider::after {
+  border-bottom-color: #334155 !important;
+}
+
+body.dark-mode .custom-checkbox label,
+[data-theme="dark"] .custom-checkbox label {
+  color: #CBD5E1 !important;
+}
+
+body.dark-mode .custom-checkbox input[type="checkbox"],
+[data-theme="dark"] .custom-checkbox input[type="checkbox"] {
+  background-color: #0F172A !important;
+  border-color: #475569 !important;
+}

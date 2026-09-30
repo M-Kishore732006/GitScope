@@ -61,7 +61,7 @@ const AdminSettings = () => {
     setMsg({ text: 'Saving settings and recalculating student scores...', type: 'info' });
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      const formattedFullName = toTitleCase(fullName).trim();
+      const formattedFullName = fullName ? fullName.trim() : '';
       const res = await axios.put('/api/admin/settings', {
         fullName: formattedFullName,
         email,
@@ -138,8 +138,8 @@ const AdminSettings = () => {
                   type="text" 
                   className="form-control bg-light border-0 py-2"
                   value={fullName}
-                  onChange={(e) => setFullName(toTitleCase(e.target.value))}
-                  onBlur={() => setFullName(toTitleCase(fullName).trim())}
+                  onChange={(e) => setFullName(e.target.value)}
+                  onBlur={() => setFullName(fullName ? fullName.trim() : '')}
                 />
               </div>
 

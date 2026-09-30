@@ -10,17 +10,18 @@ const { toTitleCase } = require('../utils/formatters');
 // @access  Private/Student
 const updateProfile = async (req, res) => {
   try {
-    const { fullName, department, year, section, githubUsername } = req.body;
+    const { fullName, department, year, section, githubUsername, phoneNumber } = req.body;
     
     const user = await User.findById(req.user._id);
 
     if (user) {
       if (fullName) {
-        user.fullName = toTitleCase(fullName);
+        user.fullName = fullName;
       }
       user.department = department || user.department;
       user.year = year || user.year;
       user.section = section || user.section;
+      if (phoneNumber) user.phoneNumber = phoneNumber;
       
       let triggerSync = false;
       if (githubUsername && githubUsername !== user.githubUsername) {
@@ -346,6 +347,21 @@ const getLeaderboards = async (req, res) => {
     }
 };
 
+const { analyzeCodeHealthAndSkills } = require('../services/aiCodeHealthService');
+
+// @desc    Get Real AI Code Health & Skill Radar Analysis
+// @route   GET /api/student/ai-code-health
+// @access  Private/Student
+const getAICodeHealth = async (req, res) => {
+    try {
+        const analysis = await analyzeCodeHealthAndSkills(req.user._id);
+        res.json(analysis);
+    } catch (error) {
+        console.error('getAICodeHealth Error:', error);
+        res.status(500).json({ message: 'Error running AI code health analysis: ' + error.message });
+    }
+};
+
 module.exports = {
   updateProfile,
   changePassword,
@@ -358,5 +374,6 @@ module.exports = {
   getAllRepositories,
   getRepositoryById,
   getAchievements,
-  getLeaderboards
+  getLeaderboards,
+  getAICodeHealth
 };
