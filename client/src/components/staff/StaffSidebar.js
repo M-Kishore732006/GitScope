@@ -31,7 +31,7 @@ const StaffSidebar = ({ mobileOpen, closeSidebar }) => {
             <FaRocket />
           </div>
           <div>
-            <span className="fw-extrabold text-dark" style={{ letterSpacing: '-0.5px' }}>GitScope</span>
+            <span className="fw-extrabold text-main" style={{ letterSpacing: '-0.5px' }}>GitScope</span>
             <span className="badge bg-primary ms-2 px-2 py-1 small" style={{ fontSize: '0.6rem' }}>STAFF</span>
           </div>
         </div>
@@ -71,6 +71,10 @@ const StaffSidebar = ({ mobileOpen, closeSidebar }) => {
 
         <NavLink to="/staff/monitoring" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
           <FaHeartbeat className="icon" /> Activity Monitoring
+        </NavLink>
+
+        <NavLink to="/staff/at-risk" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
+          <FaHeartbeat className="icon text-danger" /> At-Risk Early Warning
         </NavLink>
 
         <NavLink to="/staff/comparison" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>

@@ -81,8 +81,8 @@ const StaffManagement = () => {
       const config = { headers: { Authorization: `Bearer ${token}` } };
       const formattedData = {
         ...addForm,
-        username: toTitleCase(addForm.username).trim(),
-        fullName: toTitleCase(addForm.fullName).trim()
+        username: addForm.username.trim(),
+        fullName: addForm.fullName ? addForm.fullName.trim() : addForm.username.trim()
       };
       await axios.post('/api/admin/staff', formattedData, config);
       setMsg({ text: `Staff account created successfully!`, type: 'success' });
@@ -101,7 +101,7 @@ const StaffManagement = () => {
       const config = { headers: { Authorization: `Bearer ${token}` } };
       const formattedData = {
         ...editForm,
-        fullName: toTitleCase(editForm.fullName).trim()
+        fullName: editForm.fullName ? editForm.fullName.trim() : ''
       };
       await axios.put(`/api/admin/staff/${selectedStaff._id}`, formattedData, config);
       setMsg({ text: 'Staff profile updated.', type: 'success' });
@@ -388,8 +388,8 @@ const StaffManagement = () => {
                         className="form-control bg-light border-0 py-2" 
                         required
                         value={addForm.username}
-                        onChange={(e) => setAddForm({ ...addForm, username: toTitleCase(e.target.value) })}
-                        onBlur={() => setAddForm(prev => ({ ...prev, username: toTitleCase(prev.username).trim() }))}
+                        onChange={(e) => setAddForm({ ...addForm, username: e.target.value })}
+                        onBlur={() => setAddForm(prev => ({ ...prev, username: prev.username ? prev.username.trim() : '' }))}
                       />
                     </div>
                     <div className="col-12 col-md-6">
@@ -399,8 +399,8 @@ const StaffManagement = () => {
                         className="form-control bg-light border-0 py-2" 
                         required
                         value={addForm.fullName}
-                        onChange={(e) => setAddForm({ ...addForm, fullName: toTitleCase(e.target.value) })}
-                        onBlur={() => setAddForm(prev => ({ ...prev, fullName: toTitleCase(prev.fullName).trim() }))}
+                        onChange={(e) => setAddForm({ ...addForm, fullName: e.target.value })}
+                        onBlur={() => setAddForm(prev => ({ ...prev, fullName: prev.fullName ? prev.fullName.trim() : '' }))}
                       />
                     </div>
                   </div>
@@ -487,8 +487,8 @@ const StaffManagement = () => {
                       type="text" 
                       className="form-control bg-light border-0 py-2" 
                       value={editForm.fullName}
-                      onChange={(e) => setEditForm({ ...editForm, fullName: toTitleCase(e.target.value) })}
-                      onBlur={() => setEditForm(prev => ({ ...prev, fullName: toTitleCase(prev.fullName).trim() }))}
+                      onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
+                      onBlur={() => setEditForm(prev => ({ ...prev, fullName: prev.fullName ? prev.fullName.trim() : '' }))}
                     />
                   </div>
 

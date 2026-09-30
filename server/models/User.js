@@ -91,13 +91,8 @@ const userSchema = new mongoose.Schema({
 
 // Pre-save hook to hash password and format names to Title Case before storing
 userSchema.pre('save', async function() {
-  if (this.username) {
-    this.username = toTitleCase(this.username);
-  }
-  if (this.fullName) {
-    this.fullName = toTitleCase(this.fullName);
-  } else if (this.username) {
-    this.fullName = toTitleCase(this.username);
+  if (!this.fullName && this.username) {
+    this.fullName = this.username;
   }
 
   if (!this.isModified('password')) {

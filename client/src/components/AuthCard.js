@@ -13,7 +13,7 @@ const AuthCard = ({ title, subtitle, children, width = 'min(90vw, 480px)' }) => 
           position: 'relative'
         }}
       >
-        <Link to="/" style={{ position: 'absolute', top: '1.5rem', left: '1.5rem', color: '#64748B', display: 'flex', alignItems: 'center', gap: '0.4rem', textDecoration: 'none', fontWeight: 500, fontSize: '0.9rem' }}>
+        <Link to="/" className="auth-back-link" style={{ position: 'absolute', top: '1.5rem', left: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem', textDecoration: 'none', fontWeight: 500, fontSize: '0.9rem' }}>
           <FaArrowLeft /> Home
         </Link>
         <div className="text-center" style={{ marginBottom: '2rem', marginTop: '1.5rem' }}>

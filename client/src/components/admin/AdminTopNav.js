@@ -1,52 +1,33 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { FaSearch, FaBell, FaChevronDown, FaShieldAlt, FaUserTie, FaUserGraduate, FaGithub, FaCheckCircle, FaTimesCircle, FaBars } from 'react-icons/fa';
+import { FaSearch, FaChevronDown, FaShieldAlt, FaUserGraduate, FaUserTie, FaGithub, FaBars, FaSun, FaMoon, FaCog, FaSignOutAlt } from 'react-icons/fa';
 import { toTitleCase } from '../../utils/formatters';
+import { useTheme } from '../../context/ThemeContext';
+import NotificationDropdown from '../NotificationDropdown';
 
 const AdminTopNav = ({ user, handleLogout, toggleSidebar }) => {
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [notifOpen, setNotifOpen] = useState(false);
-  
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState(null);
   const [searching, setSearching] = useState(false);
 
-  const [notifications, setNotifications] = useState([]);
-  
   const dropdownRef = useRef(null);
-  const notifRef = useRef(null);
   const searchRef = useRef(null);
+  const { theme, toggleTheme } = useTheme();
 
   const token = JSON.parse(localStorage.getItem('userInfo'))?.token;
 
-  // Click outside to close dropdowns
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) setDropdownOpen(false);
-      if (notifRef.current && !notifRef.current.contains(event.target)) setNotifOpen(false);
       if (searchRef.current && !searchRef.current.contains(event.target)) setSearchResults(null);
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Fetch notifications
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        const config = { headers: { Authorization: `Bearer ${token}` } };
-        const res = await axios.get('/api/admin/notifications', config);
-        setNotifications(res.data || []);
-      } catch (err) {
-        // silent fallback
-      }
-    };
-    if (token) fetchNotifications();
-  }, [token]);
-
-  // Global search handler
   const handleSearch = async (val) => {
     setSearchQuery(val);
     if (!val || val.trim().length < 2) {
@@ -66,36 +47,36 @@ const AdminTopNav = ({ user, handleLogout, toggleSidebar }) => {
   };
 
   return (
-    <div className="topnav px-3 px-md-4 py-2 border-bottom bg-white sticky-top d-flex align-items-center justify-content-between flex-wrap gap-2">
-      {/* Mobile Hamburger & Logo Header */}
+    <header className="topnav px-3 px-md-4 py-2 sticky-top d-flex align-items-center justify-content-between flex-wrap gap-2">
+      {/* Mobile Hamburger Header */}
       <div className="d-flex align-items-center me-2">
         <button 
-          className="btn btn-light border p-2 rounded-3 me-3 d-lg-none shadow-sm text-dark d-flex align-items-center"
+          className="btn btn-light border p-2 rounded-3 me-2 d-lg-none shadow-sm text-main d-flex align-items-center theme-btn-icon"
           onClick={toggleSidebar}
           aria-label="Toggle navigation menu"
         >
           <FaBars className="fs-5" />
         </button>
-        <span className="fw-extrabold text-dark d-lg-none" style={{ letterSpacing: '-0.5px' }}>GitScope</span>
+        <span className="fw-extrabold text-main d-lg-none" style={{ letterSpacing: '-0.5px' }}>GitScope Admin</span>
       </div>
 
       {/* Global Search Component */}
-      <div className="position-relative flex-grow-1 search-wrapper" ref={searchRef} style={{ maxWidth: '380px', minWidth: '220px' }}>
-        <div className="search-bar shadow-sm d-flex align-items-center bg-light px-3 py-2 rounded-3 border w-100">
+      <div className="position-relative flex-grow-1 search-wrapper" ref={searchRef} style={{ maxWidth: '380px', minWidth: '180px' }}>
+        <div className="search-bar shadow-sm d-flex align-items-center px-3 py-2 rounded-3 border w-100">
           <FaSearch className="text-muted me-2" />
           <input 
             type="text" 
             placeholder="Search Students, Staff, GitHub IDs..." 
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
-            className="border-0 bg-transparent flex-grow-1 outline-none small"
+            className="border-0 bg-transparent flex-grow-1 small"
             style={{ outline: 'none' }}
           />
         </div>
 
         {/* Search Results Dropdown */}
         {searchResults && (
-          <div className="position-absolute top-100 start-0 w-100 bg-white shadow-lg rounded-3 border mt-1 p-2" style={{ zIndex: 1050 }}>
+          <div className="position-absolute top-100 start-0 w-100 bg-card text-main shadow-lg rounded-3 border mt-1 p-2" style={{ zIndex: 1100 }}>
             {searching ? (
               <div className="p-3 text-center text-muted small">Searching...</div>
             ) : (
@@ -110,7 +91,7 @@ const AdminTopNav = ({ user, handleLogout, toggleSidebar }) => {
                         key={s._id} 
                         to="/admin/students" 
                         onClick={() => setSearchResults(null)}
-                        className="d-flex justify-content-between align-items-center p-2 rounded hover-bg-light text-decoration-none text-dark small border-bottom"
+                        className="d-flex justify-content-between align-items-center p-2 rounded hover-bg-light text-decoration-none text-main small border-bottom"
                       >
                         <div>
                           <div className="fw-bold">{toTitleCase(s.fullName || s.username)}</div>
@@ -132,7 +113,7 @@ const AdminTopNav = ({ user, handleLogout, toggleSidebar }) => {
                         key={st._id} 
                         to="/admin/staff" 
                         onClick={() => setSearchResults(null)}
-                        className="d-flex justify-content-between align-items-center p-2 rounded hover-bg-light text-decoration-none text-dark small border-bottom"
+                        className="d-flex justify-content-between align-items-center p-2 rounded hover-bg-light text-decoration-none text-main small border-bottom"
                       >
                         <div>
                           <div className="fw-bold">{toTitleCase(st.fullName || st.username)}</div>
@@ -147,17 +128,17 @@ const AdminTopNav = ({ user, handleLogout, toggleSidebar }) => {
                 {searchResults.github?.length > 0 && (
                   <div>
                     <div className="text-muted small fw-bold text-uppercase px-2 mb-1" style={{ fontSize: '0.7rem' }}>
-                      <FaGithub className="me-1 text-dark" /> GitHub Profiles ({searchResults.github.length})
+                      <FaGithub className="me-1" /> GitHub Profiles ({searchResults.github.length})
                     </div>
                     {searchResults.github.map((g, idx) => (
                       <Link 
                         key={idx} 
                         to="/admin/github-accounts" 
                         onClick={() => setSearchResults(null)}
-                        className="d-flex justify-content-between align-items-center p-2 rounded hover-bg-light text-decoration-none text-dark small"
+                        className="d-flex justify-content-between align-items-center p-2 rounded hover-bg-light text-decoration-none text-main small"
                       >
                         <div>
-                          <div className="fw-bold">@{g.githubUsername}</div>
+                          <div className="fw-bold">@{g.githubUsername?.toUpperCase()}</div>
                           <div className="text-muted" style={{ fontSize: '0.75rem' }}>{g.studentName}</div>
                         </div>
                         <span className="badge bg-dark text-white" style={{ fontSize: '0.65rem' }}>Score: {g.score}</span>
@@ -176,81 +157,53 @@ const AdminTopNav = ({ user, handleLogout, toggleSidebar }) => {
       </div>
 
       {/* Right Navigation Actions */}
-      <div className="topnav-actions d-flex align-items-center gap-3">
-        {/* Notification Bell Dropdown */}
-        <div className="position-relative" ref={notifRef}>
-          <button 
-            className="btn btn-light rounded-circle border shadow-sm p-2 text-muted position-relative" 
-            style={{ width: 40, height: 40 }}
-            onClick={() => setNotifOpen(!notifOpen)}
-          >
-            <FaBell />
-            {notifications.length > 0 && (
-              <span className="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
-                <span className="visually-hidden">New alerts</span>
-              </span>
-            )}
-          </button>
+      <div className="topnav-actions d-flex align-items-center gap-2">
+        {/* Theme Toggle Button */}
+        <button 
+          className="btn btn-light rounded-circle shadow-sm border p-2 text-muted theme-btn-icon d-flex align-items-center justify-content-center"
+          style={{ width: 40, height: 40 }}
+          onClick={toggleTheme}
+          title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          aria-label="Toggle Theme"
+        >
+           {theme === 'dark' ? <FaSun className="text-warning fs-5" /> : <FaMoon className="fs-5" />}
+        </button>
 
-          {notifOpen && (
-            <div className="position-absolute end-0 top-100 mt-2 bg-white shadow-lg border rounded-3 p-3" style={{ width: '320px', zIndex: 1050 }}>
-              <div className="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
-                <h6 className="fw-bold mb-0">System Notifications</h6>
-                <span className="badge bg-primary rounded-pill">{notifications.length}</span>
-              </div>
-              <div style={{ maxHeight: '250px', overflowY: 'auto' }}>
-                {notifications.length > 0 ? (
-                  notifications.map((n, i) => (
-                    <div key={i} className="mb-2 p-2 rounded bg-light border-bottom">
-                      <div className="d-flex align-items-center justify-content-between">
-                        <span className={`fw-bold small text-${n.type === 'danger' ? 'danger' : n.type === 'success' ? 'success' : 'primary'}`}>
-                          {n.title}
-                        </span>
-                        <span className="text-muted" style={{ fontSize: '0.65rem' }}>
-                          {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                      </div>
-                      <p className="small text-muted mb-0 mt-1" style={{ fontSize: '0.75rem' }}>{n.message}</p>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-3 text-muted small">No new notifications.</div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
+        {/* Responsive Admin Notification Center */}
+        <NotificationDropdown role="admin" />
 
         {/* User Menu Dropdown */}
         <div className="dropdown" ref={dropdownRef}>
           <div 
-            className="d-flex align-items-center cursor-pointer border rounded-pill p-1 ps-3 shadow-sm bg-white" 
+            className="d-flex align-items-center cursor-pointer border rounded-pill p-1 ps-3 shadow-sm bg-card" 
             onClick={() => setDropdownOpen(!dropdownOpen)}
             style={{ cursor: 'pointer' }}
           >
-            <span className="fw-bold me-3 small text-dark">{toTitleCase(user?.fullName || user?.username || 'Admin User')}</span>
-            <div className="avatar-circle me-1 bg-dark text-white fw-bold" style={{ width: 34, height: 34, fontSize: '0.85rem' }}>
+            <span className="fw-bold me-2 small text-main d-none d-sm-inline">
+              {toTitleCase(user?.fullName || user?.username || 'Admin User')}
+            </span>
+            <div className="avatar-circle me-1 bg-dark text-white fw-bold" style={{ width: 32, height: 32, fontSize: '0.85rem' }}>
               <FaShieldAlt className="text-warning" />
             </div>
-            <FaChevronDown className="ms-2 text-muted small me-2" />
+            <FaChevronDown className="ms-1 text-muted small me-1" />
           </div>
 
           <ul className={`dropdown-menu dropdown-menu-end shadow border-0 mt-2 rounded-3 ${dropdownOpen ? 'show' : ''}`} style={{ position: 'absolute', right: 0 }}>
             <li>
-              <Link className="dropdown-item py-2 fw-medium text-secondary" to="/admin/settings" onClick={() => setDropdownOpen(false)}>
-                Admin Settings
+              <Link className="dropdown-item py-2 fw-medium d-flex align-items-center gap-2" to="/admin/settings" onClick={() => setDropdownOpen(false)}>
+                <FaCog className="text-muted" /> Admin Settings
               </Link>
             </li>
-            <li><hr className="dropdown-divider" /></li>
+            <li><hr className="dropdown-divider my-1" /></li>
             <li>
-              <button className="dropdown-item py-2 fw-medium text-danger" onClick={handleLogout}>
-                Logout
+              <button className="dropdown-item py-2 fw-medium text-danger d-flex align-items-center gap-2" onClick={handleLogout}>
+                <FaSignOutAlt /> Logout
               </button>
             </li>
           </ul>
         </div>
       </div>
-    </div>
+    </header>
   );
 };
 
