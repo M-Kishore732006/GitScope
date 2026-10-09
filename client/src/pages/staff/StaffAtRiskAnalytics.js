@@ -344,7 +344,7 @@ const StaffAtRiskAnalytics = () => {
 
         {/* High Risk */}
         <div className="col-12 col-sm-6 col-xl">
-          <div className="saas-card h-100 border-start border-danger border-4" style={{ backgroundColor: 'rgba(239, 68, 68, 0.03)' }}>
+          <div className="saas-card h-100">
             <div className="d-flex align-items-center justify-content-between">
               <div>
                 <span className="text-danger extra-small fw-bold text-uppercase">High Risk (14+ Days)</span>
@@ -360,7 +360,7 @@ const StaffAtRiskAnalytics = () => {
 
         {/* Moderate Risk */}
         <div className="col-12 col-sm-6 col-xl">
-          <div className="saas-card h-100 border-start border-warning border-4" style={{ backgroundColor: 'rgba(245, 158, 11, 0.03)' }}>
+          <div className="saas-card h-100">
             <div className="d-flex align-items-center justify-content-between">
               <div>
                 <span className="text-warning extra-small fw-bold text-uppercase">Moderate Risk (7-13 Days)</span>
@@ -376,7 +376,7 @@ const StaffAtRiskAnalytics = () => {
 
         {/* Healthy Activity */}
         <div className="col-12 col-sm-6 col-xl">
-          <div className="saas-card h-100 border-start border-success border-4" style={{ backgroundColor: 'rgba(34, 197, 94, 0.03)' }}>
+          <div className="saas-card h-100">
             <div className="d-flex align-items-center justify-content-between">
               <div>
                 <span className="text-success extra-small fw-bold text-uppercase">Healthy Activity</span>
@@ -392,7 +392,7 @@ const StaffAtRiskAnalytics = () => {
 
         {/* Missing GitHub Link */}
         <div className="col-12 col-sm-6 col-xl">
-          <div className="saas-card h-100 border-start border-secondary border-4">
+          <div className="saas-card h-100">
             <div className="d-flex align-items-center justify-content-between">
               <div>
                 <span className="text-muted extra-small fw-semibold text-uppercase">GitHub Unlinked</span>

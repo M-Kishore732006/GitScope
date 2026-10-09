@@ -83,7 +83,7 @@ const StaffGithubActivity = () => {
                   <tr key={st._id}>
                     <td>
                       <div className="fw-bold text-dark">{st.fullName}</div>
-                      <div className="text-muted extra-small">{st.department} (Y{st.year})</div>
+                      <div className="text-muted extra-small">{st.department} ({st.year})</div>
                     </td>
                     <td>
                       {st.githubLinked ? (

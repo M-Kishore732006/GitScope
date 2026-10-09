@@ -82,7 +82,7 @@ const StaffDashboard = () => {
       <div className="row g-3 mb-4">
         {/* Card 1: Total Assigned */}
         <div className="col-12 col-sm-6 col-lg-4 col-xl-2.4">
-          <div className="saas-card h-100 border-start border-primary border-4">
+          <div className="saas-card h-100">
             <div className="d-flex align-items-center justify-content-between mb-2">
               <span className="text-muted small fw-semibold">Assigned Students</span>
               <div className="icon-box primary">
@@ -96,7 +96,7 @@ const StaffDashboard = () => {
 
         {/* Card 2: GitHub Connected */}
         <div className="col-12 col-sm-6 col-lg-4 col-xl-2.4">
-          <div className="saas-card h-100 border-start border-success border-4">
+          <div className="saas-card h-100">
             <div className="d-flex align-items-center justify-content-between mb-2">
               <span className="text-muted small fw-semibold">Connected</span>
               <div className="icon-box success">
@@ -110,7 +110,7 @@ const StaffDashboard = () => {
 
         {/* Card 3: GitHub Not Connected */}
         <div className="col-12 col-sm-6 col-lg-4 col-xl-2.4">
-          <div className="saas-card h-100 border-start border-warning border-4">
+          <div className="saas-card h-100">
             <div className="d-flex align-items-center justify-content-between mb-2">
               <span className="text-muted small fw-semibold">Not Connected</span>
               <div className="icon-box warning">
@@ -124,7 +124,7 @@ const StaffDashboard = () => {
 
         {/* Card 4: Active Students */}
         <div className="col-12 col-sm-6 col-lg-4 col-xl-2.4">
-          <div className="saas-card h-100 border-start border-info border-4">
+          <div className="saas-card h-100">
             <div className="d-flex align-items-center justify-content-between mb-2">
               <span className="text-muted small fw-semibold">Active Students</span>
               <div className="icon-box secondary">
@@ -138,7 +138,7 @@ const StaffDashboard = () => {
 
         {/* Card 5: Inactive Students */}
         <div className="col-12 col-sm-6 col-lg-4 col-xl-2.4">
-          <div className="saas-card h-100 border-start border-danger border-4">
+          <div className="saas-card h-100">
             <div className="d-flex align-items-center justify-content-between mb-2">
               <span className="text-muted small fw-semibold">Inactive Students</span>
               <div className="icon-box danger">
