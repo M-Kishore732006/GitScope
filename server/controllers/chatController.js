@@ -93,20 +93,42 @@ const getEligibleContacts = async (req, res) => {
 
 /**
  * 2. GET /api/chat/conversations
- * Returns active conversations for the current user
+ * Returns active conversations for the current user including global chat
  */
 const getConversations = async (req, res) => {
   try {
     const userId = req.user._id.toString();
 
+    // Ensure the singleton global 'Chat to All' conversation exists
+    let globalConv = await Conversation.findOne({ type: 'global' });
+    if (!globalConv) {
+      globalConv = await Conversation.create({
+        type: 'global',
+        name: 'Chat to All',
+        description: 'Public channel visible to all Students, Staff, and Admins',
+        participants: [req.user._id],
+        lastMessageAt: new Date(),
+        unreadCounts: {}
+      });
+    } else {
+      // Ensure current user is in participants list for unread count indexing
+      if (!globalConv.participants.some(p => p.toString() === userId)) {
+        globalConv.participants.push(req.user._id);
+        await globalConv.save();
+      }
+    }
+
     const conversations = await Conversation.find({
-      participants: req.user._id
+      $or: [
+        { participants: req.user._id },
+        { type: 'global' }
+      ]
     })
       .populate('participants', 'fullName username email role rollNumber department year section githubUsername githubLinked isOnline lastSeen')
       .populate('groupAdmin', 'fullName username email role')
       .populate({
         path: 'lastMessage',
-        populate: { path: 'sender', select: 'fullName username' }
+        populate: { path: 'sender', select: 'fullName username role' }
       })
       .sort({ lastMessageAt: -1 });
 
@@ -122,6 +144,46 @@ const getConversations = async (req, res) => {
   } catch (error) {
     console.error('Error fetching conversations:', error);
     res.status(500).json({ message: 'Failed to load conversations' });
+  }
+};
+
+/**
+ * 2b. GET /api/chat/conversations/global
+ * Fetch or initialize the Chat to All conversation
+ */
+const getGlobalConversation = async (req, res) => {
+  try {
+    const userId = req.user._id.toString();
+    let globalConv = await Conversation.findOne({ type: 'global' })
+      .populate({
+        path: 'lastMessage',
+        populate: { path: 'sender', select: 'fullName username role' }
+      });
+
+    if (!globalConv) {
+      globalConv = await Conversation.create({
+        type: 'global',
+        name: 'Chat to All',
+        description: 'Public channel visible to all Students, Staff, and Admins',
+        participants: [req.user._id],
+        lastMessageAt: new Date(),
+        unreadCounts: {}
+      });
+    } else {
+      if (!globalConv.participants.some(p => p.toString() === userId)) {
+        globalConv.participants.push(req.user._id);
+        await globalConv.save();
+      }
+    }
+
+    const convObj = globalConv.toObject();
+    const unreadMap = globalConv.unreadCounts || {};
+    convObj.unreadCount = (unreadMap instanceof Map ? unreadMap.get(userId) : unreadMap[userId]) || 0;
+
+    res.json(convObj);
+  } catch (error) {
+    console.error('Error fetching global conversation:', error);
+    res.status(500).json({ message: 'Failed to retrieve global conversation' });
   }
 };
 
@@ -253,9 +315,10 @@ const getConversationMessages = async (req, res) => {
     }
 
     // Check membership
+    const isGlobal = conversation.type === 'global';
     const isMember = conversation.participants.some(p => p.toString() === req.user._id.toString());
     const isAdmin = req.user.role === 'admin';
-    if (!isMember && !isAdmin) {
+    if (!isMember && !isAdmin && !isGlobal) {
       return res.status(403).json({ message: 'Access denied: You are not a member of this conversation' });
     }
 
@@ -303,9 +366,10 @@ const sendMessage = async (req, res) => {
     }
 
     // Check membership
+    const isGlobal = conversation.type === 'global';
     const isMember = conversation.participants.some(p => p.toString() === req.user._id.toString());
     const isAdmin = req.user.role === 'admin';
-    if (!isMember && !isAdmin) {
+    if (!isMember && !isAdmin && !isGlobal) {
       return res.status(403).json({ message: 'Access denied: You cannot send messages to this conversation' });
     }
 
@@ -354,6 +418,10 @@ const sendMessage = async (req, res) => {
       conversation.unreadCounts = new Map();
     }
 
+    if (isGlobal && !conversation.participants.some(p => p.toString() === req.user._id.toString())) {
+      conversation.participants.push(req.user._id);
+    }
+
     conversation.participants.forEach(p => {
       const pId = p.toString();
       if (pId !== req.user._id.toString()) {
@@ -380,26 +448,43 @@ const sendMessage = async (req, res) => {
     // Real-time broadcast
     try {
       const io = getIO();
-      // Emit to conversation room
-      io.to(`conversation:${conversation._id}`).emit('message:new', {
-        message: populatedMessage,
-        conversationId: conversation._id
-      });
+      if (conversation.type === 'global') {
+        // Broadcast to all connected clients
+        io.emit('message:new', {
+          message: populatedMessage,
+          conversationId: conversation._id
+        });
 
-      // Also emit notification to each participant's individual room
-      conversation.participants.forEach(p => {
-        const pId = p.toString();
-        if (pId !== req.user._id.toString()) {
-          io.to(`user:${pId}`).emit('notification:new_message', {
-            message: populatedMessage,
-            conversation: {
-              _id: conversation._id,
-              type: conversation.type,
-              name: conversation.type === 'group' ? conversation.name : req.user.fullName || req.user.username
-            }
-          });
-        }
-      });
+        io.emit('notification:new_message', {
+          message: populatedMessage,
+          conversation: {
+            _id: conversation._id,
+            type: 'global',
+            name: 'Chat to All'
+          }
+        });
+      } else {
+        // Emit to conversation room
+        io.to(`conversation:${conversation._id}`).emit('message:new', {
+          message: populatedMessage,
+          conversationId: conversation._id
+        });
+
+        // Also emit notification to each participant's individual room
+        conversation.participants.forEach(p => {
+          const pId = p.toString();
+          if (pId !== req.user._id.toString()) {
+            io.to(`user:${pId}`).emit('notification:new_message', {
+              message: populatedMessage,
+              conversation: {
+                _id: conversation._id,
+                type: conversation.type,
+                name: conversation.type === 'group' ? conversation.name : req.user.fullName || req.user.username
+              }
+            });
+          }
+        });
+      }
     } catch (e) {
       console.warn('Real-time notification dispatch failed:', e.message);
     }
@@ -460,7 +545,8 @@ const downloadAttachment = async (req, res) => {
       if (conv) {
         const isMember = conv.participants.some(p => p.toString() === req.user._id.toString());
         const isAdmin = req.user.role === 'admin';
-        if (!isMember && !isAdmin) {
+        const isGlobal = conv.type === 'global';
+        if (!isMember && !isAdmin && !isGlobal) {
           return res.status(403).json({ message: 'Access denied to this file attachment' });
         }
       }
@@ -582,7 +668,12 @@ const leaveGroup = async (req, res) => {
 const getTotalUnreadCount = async (req, res) => {
   try {
     const userId = req.user._id.toString();
-    const conversations = await Conversation.find({ participants: req.user._id });
+    const conversations = await Conversation.find({
+      $or: [
+        { participants: req.user._id },
+        { type: 'global' }
+      ]
+    });
 
     let total = 0;
     conversations.forEach(c => {
@@ -641,20 +732,28 @@ const deleteMessage = async (req, res) => {
     // Emit real-time deletion
     try {
       const io = getIO();
-      io.to(`conversation:${message.conversation}`).emit('message:deleted', {
-        messageId: message._id,
-        conversationId: message.conversation,
-        isDeleted: true
-      });
-
-      if (conversation && conversation.participants) {
-        conversation.participants.forEach(p => {
-          io.to(`user:${p.toString()}`).emit('message:deleted', {
-            messageId: message._id,
-            conversationId: message.conversation,
-            isDeleted: true
-          });
+      if (conversation && conversation.type === 'global') {
+        io.emit('message:deleted', {
+          messageId: message._id,
+          conversationId: message.conversation,
+          isDeleted: true
         });
+      } else {
+        io.to(`conversation:${message.conversation}`).emit('message:deleted', {
+          messageId: message._id,
+          conversationId: message.conversation,
+          isDeleted: true
+        });
+
+        if (conversation && conversation.participants) {
+          conversation.participants.forEach(p => {
+            io.to(`user:${p.toString()}`).emit('message:deleted', {
+              messageId: message._id,
+              conversationId: message.conversation,
+              isDeleted: true
+            });
+          });
+        }
       }
     } catch (e) {
       console.warn('Socket alert error:', e.message);
@@ -670,6 +769,7 @@ const deleteMessage = async (req, res) => {
 module.exports = {
   getEligibleContacts,
   getConversations,
+  getGlobalConversation,
   getOrCreatePrivateConversation,
   createGroupConversation,
   getConversationMessages,

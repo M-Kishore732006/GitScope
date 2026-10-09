@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   FaPaperPlane, FaPaperclip, FaTimes, FaSearch, FaArrowLeft, 
   FaUsers, FaCheck, FaFileAlt, FaFilePdf, FaFileWord, FaFileExcel, 
-  FaFileArchive, FaDownload, FaSpinner, FaTrash 
+  FaFileArchive, FaDownload, FaSpinner, FaTrash, FaGlobe 
 } from 'react-icons/fa';
 import { BsCheckAll } from 'react-icons/bs';
 import axios from 'axios';
@@ -71,7 +71,8 @@ const ChatThread = ({
   const isTypingRef = useRef(false);
 
   const isGroup = conversation?.type === 'group';
-  const otherParticipant = !isGroup 
+  const isGlobal = conversation?.type === 'global';
+  const otherParticipant = (!isGroup && !isGlobal)
     ? conversation?.participants?.find(p => String(p._id) !== String(currentUserId)) || {} 
     : null;
 
@@ -391,23 +392,36 @@ const ChatThread = ({
               style={{
                 width: 40,
                 height: 40,
-                backgroundColor: isGroup ? '#4f46e5' : '#6d5ef5',
+                background: isGlobal 
+                  ? 'linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%)' 
+                  : isGroup 
+                    ? '#4f46e5' 
+                    : '#6d5ef5',
                 fontSize: '0.9rem'
               }}
             >
-              {isGroup ? <FaUsers /> : (otherParticipant.fullName || otherParticipant.username || 'U').charAt(0).toUpperCase()}
+              {isGlobal ? <FaGlobe /> : isGroup ? <FaUsers /> : (otherParticipant?.fullName || otherParticipant?.username || 'U').charAt(0).toUpperCase()}
             </div>
-            {!isGroup && (
+            {!isGroup && !isGlobal && (
               <div className={`presence-dot ${isOnline ? 'online' : 'offline'}`} />
             )}
           </div>
 
           <div>
-            <div className="fw-bold text-main small lh-1">
-              {isGroup ? conversation.name : (otherParticipant.fullName || otherParticipant.username)}
+            <div className="fw-bold text-main small lh-1 d-flex align-items-center gap-2">
+              <span>{isGlobal ? (conversation.name || 'Chat to All') : isGroup ? conversation.name : (otherParticipant?.fullName || otherParticipant?.username)}</span>
+              {isGlobal && (
+                <span className="badge rounded-pill bg-info-subtle text-info border border-info-subtle" style={{ fontSize: '0.65rem' }}>
+                  Public Channel
+                </span>
+              )}
             </div>
             <div className="text-muted small" style={{ fontSize: '0.72rem' }}>
-              {isGroup ? (
+              {isGlobal ? (
+                <span className="text-primary fw-medium">
+                  Visible to all Students, Staff & Admins
+                </span>
+              ) : isGroup ? (
                 <span 
                   className="cursor-pointer text-primary" 
                   onClick={onOpenGroupMembers}
@@ -496,10 +510,26 @@ const ChatThread = ({
 
                   <div className={`message-row ${isSentByMe ? 'sent' : 'received'}`}>
                     <div className="message-bubble">
-                      {/* Sender name in group chats if received */}
-                      {isGroup && !isSentByMe && (
-                        <div className="fw-bold text-primary small mb-1" style={{ fontSize: '0.75rem' }}>
-                          {msg.sender?.fullName || msg.sender?.username}
+                      {/* Sender name and role in group or global chats if received */}
+                      {(isGroup || isGlobal) && !isSentByMe && (
+                        <div className="d-flex align-items-center gap-1 mb-1">
+                          <span className="fw-bold text-primary small" style={{ fontSize: '0.75rem' }}>
+                            {msg.sender?.fullName || msg.sender?.username}
+                          </span>
+                          {msg.sender?.role && (
+                            <span 
+                              className={`badge rounded-pill ${
+                                msg.sender.role === 'admin' 
+                                  ? 'bg-danger-subtle text-danger border border-danger-subtle' 
+                                  : msg.sender.role === 'teacher' || msg.sender.role === 'staff'
+                                    ? 'bg-primary-subtle text-primary border border-primary-subtle'
+                                    : 'bg-success-subtle text-success border border-success-subtle'
+                              }`}
+                              style={{ fontSize: '0.62rem', padding: '1px 5px' }}
+                            >
+                              {msg.sender.role === 'teacher' || msg.sender.role === 'staff' ? 'Staff' : msg.sender.role === 'admin' ? 'Admin' : 'Student'}
+                            </span>
+                          )}
                         </div>
                       )}
 
@@ -582,12 +612,14 @@ const ChatThread = ({
           })()
         ) : (
           <div className="text-center py-5 px-3 text-muted my-auto">
-            <div className="fs-1 opacity-30 mb-2">👋</div>
-            <h6 className="fw-bold mb-1">Start the Conversation</h6>
-            <p className="small mb-0 text-muted" style={{ maxWidth: '280px', margin: '0 auto' }}>
-              {isGroup 
-                ? `Send a message to everyone in ${conversation.name}.`
-                : `Send a message to ${otherParticipant.fullName || otherParticipant.username}.`}
+            <div className="fs-1 opacity-30 mb-2">{isGlobal ? '📢' : '👋'}</div>
+            <h6 className="fw-bold mb-1">{isGlobal ? 'Welcome to Chat to All' : 'Start the Conversation'}</h6>
+            <p className="small mb-0 text-muted" style={{ maxWidth: '340px', margin: '0 auto' }}>
+              {isGlobal
+                ? 'This is a public channel visible to all Students, Staff, and Admins. Anyone can participate and collaborate.'
+                : isGroup 
+                  ? `Send a message to everyone in ${conversation.name}.`
+                  : `Send a message to ${otherParticipant?.fullName || otherParticipant?.username}.`}
             </p>
           </div>
         )}

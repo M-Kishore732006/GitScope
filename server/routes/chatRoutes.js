@@ -5,6 +5,7 @@ const upload = require('../middleware/chatUploadMiddleware');
 const {
   getEligibleContacts,
   getConversations,
+  getGlobalConversation,
   getOrCreatePrivateConversation,
   createGroupConversation,
   getConversationMessages,
@@ -23,6 +24,7 @@ router.use(protect);
 // Contacts & Conversations
 router.get('/contacts', getEligibleContacts);
 router.get('/conversations', getConversations);
+router.get('/conversations/global', getGlobalConversation);
 router.post('/conversations/private', getOrCreatePrivateConversation);
 router.post('/conversations/group', createGroupConversation);
 

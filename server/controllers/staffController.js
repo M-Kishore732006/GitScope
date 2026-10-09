@@ -801,6 +801,203 @@ const syncStudentGithub = async (req, res) => {
   }
 };
 
+// ==========================================
+// 15. AT-RISK ANALYTICS & INTERVENTION
+// ==========================================
+const getAtRiskAnalytics = async (req, res) => {
+  try {
+    const assignedIds = await getAssignedStudentIds(req.user._id);
+    const students = await User.find({ _id: { $in: assignedIds } })
+      .select('fullName username email rollNumber department year section githubUsername githubLinked status');
+
+    const statsList = await GithubStats.find({ user: { $in: assignedIds } });
+    const statsMap = {};
+    statsList.forEach(s => { statsMap[s.user.toString()] = s; });
+
+    // Fetch recent warnings sent to these students
+    const warnings = await Notification.find({
+      recipient: { $in: assignedIds },
+      category: 'ACADEMIC_ALERT'
+    }).sort({ createdAt: -1 });
+
+    const warningsMap = {};
+    warnings.forEach(w => {
+      const recId = w.recipient?.toString();
+      if (recId && !warningsMap[recId]) {
+        warningsMap[recId] = w;
+      }
+    });
+
+    const now = new Date();
+
+    const analyzedStudents = students.map(st => {
+      const stat = statsMap[st._id.toString()];
+      const lastActivity = stat?.lastUpdated ? new Date(stat.lastUpdated) : null;
+      const totalCommits = stat?.totalCommits || 0;
+      const totalPRs = stat?.mergedPullRequests || stat?.totalPullRequests || 0;
+      const totalIssues = stat?.totalIssues || 0;
+
+      let daysInactive = 0;
+      const isConnected = Boolean(st.githubLinked && st.githubUsername && st.githubUsername !== 'Not Connected');
+
+      if (!isConnected) {
+        daysInactive = 999;
+      } else if (lastActivity) {
+        daysInactive = Math.max(0, Math.floor((now - lastActivity) / (1000 * 60 * 60 * 24)));
+      } else {
+        daysInactive = totalCommits > 0 ? 8 : 28;
+      }
+
+      const riskFactors = [];
+      let riskLevel = 'HEALTHY';
+
+      if (!isConnected) {
+        riskLevel = 'HIGH';
+        riskFactors.push('GitHub account not linked');
+      } else {
+        if (daysInactive >= 14) {
+          riskLevel = 'HIGH';
+          riskFactors.push(`Inactive for ${daysInactive} days (14+ day threshold)`);
+        } else if (daysInactive >= 7) {
+          riskLevel = 'MODERATE';
+          riskFactors.push(`No commits in ${daysInactive} days`);
+        }
+
+        if (totalCommits === 0) {
+          riskLevel = 'HIGH';
+          riskFactors.push('Zero recorded commits');
+        } else if (totalCommits < 5 && daysInactive >= 5) {
+          if (riskLevel !== 'HIGH') riskLevel = 'MODERATE';
+          riskFactors.push(`Low commit volume (${totalCommits} total commits)`);
+        }
+
+        if (totalPRs === 0 && daysInactive >= 7) {
+          riskFactors.push('No pull requests submitted');
+        }
+      }
+
+      if (riskFactors.length === 0) {
+        riskFactors.push('Normal activity within lab guidelines');
+      }
+
+      const lastWarning = warningsMap[st._id.toString()];
+
+      return {
+        _id: st._id,
+        fullName: st.fullName || st.username,
+        username: st.username,
+        email: st.email,
+        rollNumber: st.rollNumber || 'N/A',
+        department: st.department || 'CSE',
+        year: st.year || '3rd',
+        section: st.section || 'A',
+        githubUsername: st.githubUsername || '',
+        githubLinked: isConnected,
+        totalCommits,
+        totalPRs,
+        totalIssues,
+        lastActivityDate: lastActivity,
+        daysInactive: daysInactive === 999 ? 'N/A' : daysInactive,
+        daysInactiveNum: daysInactive,
+        riskLevel,
+        riskFactors,
+        lastWarningSentAt: lastWarning ? lastWarning.createdAt : null,
+        lastWarningTitle: lastWarning ? lastWarning.title : null
+      };
+    });
+
+    const highRiskCount = analyzedStudents.filter(s => s.riskLevel === 'HIGH').length;
+    const modRiskCount = analyzedStudents.filter(s => s.riskLevel === 'MODERATE').length;
+    const healthyCount = analyzedStudents.filter(s => s.riskLevel === 'HEALTHY').length;
+    const notConnectedCount = analyzedStudents.filter(s => !s.githubLinked).length;
+
+    res.json({
+      summary: {
+        totalStudents: analyzedStudents.length,
+        highRiskCount,
+        modRiskCount,
+        healthyCount,
+        notConnectedCount
+      },
+      students: analyzedStudents
+    });
+  } catch (error) {
+    console.error('Error calculating at-risk analytics:', error);
+    res.status(500).json({ message: 'Failed to calculate at-risk analytics' });
+  }
+};
+
+// ==========================================
+// 16. SEND EARLY WARNING TO STUDENT
+// ==========================================
+const sendEarlyWarningNotice = async (req, res) => {
+  try {
+    const studentId = req.body.studentId || req.body.targetUserId;
+    const { title, message } = req.body;
+
+    if (!studentId) {
+      return res.status(400).json({ message: 'Student ID is required' });
+    }
+
+    const assignedIds = await getAssignedStudentIds(req.user._id);
+    if (!assignedIds.includes(studentId.toString())) {
+      return res.status(403).json({ message: 'Access Denied: Student is not assigned to you.' });
+    }
+
+    const student = await User.findById(studentId);
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+
+    const noticeTitle = title || '⚠️ Academic Early Warning Notice';
+    const noticeMessage = message || `Notice from faculty mentor (${req.user.fullName || req.user.username}): Your GitHub lab activity has been inactive for several days. Please update your repository commits before the upcoming evaluation.`;
+
+    const notification = await Notification.create({
+      recipient: student._id,
+      sender: req.user._id,
+      title: noticeTitle,
+      message: noticeMessage,
+      type: 'warning',
+      category: 'ACADEMIC_ALERT',
+      isRead: false
+    });
+
+    // Broadcast via socket to student room
+    try {
+      const { getIO } = require('../socket');
+      const io = getIO();
+      io.to(`user:${student._id}`).emit('notification:new_message', {
+        message: {
+          _id: notification._id,
+          content: noticeMessage,
+          messageType: 'text',
+          sender: {
+            _id: req.user._id,
+            fullName: req.user.fullName || req.user.username,
+            role: req.user.role
+          },
+          createdAt: notification.createdAt
+        },
+        conversation: {
+          _id: 'notice',
+          name: noticeTitle
+        }
+      });
+    } catch (e) {
+      console.warn('Socket alert warning dispatch error:', e.message);
+    }
+
+    res.json({
+      success: true,
+      message: 'Early warning notice dispatched successfully',
+      notification
+    });
+  } catch (error) {
+    console.error('Error sending early warning notice:', error);
+    res.status(500).json({ message: 'Failed to dispatch early warning notice' });
+  }
+};
+
 module.exports = {
   getStaffDashboard,
   getAssignedStudentsList,
@@ -817,5 +1014,7 @@ module.exports = {
   getStaffProfile,
   updateStaffProfile,
   changeStaffPassword,
-  syncStudentGithub
+  syncStudentGithub,
+  getAtRiskAnalytics,
+  sendEarlyWarningNotice
 };

@@ -37,8 +37,9 @@ const StaffSidebar = ({ mobileOpen, closeSidebar, collapsed, toggleSidebar }) =>
           </div>
           <div>
             <span className="fw-extrabold text-main" style={{ letterSpacing: '-0.5px' }}>GitScope</span>
-            <span className="badge bg-primary ms-2 px-2 py-1 small" style={{ fontSize: '0.6rem' }}>STAFF</span>
+            
           </div>
+          <span className="badge bg-primary ms-2 px-2 py-1 small" style={{ fontSize: '0.6rem' }}>STAFF</span>
         </div>
         <div className="d-flex align-items-center gap-1">
           <button 

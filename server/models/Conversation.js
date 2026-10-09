@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const conversationSchema = new mongoose.Schema({
   type: {
     type: String,
-    enum: ['private', 'group'],
+    enum: ['private', 'group', 'global'],
     default: 'private',
     required: true
   },

@@ -81,13 +81,14 @@ const initSocket = (httpServer) => {
     socket.on('conversation:join', async ({ conversationId }) => {
       try {
         if (!conversationId) return;
-        const conv = await Conversation.findById(conversationId).select('participants');
+        const conv = await Conversation.findById(conversationId).select('participants type');
         if (!conv) return;
 
         const isMember = conv.participants.some(p => p.toString() === userId);
         const isAdmin = socket.user.role === 'admin';
+        const isGlobal = conv.type === 'global';
 
-        if (isMember || isAdmin) {
+        if (isMember || isAdmin || isGlobal) {
           socket.join(`conversation:${conversationId}`);
         }
       } catch (err) {
@@ -106,10 +107,10 @@ const initSocket = (httpServer) => {
     socket.on('typing:start', async ({ conversationId }) => {
       try {
         if (!conversationId) return;
-        const conv = await Conversation.findById(conversationId).select('participants');
+        const conv = await Conversation.findById(conversationId).select('participants type');
         if (!conv) return;
 
-        const isMember = conv.participants.some(p => p.toString() === userId) || socket.user.role === 'admin';
+        const isMember = conv.participants.some(p => p.toString() === userId) || socket.user.role === 'admin' || conv.type === 'global';
         if (isMember) {
           socket.to(`conversation:${conversationId}`).emit('typing:start', {
             conversationId,

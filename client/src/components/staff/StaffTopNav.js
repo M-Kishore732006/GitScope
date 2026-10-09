@@ -41,7 +41,7 @@ const StaffTopNav = ({ user, handleLogout, toggleSidebar, sidebarCollapsed }) =>
         >
           <FaBars className="fs-5" />
         </button>
-        <span className="fw-extrabold text-main" style={{ letterSpacing: '-0.5px' }}>GitScope</span>
+        
       </div>
 
       {/* Global Search Bar for Assigned Students */}

@@ -35,7 +35,6 @@ const TopNav = ({ user, stats, handleLogout, toggleSidebar, sidebarCollapsed }) 
          >
            <FaBars className="fs-5" />
          </button>
-         <span className="fw-extrabold text-main" style={{ letterSpacing: '-0.5px' }}>GitScope</span>
        </div>
 
        <div className="search-bar shadow-sm flex-grow-1 search-wrapper" style={{ maxWidth: '380px', minWidth: '180px' }}>

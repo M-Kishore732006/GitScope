@@ -35,6 +35,7 @@ app.use('/api/staff', require('./routes/staffRoutes'));
 app.use('/api/config', require('./routes/configRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/chat', require('./routes/chatRoutes'));
+app.use('/api/notifications', require('./routes/staffRoutes'));
 
 // Basic generic error handler - do not expose internal server errors
 app.use((err, req, res, next) => {

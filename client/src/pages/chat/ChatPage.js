@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
-import { FaComments, FaUserGraduate, FaPlus } from 'react-icons/fa';
+import { FaComments, FaUserGraduate, FaPlus, FaGlobe } from 'react-icons/fa';
 import { useSocket } from '../../context/SocketContext';
 import ConversationList from '../../components/chat/ConversationList';
 import ContactSelection from '../../components/chat/ContactSelection';
@@ -16,7 +16,6 @@ const ChatPage = () => {
 
   const { 
     socket, 
-    connected, 
     onlineUsers, 
     setActiveConversationId,
     joinConversation,
@@ -314,6 +313,34 @@ const ChatPage = () => {
     fetchTotalUnread();
   };
 
+  // Open the public "Chat to All" conversation
+  const handleOpenGlobalChat = useCallback(async () => {
+    try {
+      const globalInList = conversations.find(c => c.type === 'global');
+      if (globalInList) {
+        handleSelectConversation(globalInList);
+        setActiveTab('CONVERSATIONS');
+        return;
+      }
+
+      if (userInfo?.token) {
+        const res = await axios.get('/api/chat/conversations/global', {
+          headers: { Authorization: `Bearer ${userInfo.token}` }
+        });
+        const globalConv = res.data;
+        setConversations(prev => {
+          const exists = prev.find(c => c.type === 'global');
+          if (exists) return prev;
+          return [globalConv, ...prev];
+        });
+        handleSelectConversation(globalConv);
+        setActiveTab('CONVERSATIONS');
+      }
+    } catch (err) {
+      console.error('Failed to open global chat:', err);
+    }
+  }, [conversations, handleSelectConversation, userInfo?.token]);
+
   return (
     <div className="chat-container">
       {/* LEFT PANEL */}
@@ -324,24 +351,29 @@ const ChatPage = () => {
             <h5 className="fw-bold mb-0 text-main d-flex align-items-center gap-2">
               <FaComments className="text-primary" /> Messages
             </h5>
-            {/* <span 
-              className={`badge rounded-pill small ${connected ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'}`}
-              style={{ fontSize: '0.65rem' }}
-            >
-              {connected ? 'Live' : 'Connecting...'}
-            </span> */}
           </div>
 
-          {(userRole === 'teacher' || userRole === 'staff' || userRole === 'admin') && (
+          <div className="d-flex align-items-center gap-1">
             <button 
-              className="btn btn-sm btn-outline-primary rounded-pill d-flex align-items-center gap-1 py-1 px-2 small"
-              onClick={() => setShowCreateGroup(true)}
-              title="Create new group chat"
+              className="btn btn-sm btn-outline-info rounded-pill d-flex align-items-center gap-1 py-1 px-2 small"
+              onClick={handleOpenGlobalChat}
+              title="Open Chat to All (Public Channel)"
             >
-              <FaPlus style={{ fontSize: '0.7rem' }} />
-              <span style={{ fontSize: '0.75rem' }}>New Group</span>
+              <FaGlobe style={{ fontSize: '0.72rem' }} />
+              <span style={{ fontSize: '0.75rem' }}>Chat to All</span>
             </button>
-          )}
+
+            {(userRole === 'teacher' || userRole === 'staff' || userRole === 'admin') && (
+              <button 
+                className="btn btn-sm btn-outline-primary rounded-pill d-flex align-items-center gap-1 py-1 px-2 small"
+                onClick={() => setShowCreateGroup(true)}
+                title="Create new group chat"
+              >
+                <FaPlus style={{ fontSize: '0.7rem' }} />
+                <span style={{ fontSize: '0.75rem' }}>Group</span>
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Tab Switcher: Chats vs Contacts */}
@@ -405,16 +437,24 @@ const ChatPage = () => {
               <FaComments className="text-primary" style={{ fontSize: '2.5rem' }} />
             </div>
             <h5 className="fw-bold text-main mb-1">GitScope Real-Time Collaboration</h5>
-            <p className="text-muted small text-center mb-4" style={{ maxWidth: '360px' }}>
-              Select an existing conversation from the left or choose an assigned student from your contacts list to begin messaging.
+            <p className="text-muted small text-center mb-4" style={{ maxWidth: '380px' }}>
+              Communicate with assigned contacts, organize student group discussions, or join the public Chat to All channel visible to all users.
             </p>
 
-            <button 
-              className="btn btn-primary rounded-pill px-4 py-2 fw-semibold shadow-sm d-flex align-items-center gap-2"
-              onClick={() => setActiveTab('CONTACTS')}
-            >
-              <FaUserGraduate /> Browse {userRole === 'student' ? 'Assigned Staff' : 'My Students'}
-            </button>
+            <div className="d-flex flex-wrap gap-2 justify-content-center">
+              <button 
+                className="btn btn-primary rounded-pill px-4 py-2 fw-semibold shadow-sm d-flex align-items-center gap-2"
+                onClick={handleOpenGlobalChat}
+              >
+                <FaGlobe /> Open Chat to All
+              </button>
+              <button 
+                className="btn btn-outline-primary rounded-pill px-4 py-2 fw-semibold shadow-sm d-flex align-items-center gap-2"
+                onClick={() => setActiveTab('CONTACTS')}
+              >
+                <FaUserGraduate /> Browse {userRole === 'student' ? 'Assigned Staff' : 'My Students'}
+              </button>
+            </div>
           </div>
         )}
       </div>
