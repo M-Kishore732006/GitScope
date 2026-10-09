@@ -324,12 +324,12 @@ const ChatPage = () => {
             <h5 className="fw-bold mb-0 text-main d-flex align-items-center gap-2">
               <FaComments className="text-primary" /> Messages
             </h5>
-            <span 
+            {/* <span 
               className={`badge rounded-pill small ${connected ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'}`}
               style={{ fontSize: '0.65rem' }}
             >
               {connected ? 'Live' : 'Connecting...'}
-            </span>
+            </span> */}
           </div>
 
           {(userRole === 'teacher' || userRole === 'staff' || userRole === 'admin') && (

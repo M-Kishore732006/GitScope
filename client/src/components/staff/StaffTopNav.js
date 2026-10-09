@@ -6,7 +6,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useSocket } from '../../context/SocketContext';
 import NotificationDropdown from '../NotificationDropdown';
 
-const StaffTopNav = ({ user, handleLogout, toggleSidebar }) => {
+const StaffTopNav = ({ user, handleLogout, toggleSidebar, sidebarCollapsed }) => {
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -31,16 +31,17 @@ const StaffTopNav = ({ user, handleLogout, toggleSidebar }) => {
 
   return (
     <header className="topnav px-3 px-md-4 py-2 sticky-top d-flex align-items-center justify-content-between flex-wrap gap-2">
-      {/* Mobile Hamburger & Logo */}
+      {/* Sidebar Toggle Button (Desktop Full Screen & Mobile Slide In/Out) */}
       <div className="d-flex align-items-center me-2">
         <button 
-          className="btn btn-light border p-2 rounded-3 me-2 d-lg-none shadow-sm text-main d-flex align-items-center theme-btn-icon"
+          className="btn btn-light border p-2 rounded-3 me-2 shadow-sm text-main d-flex align-items-center theme-btn-icon"
           onClick={toggleSidebar}
+          title={sidebarCollapsed ? "Slide In Sidebar" : "Slide Out to Full Screen"}
           aria-label="Toggle navigation menu"
         >
           <FaBars className="fs-5" />
         </button>
-        <span className="fw-extrabold text-main d-lg-none" style={{ letterSpacing: '-0.5px' }}>GitScope</span>
+        <span className="fw-extrabold text-main" style={{ letterSpacing: '-0.5px' }}>GitScope</span>
       </div>
 
       {/* Global Search Bar for Assigned Students */}

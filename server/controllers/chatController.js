@@ -646,6 +646,16 @@ const deleteMessage = async (req, res) => {
         conversationId: message.conversation,
         isDeleted: true
       });
+
+      if (conversation && conversation.participants) {
+        conversation.participants.forEach(p => {
+          io.to(`user:${p.toString()}`).emit('message:deleted', {
+            messageId: message._id,
+            conversationId: message.conversation,
+            isDeleted: true
+          });
+        });
+      }
     } catch (e) {
       console.warn('Socket alert error:', e.message);
     }

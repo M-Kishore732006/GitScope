@@ -11,8 +11,22 @@ const DashboardLayout = () => {
   const [loading, setLoading] = useState(true);
   const [clientId, setClientId] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    return localStorage.getItem('sidebar_collapsed') === 'true';
+  });
 
-  const toggleSidebar = () => setSidebarOpen(prev => !prev);
+  const toggleSidebar = () => {
+    if (window.innerWidth < 992) {
+      setSidebarOpen(prev => !prev);
+    } else {
+      setSidebarCollapsed(prev => {
+        const next = !prev;
+        localStorage.setItem('sidebar_collapsed', String(next));
+        return next;
+      });
+    }
+  };
+
   const closeSidebar = () => setSidebarOpen(false);
 
   const userInfoStr = localStorage.getItem('userInfo');
@@ -57,11 +71,22 @@ const DashboardLayout = () => {
 
   return (
     <div className="dashboard-wrapper">
-       <Sidebar mobileOpen={sidebarOpen} closeSidebar={closeSidebar} />
+       <Sidebar 
+         mobileOpen={sidebarOpen} 
+         collapsed={sidebarCollapsed} 
+         closeSidebar={closeSidebar} 
+         toggleSidebar={toggleSidebar} 
+       />
        {sidebarOpen && <div className="sidebar-backdrop d-lg-none" onClick={closeSidebar}></div>}
        
-       <div className="main-content">
-          <TopNav user={user} stats={stats} handleLogout={handleLogout} toggleSidebar={toggleSidebar} />
+       <div className={`main-content ${sidebarCollapsed ? 'expanded-full' : ''}`}>
+          <TopNav 
+            user={user} 
+            stats={stats} 
+            handleLogout={handleLogout} 
+            toggleSidebar={toggleSidebar} 
+            sidebarCollapsed={sidebarCollapsed}
+          />
           
           <Outlet context={{ user, stats, clientId, fetchDashboardData }} />
        </div>

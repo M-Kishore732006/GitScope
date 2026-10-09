@@ -6,6 +6,7 @@ import {
 } from 'react-icons/fa';
 import { BsCheckAll } from 'react-icons/bs';
 import axios from 'axios';
+import { useSocket } from '../../context/SocketContext';
 import MediaLightboxModal from './MediaLightboxModal';
 
 const formatMessageTime = (dateString) => {
@@ -50,6 +51,8 @@ const ChatThread = ({
   socket,
   typingUser
 }) => {
+  const { fetchTotalUnread, clearUnreadForConversation } = useSocket();
+
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [inputText, setInputText] = useState('');
@@ -59,6 +62,8 @@ const ChatThread = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const [lightboxImage, setLightboxImage] = useState(null);
+  const [deleteTargetMessage, setDeleteTargetMessage] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -67,7 +72,7 @@ const ChatThread = ({
 
   const isGroup = conversation?.type === 'group';
   const otherParticipant = !isGroup 
-    ? conversation?.participants?.find(p => p._id !== currentUserId) || {} 
+    ? conversation?.participants?.find(p => String(p._id) !== String(currentUserId)) || {} 
     : null;
 
   const presence = otherParticipant ? onlineUsers[otherParticipant._id] : null;
@@ -94,13 +99,16 @@ const ChatThread = ({
       }
       axios.post(`/api/chat/conversations/${conversation._id}/read`, {}, {
         headers: { Authorization: `Bearer ${userInfo.token}` }
+      }).then(() => {
+        if (fetchTotalUnread) fetchTotalUnread();
+        if (clearUnreadForConversation) clearUnreadForConversation(conversation._id);
       }).catch(() => {});
     } catch (err) {
       console.error('Error fetching messages:', err);
     } finally {
       setLoading(false);
     }
-  }, [conversation?._id, searchQuery, socket]);
+  }, [conversation?._id, searchQuery, socket, fetchTotalUnread, clearUnreadForConversation]);
 
   useEffect(() => {
     fetchMessages();
@@ -118,15 +126,17 @@ const ChatThread = ({
     if (!socket || !conversation?._id) return;
 
     const handleNewMessage = ({ message, conversationId }) => {
-      if (conversationId === conversation._id) {
+      if (String(conversationId) === String(conversation._id)) {
         setMessages(prev => {
           // Deduplicate if already present
-          if (prev.some(m => m._id === message._id)) return prev;
+          if (prev.some(m => String(m._id) === String(message._id))) return prev;
           return [...prev, message];
         });
 
         // If received from someone else, acknowledge delivery and read
-        if (message.sender?._id !== currentUserId) {
+        const senderIdStr = String(message.sender?._id || message.sender || '');
+        const currentUserIdStr = String(currentUserId || '');
+        if (senderIdStr !== currentUserIdStr) {
           socket.emit('message:delivered', {
             messageId: message._id,
             conversationId: conversation._id
@@ -139,6 +149,9 @@ const ChatThread = ({
           if (userInfo?.token) {
             axios.post(`/api/chat/conversations/${conversation._id}/read`, {}, {
               headers: { Authorization: `Bearer ${userInfo.token}` }
+            }).then(() => {
+              if (fetchTotalUnread) fetchTotalUnread();
+              if (clearUnreadForConversation) clearUnreadForConversation(conversation._id);
             }).catch(() => {});
           }
         }
@@ -146,7 +159,7 @@ const ChatThread = ({
     };
 
     const handleMessageDeleted = ({ messageId }) => {
-      setMessages(prev => prev.map(m => m._id === messageId ? {
+      setMessages(prev => prev.map(m => String(m._id) === String(messageId) ? {
         ...m,
         isDeleted: true,
         content: 'This message was deleted',
@@ -156,21 +169,21 @@ const ChatThread = ({
     };
 
     const handleStatusUpdate = ({ messageId, status }) => {
-      setMessages(prev => prev.map(m => m._id === messageId ? { ...m, status } : m));
+      setMessages(prev => prev.map(m => String(m._id) === String(messageId) ? { ...m, status } : m));
     };
 
     const handleReadUpdate = ({ conversationId, readerId }) => {
-      if (conversationId === conversation._id) {
+      if (String(conversationId) === String(conversation._id)) {
         setMessages(prev => prev.map(m => {
-          if (m.sender?._id === currentUserId) {
-            const alreadyRead = (m.readBy || []).some(r => r.user === readerId || r.user?._id === readerId);
-            if (!alreadyRead) {
-              return {
-                ...m,
-                status: 'read',
-                readBy: [...(m.readBy || []), { user: readerId, readAt: new Date() }]
-              };
-            }
+          const isMyMsg = String(m.sender?._id || m.sender || '') === String(currentUserId || '');
+          if (isMyMsg) {
+            const currentReadBy = m.readBy || [];
+            const alreadyRead = currentReadBy.some(r => String(r.user?._id || r.user || '') === String(readerId || ''));
+            return {
+              ...m,
+              status: 'read',
+              readBy: alreadyRead ? currentReadBy : [...currentReadBy, { user: readerId, readAt: new Date() }]
+            };
           }
           return m;
         }));
@@ -188,30 +201,33 @@ const ChatThread = ({
       socket.off('message:status_update', handleStatusUpdate);
       socket.off('message:read_update', handleReadUpdate);
     };
-  }, [socket, conversation?._id, currentUserId]);
+  }, [socket, conversation?._id, currentUserId, fetchTotalUnread, clearUnreadForConversation]);
 
-  // Handle message deletion
-  const handleDeleteMessage = async (messageId) => {
-    if (!window.confirm('Are you sure you want to delete this message?')) {
-      return;
-    }
+  // Handle message deletion confirmation
+  const handleConfirmDelete = async () => {
+    if (!deleteTargetMessage) return;
 
     try {
+      setDeleting(true);
       const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
-      await axios.delete(`/api/chat/messages/${messageId}`, {
+      await axios.delete(`/api/chat/messages/${deleteTargetMessage._id}`, {
         headers: { Authorization: `Bearer ${userInfo.token}` }
       });
 
       // Update locally immediately
-      setMessages(prev => prev.map(m => m._id === messageId ? {
+      setMessages(prev => prev.map(m => String(m._id) === String(deleteTargetMessage._id) ? {
         ...m,
         isDeleted: true,
         content: 'This message was deleted',
         file: {},
         messageType: 'text'
       } : m));
+
+      setDeleteTargetMessage(null);
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to delete message');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -337,15 +353,22 @@ const ChatThread = ({
       return <FaSpinner className="spinner-border spinner-border-sm text-light" style={{ width: 10, height: 10 }} />;
     }
 
-    if (message.status === 'read' || (message.readBy && message.readBy.length > 1)) {
-      return <BsCheckAll className="receipt-icon read" title="Read" />;
+    const currentUserIdStr = String(currentUserId || '');
+    const isRead = message.status === 'read' || 
+                   (message.readBy && message.readBy.some(r => String(r.user?._id || r.user || '') !== currentUserIdStr));
+
+    if (isRead) {
+      return <BsCheckAll className="receipt-icon read" title="Read" style={{ color: '#38bdf8', fontSize: '1.05rem' }} />;
     }
 
-    if (message.status === 'delivered' || (message.deliveredTo && message.deliveredTo.length > 1)) {
-      return <BsCheckAll className="receipt-icon delivered" title="Delivered" />;
+    const isDelivered = message.status === 'delivered' || 
+                        (message.deliveredTo && message.deliveredTo.some(d => String(d.user?._id || d.user || '') !== currentUserIdStr));
+
+    if (isDelivered) {
+      return <BsCheckAll className="receipt-icon delivered" title="Delivered" style={{ color: 'rgba(255, 255, 255, 0.85)', fontSize: '1.05rem' }} />;
     }
 
-    return <FaCheck className="receipt-icon sent" title="Sent" />;
+    return <FaCheck className="receipt-icon sent" title="Sent" style={{ color: 'rgba(255, 255, 255, 0.65)', fontSize: '0.8rem' }} />;
   };
 
   return (
@@ -456,7 +479,9 @@ const ChatThread = ({
           (() => {
             let lastDate = null;
             return messages.map((msg, index) => {
-              const isSentByMe = msg.sender?._id === currentUserId;
+              const senderIdStr = String(msg.sender?._id || msg.sender || '');
+              const currentUserIdStr = String(currentUserId || '');
+              const isSentByMe = Boolean(senderIdStr && currentUserIdStr && senderIdStr === currentUserIdStr);
               const msgDate = new Date(msg.createdAt).toDateString();
               const showDateDivider = msgDate !== lastDate;
               lastDate = msgDate;
@@ -541,10 +566,9 @@ const ChatThread = ({
                         {isSentByMe && !msg.isDeleted && (
                           <button
                             type="button"
-                            className="btn btn-xs text-white border-0 p-0 ms-2 opacity-75"
-                            onClick={() => handleDeleteMessage(msg._id)}
+                            className="btn-msg-delete border-0 p-0 ms-2"
+                            onClick={() => setDeleteTargetMessage(msg)}
                             title="Delete message"
-                            style={{ fontSize: '0.7rem', background: 'transparent', cursor: 'pointer' }}
                           >
                             <FaTrash />
                           </button>
@@ -672,6 +696,53 @@ const ChatThread = ({
           mediaUrl={lightboxImage.url}
           filename={lightboxImage.filename}
         />
+      )}
+
+      {/* Delete Message Confirmation Modal */}
+      {deleteTargetMessage && (
+        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
+          <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: '400px' }}>
+            <div className="modal-content border-0 shadow-lg rounded-4 bg-card">
+              <div className="modal-body text-center p-4">
+                <div 
+                  className="rounded-circle bg-danger-subtle text-danger p-3 mx-auto mb-3 d-flex align-items-center justify-content-center" 
+                  style={{ width: 60, height: 60 }}
+                >
+                  <FaTrash className="fs-4" />
+                </div>
+                <h5 className="fw-bold text-main mb-2">Delete Message?</h5>
+                <p className="text-muted small mb-4">
+                  This message will be deleted for everyone in this conversation. This action cannot be undone.
+                </p>
+                <div className="d-flex gap-2">
+                  <button 
+                    type="button" 
+                    className="btn btn-light border text-muted w-50 py-2 rounded-3 fw-semibold" 
+                    onClick={() => setDeleteTargetMessage(null)}
+                    disabled={deleting}
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="button" 
+                    className="btn btn-danger w-50 py-2 rounded-3 fw-semibold d-flex align-items-center justify-content-center gap-2"
+                    onClick={handleConfirmDelete}
+                    disabled={deleting}
+                  >
+                    {deleting ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        <span>Deleting...</span>
+                      </>
+                    ) : (
+                      'Delete'
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

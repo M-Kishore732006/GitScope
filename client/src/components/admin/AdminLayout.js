@@ -30,8 +30,22 @@ const AdminLayout = () => {
   };
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    return localStorage.getItem('sidebar_collapsed') === 'true';
+  });
 
-  const toggleSidebar = () => setSidebarOpen(prev => !prev);
+  const toggleSidebar = () => {
+    if (window.innerWidth < 992) {
+      setSidebarOpen(prev => !prev);
+    } else {
+      setSidebarCollapsed(prev => {
+        const next = !prev;
+        localStorage.setItem('sidebar_collapsed', String(next));
+        return next;
+      });
+    }
+  };
+
   const closeSidebar = () => setSidebarOpen(false);
 
   if (loading) {
@@ -47,10 +61,20 @@ const AdminLayout = () => {
 
   return (
     <div className="dashboard-wrapper">
-      <AdminSidebar mobileOpen={sidebarOpen} closeSidebar={closeSidebar} />
+      <AdminSidebar 
+        mobileOpen={sidebarOpen} 
+        collapsed={sidebarCollapsed} 
+        closeSidebar={closeSidebar} 
+        toggleSidebar={toggleSidebar} 
+      />
       {sidebarOpen && <div className="sidebar-backdrop d-lg-none" onClick={closeSidebar}></div>}
-      <div className="main-content">
-        <AdminTopNav user={adminUser} handleLogout={handleLogout} toggleSidebar={toggleSidebar} />
+      <div className={`main-content ${sidebarCollapsed ? 'expanded-full' : ''}`}>
+        <AdminTopNav 
+          user={adminUser} 
+          handleLogout={handleLogout} 
+          toggleSidebar={toggleSidebar} 
+          sidebarCollapsed={sidebarCollapsed}
+        />
         <main className="p-3 p-md-4 p-lg-5">
           <Outlet context={{ user: adminUser }} />
         </main>

@@ -15,11 +15,12 @@ import {
   FaSignOutAlt,
   FaTimes,
   FaRocket,
-  FaComments
+  FaComments,
+  FaChevronLeft
 } from 'react-icons/fa';
 import { useSocket } from '../../context/SocketContext';
 
-const StaffSidebar = ({ mobileOpen, closeSidebar }) => {
+const StaffSidebar = ({ mobileOpen, closeSidebar, collapsed, toggleSidebar }) => {
   const { totalUnread } = useSocket();
 
   const handleLogout = () => {
@@ -28,7 +29,7 @@ const StaffSidebar = ({ mobileOpen, closeSidebar }) => {
   };
 
   return (
-    <div className={`sidebar shadow-sm ${mobileOpen ? 'mobile-open' : ''}`} style={{ width: '250px' }}>
+    <div className={`sidebar shadow-sm ${mobileOpen ? 'mobile-open' : ''} ${collapsed ? 'collapsed' : ''}`} style={{ width: '250px' }}>
       <div className="sidebar-header d-flex align-items-center justify-content-between">
         <div className="d-flex align-items-center">
           <div className="avatar-circle me-2" style={{ width: 34, height: 34, fontSize: '0.95rem' }}>
@@ -39,9 +40,19 @@ const StaffSidebar = ({ mobileOpen, closeSidebar }) => {
             <span className="badge bg-primary ms-2 px-2 py-1 small" style={{ fontSize: '0.6rem' }}>STAFF</span>
           </div>
         </div>
-        <button className="btn btn-sm text-muted d-lg-none p-1 border-0" onClick={closeSidebar}>
-          <FaTimes className="fs-5" />
-        </button>
+        <div className="d-flex align-items-center gap-1">
+          <button 
+            className="btn btn-sm btn-light border p-1 rounded-circle text-muted d-none d-lg-flex align-items-center justify-content-center"
+            onClick={toggleSidebar}
+            title="Slide Out (Full Screen)"
+            style={{ width: 28, height: 28 }}
+          >
+            <FaChevronLeft style={{ fontSize: '0.75rem' }} />
+          </button>
+          <button className="btn btn-sm text-muted d-lg-none p-1 border-0" onClick={closeSidebar}>
+            <FaTimes className="fs-5" />
+          </button>
+        </div>
       </div>
 
       <div className="sidebar-nav px-2 py-3" onClick={closeSidebar}>

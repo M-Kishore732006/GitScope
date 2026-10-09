@@ -10,6 +10,23 @@ const StaffLayout = () => {
   const [loading, setLoading] = useState(true);
   const [inactiveError, setInactiveError] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    return localStorage.getItem('sidebar_collapsed') === 'true';
+  });
+
+  const toggleSidebar = () => {
+    if (window.innerWidth < 992) {
+      setSidebarOpen(prev => !prev);
+    } else {
+      setSidebarCollapsed(prev => {
+        const next = !prev;
+        localStorage.setItem('sidebar_collapsed', String(next));
+        return next;
+      });
+    }
+  };
+
+  const closeSidebar = () => setSidebarOpen(false);
 
   useEffect(() => {
     const userInfoStr = localStorage.getItem('userInfo');
@@ -41,9 +58,6 @@ const StaffLayout = () => {
     setStaffUser(userInfo);
     setLoading(false);
   }, [navigate]);
-
-  const toggleSidebar = () => setSidebarOpen(prev => !prev);
-  const closeSidebar = () => setSidebarOpen(false);
 
   const handleLogout = () => {
     localStorage.removeItem('userInfo');
@@ -82,10 +96,20 @@ const StaffLayout = () => {
 
   return (
     <div className="dashboard-wrapper">
-      <StaffSidebar mobileOpen={sidebarOpen} closeSidebar={closeSidebar} />
+      <StaffSidebar 
+        mobileOpen={sidebarOpen} 
+        collapsed={sidebarCollapsed} 
+        closeSidebar={closeSidebar} 
+        toggleSidebar={toggleSidebar} 
+      />
       {sidebarOpen && <div className="sidebar-backdrop d-lg-none" onClick={closeSidebar}></div>}
-      <div className="main-content">
-        <StaffTopNav user={staffUser} handleLogout={handleLogout} toggleSidebar={toggleSidebar} />
+      <div className={`main-content ${sidebarCollapsed ? 'expanded-full' : ''}`}>
+        <StaffTopNav 
+          user={staffUser} 
+          handleLogout={handleLogout} 
+          toggleSidebar={toggleSidebar} 
+          sidebarCollapsed={sidebarCollapsed}
+        />
         <main className="p-3 p-md-4 p-lg-5">
           <Outlet context={{ user: staffUser }} />
         </main>

@@ -1,13 +1,13 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaChartPie, FaBook, FaTrophy, FaMedal, FaChartLine, FaUser, FaCog, FaRocket, FaTimes, FaComments } from 'react-icons/fa';
+import { FaChartPie, FaBook, FaTrophy, FaMedal, FaChartLine, FaUser, FaCog, FaRocket, FaTimes, FaComments, FaChevronLeft } from 'react-icons/fa';
 import { useSocket } from '../../context/SocketContext';
 
-const Sidebar = ({ handleLogout, mobileOpen, closeSidebar }) => {
+const Sidebar = ({ handleLogout, mobileOpen, closeSidebar, collapsed, toggleSidebar }) => {
   const { totalUnread } = useSocket();
 
   return (
-    <div className={`sidebar shadow-sm ${mobileOpen ? 'mobile-open' : ''}`}>
+    <div className={`sidebar shadow-sm ${mobileOpen ? 'mobile-open' : ''} ${collapsed ? 'collapsed' : ''}`}>
       <div className="sidebar-header d-flex align-items-center justify-content-between">
          <div className="d-flex align-items-center">
            <div className="avatar-circle me-2" style={{ width: 34, height: 34, fontSize: '0.95rem' }}>
@@ -17,9 +17,19 @@ const Sidebar = ({ handleLogout, mobileOpen, closeSidebar }) => {
              <span className="fw-extrabold text-main" style={{ letterSpacing: '-0.5px' }}>GitScope</span>
            </div>
          </div>
-         <button className="btn btn-sm text-muted d-lg-none p-1 border-0" onClick={closeSidebar}>
-           <FaTimes className="fs-5" />
-         </button>
+         <div className="d-flex align-items-center gap-1">
+           <button 
+             className="btn btn-sm btn-light border p-1 rounded-circle text-muted d-none d-lg-flex align-items-center justify-content-center"
+             onClick={toggleSidebar}
+             title="Slide Out (Full Screen)"
+             style={{ width: 28, height: 28 }}
+           >
+             <FaChevronLeft style={{ fontSize: '0.75rem' }} />
+           </button>
+           <button className="btn btn-sm text-muted d-lg-none p-1 border-0" onClick={closeSidebar}>
+             <FaTimes className="fs-5" />
+           </button>
+         </div>
       </div>
       <div className="sidebar-nav" onClick={closeSidebar}>
          <NavLink to="/student/dashboard" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`} end>

@@ -83,7 +83,12 @@ body {
   bottom: 0;
   left: 0;
   z-index: 1000;
-  transition: transform 0.3s ease, background-color 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease;
+}
+
+/* Slide out state (collapsed / hidden) */
+.sidebar.collapsed {
+  transform: translateX(-100%);
 }
 
 .sidebar-header {
@@ -137,7 +142,13 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  transition: margin-left 0.3s ease;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Full screen view when navbar is slid out */
+.main-content.expanded-full {
+  margin-left: 0 !important;
+  width: 100% !important;
 }
 
 /* Top Nav */
