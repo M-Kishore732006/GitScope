@@ -7,8 +7,9 @@ const Landing = () => {
   return (
     <div className="landing-page">
       <nav className="landing-navbar">
-        <Link to="/" className="landing-brand">
-          <FaCode className="text-primary" /> Git<span>Scope</span>
+        <Link to="/" className="landing-brand d-flex">
+          <img src="/git_logo.png" alt="GitScope Logo" width="50" />
+            GitScope
         </Link>
         <div className="landing-nav-links">
           <Link to="/login" className="btn-login">Sign In</Link>
@@ -82,7 +83,10 @@ const Landing = () => {
       <footer className="landing-footer">
         <div className="footer-content">
           <div className="footer-brand">
-            <FaCode /> Git<span>Scope</span>
+           <Link to="/" className="landing-brand d-flex">
+  <img src="/git_logo.png" alt="GitScope Logo" width="50" />
+  <span style={{ color: "white" }}>GitScope</span>
+</Link>
           </div>
           <div className="footer-nav">
             <a href="#about">About</a>
