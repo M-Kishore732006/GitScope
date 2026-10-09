@@ -88,9 +88,10 @@ const StaffAnalytics = () => {
             {/* Monthly Commit Trends Bar Graph Simulation */}
             <div className="col-12 col-lg-8">
               <div className="saas-card h-100">
-                <h5 className="fw-bold text-dark mb-3 d-flex align-items-center">
+                <h5 className="fw-bold text-dark mb-3 d-flex align-items-center mt-2">
                   <FaChartBar className="me-2 text-primary" /> Commit Activity Trends
                 </h5>
+                <br/>
                 {monthlyCommitTrends && monthlyCommitTrends.length > 0 ? (
                   <div className="d-flex align-items-end justify-content-between pt-4 pb-2 px-3 border-bottom" style={{ height: '220px' }}>
                     {monthlyCommitTrends.map((item, idx) => (

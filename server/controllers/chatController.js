@@ -260,8 +260,7 @@ const getConversationMessages = async (req, res) => {
     }
 
     const query = {
-      conversation: conversationId,
-      isDeleted: false
+      conversation: conversationId
     };
 
     if (before) {
@@ -370,6 +369,7 @@ const sendMessage = async (req, res) => {
       }
     });
 
+    conversation.markModified('unreadCounts');
     await conversation.save();
 
     const populatedMessage = await Message.findById(message._id)
@@ -489,14 +489,16 @@ const markConversationAsRead = async (req, res) => {
     }
 
     // Reset unread count for current user
-    if (conversation.unreadCounts) {
-      if (conversation.unreadCounts instanceof Map) {
-        conversation.unreadCounts.set(userId, 0);
-      } else {
-        conversation.unreadCounts[userId] = 0;
-      }
-      await conversation.save();
+    if (!conversation.unreadCounts) {
+      conversation.unreadCounts = new Map();
     }
+    if (conversation.unreadCounts instanceof Map) {
+      conversation.unreadCounts.set(userId, 0);
+    } else {
+      conversation.unreadCounts[userId] = 0;
+    }
+    conversation.markModified('unreadCounts');
+    await conversation.save();
 
     // Update unread messages
     const readAt = new Date();
@@ -596,6 +598,65 @@ const getTotalUnreadCount = async (req, res) => {
   }
 };
 
+/**
+ * 12. DELETE /api/chat/messages/:id
+ * Delete a sent message (sender or admin only)
+ */
+const deleteMessage = async (req, res) => {
+  try {
+    const messageId = req.params.id;
+    const userId = req.user._id.toString();
+    const isAdmin = req.user.role === 'admin';
+
+    const message = await Message.findById(messageId);
+    if (!message) {
+      return res.status(404).json({ message: 'Message not found' });
+    }
+
+    // Only sender or admin can delete
+    if (message.sender.toString() !== userId && !isAdmin) {
+      return res.status(403).json({ message: 'You can only delete your own sent messages' });
+    }
+
+    message.isDeleted = true;
+    message.content = 'This message was deleted';
+    message.file = {};
+    message.messageType = 'text';
+    await message.save();
+
+    // If this was the conversation's last message, update lastMessage
+    const conversation = await Conversation.findById(message.conversation);
+    if (conversation && conversation.lastMessage && conversation.lastMessage.toString() === messageId) {
+      const prevMessage = await Message.findOne({
+        conversation: conversation._id,
+        _id: { $ne: message._id },
+        isDeleted: false
+      }).sort({ createdAt: -1 });
+
+      conversation.lastMessage = prevMessage ? prevMessage._id : null;
+      conversation.markModified('lastMessage');
+      await conversation.save();
+    }
+
+    // Emit real-time deletion
+    try {
+      const io = getIO();
+      io.to(`conversation:${message.conversation}`).emit('message:deleted', {
+        messageId: message._id,
+        conversationId: message.conversation,
+        isDeleted: true
+      });
+    } catch (e) {
+      console.warn('Socket alert error:', e.message);
+    }
+
+    res.json({ message: 'Message deleted successfully', messageId: message._id });
+  } catch (error) {
+    console.error('Error deleting message:', error);
+    res.status(500).json({ message: 'Failed to delete message' });
+  }
+};
+
 module.exports = {
   getEligibleContacts,
   getConversations,
@@ -607,5 +668,6 @@ module.exports = {
   downloadAttachment,
   markConversationAsRead,
   leaveGroup,
-  getTotalUnreadCount
+  getTotalUnreadCount,
+  deleteMessage
 };

@@ -13,7 +13,8 @@ const {
   downloadAttachment,
   markConversationAsRead,
   leaveGroup,
-  getTotalUnreadCount
+  getTotalUnreadCount,
+  deleteMessage
 } = require('../controllers/chatController');
 
 // All chat routes are protected
@@ -28,6 +29,7 @@ router.post('/conversations/group', createGroupConversation);
 // Messages
 router.get('/conversations/:id/messages', getConversationMessages);
 router.post('/conversations/:id/messages', sendMessage);
+router.delete('/messages/:id', deleteMessage);
 router.post('/conversations/:id/read', markConversationAsRead);
 router.post('/conversations/:id/leave', leaveGroup);
 

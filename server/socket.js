@@ -168,6 +168,7 @@ const initSocket = (httpServer) => {
         if (conv) {
           if (!conv.unreadCounts) conv.unreadCounts = new Map();
           conv.unreadCounts.set(userId, 0);
+          conv.markModified('unreadCounts');
           await conv.save();
         }
 

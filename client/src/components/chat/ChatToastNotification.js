@@ -4,7 +4,12 @@ import { useSocket } from '../../context/SocketContext';
 import { FaTimes, FaCommentDots, FaUsers } from 'react-icons/fa';
 
 const ChatToastNotification = () => {
-  const { toastNotification, dismissToast } = useSocket();
+  const { 
+    toastNotification, 
+    dismissToast, 
+    clearUnreadForConversation, 
+    setActiveConversationId 
+  } = useSocket();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,7 +26,11 @@ const ChatToastNotification = () => {
   if (!toastNotification) return null;
 
   const handleClick = () => {
+    const convId = toastNotification.conversationId;
     dismissToast();
+    clearUnreadForConversation(convId);
+    setActiveConversationId(convId);
+
     // Determine route based on user role
     const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
     const role = userInfo.role;
@@ -31,7 +40,7 @@ const ChatToastNotification = () => {
         ? '/admin/messages' 
         : '/student/messages';
 
-    navigate(`${basePath}?conv=${toastNotification.conversationId}`);
+    navigate(`${basePath}?conv=${convId}`);
   };
 
   return (

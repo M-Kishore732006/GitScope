@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   FaPaperPlane, FaPaperclip, FaTimes, FaSearch, FaArrowLeft, 
   FaUsers, FaCheck, FaFileAlt, FaFilePdf, FaFileWord, FaFileExcel, 
-  FaFileArchive, FaDownload, FaSpinner 
+  FaFileArchive, FaDownload, FaSpinner, FaTrash 
 } from 'react-icons/fa';
 import { BsCheckAll } from 'react-icons/bs';
 import axios from 'axios';
@@ -86,12 +86,15 @@ const ChatThread = ({
       });
       setMessages(res.data);
 
-      // Emit read receipts
+      // Emit read receipts & persist to backend
       if (socket) {
         socket.emit('message:read', {
           conversationId: conversation._id
         });
       }
+      axios.post(`/api/chat/conversations/${conversation._id}/read`, {}, {
+        headers: { Authorization: `Bearer ${userInfo.token}` }
+      }).catch(() => {});
     } catch (err) {
       console.error('Error fetching messages:', err);
     } finally {
@@ -132,8 +135,24 @@ const ChatThread = ({
             conversationId: conversation._id,
             messageIds: [message._id]
           });
+          const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+          if (userInfo?.token) {
+            axios.post(`/api/chat/conversations/${conversation._id}/read`, {}, {
+              headers: { Authorization: `Bearer ${userInfo.token}` }
+            }).catch(() => {});
+          }
         }
       }
+    };
+
+    const handleMessageDeleted = ({ messageId }) => {
+      setMessages(prev => prev.map(m => m._id === messageId ? {
+        ...m,
+        isDeleted: true,
+        content: 'This message was deleted',
+        file: {},
+        messageType: 'text'
+      } : m));
     };
 
     const handleStatusUpdate = ({ messageId, status }) => {
@@ -159,15 +178,42 @@ const ChatThread = ({
     };
 
     socket.on('message:new', handleNewMessage);
+    socket.on('message:deleted', handleMessageDeleted);
     socket.on('message:status_update', handleStatusUpdate);
     socket.on('message:read_update', handleReadUpdate);
 
     return () => {
       socket.off('message:new', handleNewMessage);
+      socket.off('message:deleted', handleMessageDeleted);
       socket.off('message:status_update', handleStatusUpdate);
       socket.off('message:read_update', handleReadUpdate);
     };
   }, [socket, conversation?._id, currentUserId]);
+
+  // Handle message deletion
+  const handleDeleteMessage = async (messageId) => {
+    if (!window.confirm('Are you sure you want to delete this message?')) {
+      return;
+    }
+
+    try {
+      const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      await axios.delete(`/api/chat/messages/${messageId}`, {
+        headers: { Authorization: `Bearer ${userInfo.token}` }
+      });
+
+      // Update locally immediately
+      setMessages(prev => prev.map(m => m._id === messageId ? {
+        ...m,
+        isDeleted: true,
+        content: 'This message was deleted',
+        file: {},
+        messageType: 'text'
+      } : m));
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to delete message');
+    }
+  };
 
   // Handle typing debounce
   const handleInputChange = (e) => {
@@ -432,54 +478,77 @@ const ChatThread = ({
                         </div>
                       )}
 
-                      {/* Text content */}
-                      {msg.content && (
-                        <div>{msg.content}</div>
-                      )}
-
-                      {/* Image Attachment */}
-                      {msg.messageType === 'image' && msg.file?.path && (
-                        <div className="mt-1">
-                          <img 
-                            src={msg.file.path} 
-                            alt={msg.file.filename || 'Attachment'}
-                            className="chat-image-preview shadow-sm"
-                            onClick={() => setLightboxImage({ url: msg.file.path, filename: msg.file.filename })}
-                          />
+                      {/* Message Content or Deleted Notice */}
+                      {msg.isDeleted ? (
+                        <div className="fst-italic opacity-75 d-flex align-items-center gap-1 small py-1">
+                          <FaTrash style={{ fontSize: '0.72rem' }} /> This message was deleted
                         </div>
+                      ) : (
+                        <>
+                          {/* Text content */}
+                          {msg.content && (
+                            <div>{msg.content}</div>
+                          )}
+
+                          {/* Image Attachment */}
+                          {msg.messageType === 'image' && msg.file?.path && (
+                            <div className="mt-1">
+                              <img 
+                                src={msg.file.path} 
+                                alt={msg.file.filename || 'Attachment'}
+                                className="chat-image-preview shadow-sm"
+                                onClick={() => setLightboxImage({ url: msg.file.path, filename: msg.file.filename })}
+                              />
+                            </div>
+                          )}
+
+                          {/* Document Attachment */}
+                          {msg.messageType === 'file' && msg.file?.path && (
+                            <div className="attachment-card">
+                              <div>
+                                {getFileIcon(msg.file.mimetype, msg.file.filename)}
+                              </div>
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div className="fw-semibold text-truncate small" style={{ maxWidth: '170px' }}>
+                                  {msg.file.filename}
+                                </div>
+                                <div className="small opacity-75" style={{ fontSize: '0.7rem' }}>
+                                  {formatFileSize(msg.file.size)}
+                                </div>
+                              </div>
+                              <a 
+                                href={msg.file.path} 
+                                download={msg.file.filename}
+                                className="btn btn-sm btn-light border p-1 rounded-circle"
+                                target="_blank" 
+                                rel="noreferrer"
+                                title="Download file"
+                              >
+                                <FaDownload style={{ fontSize: '0.75rem' }} />
+                              </a>
+                            </div>
+                          )}
+                        </>
                       )}
 
-                      {/* Document Attachment */}
-                      {msg.messageType === 'file' && msg.file?.path && (
-                        <div className="attachment-card">
-                          <div>
-                            {getFileIcon(msg.file.mimetype, msg.file.filename)}
-                          </div>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div className="fw-semibold text-truncate small" style={{ maxWidth: '170px' }}>
-                              {msg.file.filename}
-                            </div>
-                            <div className="small opacity-75" style={{ fontSize: '0.7rem' }}>
-                              {formatFileSize(msg.file.size)}
-                            </div>
-                          </div>
-                          <a 
-                            href={msg.file.path} 
-                            download={msg.file.filename}
-                            className="btn btn-sm btn-light border p-1 rounded-circle"
-                            target="_blank" 
-                            rel="noreferrer"
-                            title="Download file"
+                      {/* Meta: Time, Receipts, and Delete Button */}
+                      <div className="message-meta d-flex align-items-center justify-content-between">
+                        <div className="d-flex align-items-center gap-1">
+                          <span>{formatMessageTime(msg.createdAt)}</span>
+                          {isSentByMe && renderReceiptIcon(msg)}
+                        </div>
+
+                        {isSentByMe && !msg.isDeleted && (
+                          <button
+                            type="button"
+                            className="btn btn-xs text-white border-0 p-0 ms-2 opacity-75"
+                            onClick={() => handleDeleteMessage(msg._id)}
+                            title="Delete message"
+                            style={{ fontSize: '0.7rem', background: 'transparent', cursor: 'pointer' }}
                           >
-                            <FaDownload style={{ fontSize: '0.75rem' }} />
-                          </a>
-                        </div>
-                      )}
-
-                      {/* Meta: Time & Receipts */}
-                      <div className="message-meta">
-                        <span>{formatMessageTime(msg.createdAt)}</span>
-                        {isSentByMe && renderReceiptIcon(msg)}
+                            <FaTrash />
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>

@@ -60,9 +60,21 @@ export const SocketProvider = ({ children }) => {
     }
   }, []);
 
-  const setActiveConversationId = (id) => {
-    activeConversationIdRef.current = id;
-  };
+  const setActiveConversationId = useCallback((id) => {
+    activeConversationIdRef.current = id ? String(id) : null;
+  }, []);
+
+  const clearUnreadForConversation = useCallback((convId) => {
+    if (!convId) return;
+    const strId = String(convId);
+    setToastNotification(prev => {
+      if (prev && String(prev.conversationId) === strId) {
+        return null;
+      }
+      return prev;
+    });
+    fetchTotalUnread();
+  }, [fetchTotalUnread]);
 
   useEffect(() => {
     const user = getStoredUser();
@@ -105,16 +117,42 @@ export const SocketProvider = ({ children }) => {
 
     // New message notifications
     newSocket.on('notification:new_message', ({ message, conversation }) => {
-      const currentActiveId = activeConversationIdRef.current;
-      const isCurrentChat = currentActiveId && currentActiveId === message.conversation;
+      const stored = getStoredUser();
+      const currentUserId = String(stored?._id || stored?.id || '');
+      const senderId = String(message.sender?._id || message.sender || '');
 
+      // NEVER show notification or increment unread for messages sent by the current user
+      if (senderId && senderId === currentUserId) {
+        return;
+      }
+
+      const currentActiveId = String(activeConversationIdRef.current || '');
+      const targetConvId = String(conversation?._id || message.conversation?._id || message.conversation || '');
+
+      // Check if user is currently looking at this conversation via URL params
+      let currentUrlConvId = '';
+      try {
+        if (window.location.pathname.includes('/messages')) {
+          const params = new URLSearchParams(window.location.search);
+          currentUrlConvId = String(params.get('conv') || '');
+        }
+      } catch (e) {}
+
+      const isCurrentChat = Boolean(
+        targetConvId && (
+          (currentActiveId && currentActiveId === targetConvId) ||
+          (currentUrlConvId && currentUrlConvId === targetConvId)
+        )
+      );
+
+      // Only show popup and increment unread if user is NOT currently inside this conversation
       if (!isCurrentChat) {
         playNotificationChime();
         setTotalUnread(prev => prev + 1);
 
         setToastNotification({
           id: Date.now(),
-          conversationId: message.conversation,
+          conversationId: targetConvId,
           senderName: message.sender?.fullName || message.sender?.username || 'New Message',
           conversationName: conversation?.name || (message.sender?.fullName || message.sender?.username),
           isGroup: conversation?.type === 'group',
@@ -125,11 +163,27 @@ export const SocketProvider = ({ children }) => {
               : `📎 Sent file: ${message.file?.filename || 'Attachment'}`,
           timestamp: new Date()
         });
+      } else {
+        // User IS looking at this conversation! Ensure any toast for this conversation is dismissed
+        setToastNotification(prev => {
+          if (prev && String(prev.conversationId) === targetConvId) {
+            return null;
+          }
+          return prev;
+        });
       }
     });
 
     // Conversation read cleared
-    newSocket.on('conversation:unread_cleared', () => {
+    newSocket.on('conversation:unread_cleared', ({ conversationId } = {}) => {
+      if (conversationId) {
+        setToastNotification(prev => {
+          if (prev && String(prev.conversationId) === String(conversationId)) {
+            return null;
+          }
+          return prev;
+        });
+      }
       fetchTotalUnread();
     });
 
@@ -145,13 +199,13 @@ export const SocketProvider = ({ children }) => {
 
   const joinConversation = useCallback((conversationId) => {
     if (socket && conversationId) {
-      socket.emit('conversation:join', { conversationId });
+      socket.emit('conversation:join', { conversationId: String(conversationId) });
     }
   }, [socket]);
 
   const leaveConversation = useCallback((conversationId) => {
     if (socket && conversationId) {
-      socket.emit('conversation:leave', { conversationId });
+      socket.emit('conversation:leave', { conversationId: String(conversationId) });
     }
   }, [socket]);
 
@@ -169,6 +223,7 @@ export const SocketProvider = ({ children }) => {
         fetchTotalUnread,
         toastNotification,
         dismissToast,
+        clearUnreadForConversation,
         setActiveConversationId,
         joinConversation,
         leaveConversation

@@ -21,7 +21,8 @@ const ChatPage = () => {
     setActiveConversationId,
     joinConversation,
     leaveConversation,
-    fetchTotalUnread
+    fetchTotalUnread,
+    clearUnreadForConversation
   } = useSocket();
 
   const [activeTab, setActiveTab] = useState('CONVERSATIONS'); // CONVERSATIONS or CONTACTS
@@ -46,6 +47,40 @@ const ChatPage = () => {
   const currentUserId = userInfo._id || userInfo.id;
   const userRole = userInfo.role;
 
+  // Immediate sync of queryConvId with SocketContext
+  useEffect(() => {
+    if (queryConvId) {
+      setActiveConversationId(queryConvId);
+    }
+  }, [queryConvId, setActiveConversationId]);
+
+  // Handle selecting a conversation
+  const handleSelectConversation = useCallback((conv) => {
+    if (!conv) return;
+    const convId = String(conv._id);
+    setActiveConversation(conv);
+    setActiveConversationId(convId);
+    clearUnreadForConversation(convId);
+
+    // Clear unread on select locally
+    setConversations(prev => prev.map(c => 
+      String(c._id) === convId ? { ...c, unreadCount: 0 } : c
+    ));
+
+    // Persist mark-as-read to server
+    if (userInfo?.token) {
+      axios.post(`/api/chat/conversations/${convId}/read`, {}, {
+        headers: { Authorization: `Bearer ${userInfo.token}` }
+      }).then(() => {
+        fetchTotalUnread();
+      }).catch(() => {});
+    }
+
+    if (socket) {
+      socket.emit('message:read', { conversationId: convId });
+    }
+  }, [userInfo?.token, setActiveConversationId, clearUnreadForConversation, fetchTotalUnread, socket]);
+
   // 1. Fetch Conversations
   const fetchConversations = useCallback(async () => {
     if (!userInfo?.token) return;
@@ -56,11 +91,24 @@ const ChatPage = () => {
       });
       setConversations(res.data);
 
-      // If queryConvId present, select it
+      // If queryConvId present, select it and mark as read
       if (queryConvId) {
-        const found = res.data.find(c => c._id === queryConvId);
+        const found = res.data.find(c => String(c._id) === String(queryConvId));
         if (found) {
-          setActiveConversation(found);
+          const clearedFound = { ...found, unreadCount: 0 };
+          setActiveConversation(clearedFound);
+          setActiveConversationId(queryConvId);
+          clearUnreadForConversation(queryConvId);
+
+          axios.post(`/api/chat/conversations/${queryConvId}/read`, {}, {
+            headers: { Authorization: `Bearer ${userInfo.token}` }
+          }).then(() => {
+            fetchTotalUnread();
+          }).catch(() => {});
+
+          if (socket) {
+            socket.emit('message:read', { conversationId: queryConvId });
+          }
         }
       }
     } catch (err) {
@@ -68,7 +116,7 @@ const ChatPage = () => {
     } finally {
       setLoadingConversations(false);
     }
-  }, [userInfo?.token, queryConvId]);
+  }, [userInfo?.token, queryConvId, socket, setActiveConversationId, clearUnreadForConversation, fetchTotalUnread]);
 
   // 2. Fetch Eligible Contacts
   const fetchContacts = useCallback(async () => {
@@ -89,41 +137,62 @@ const ChatPage = () => {
   useEffect(() => {
     fetchConversations();
     fetchContacts();
-  }, [fetchConversations, fetchContacts]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userInfo?.token]);
+
+  // Sync route query change if conversations already loaded
+  useEffect(() => {
+    if (queryConvId && conversations.length > 0) {
+      const found = conversations.find(c => String(c._id) === String(queryConvId));
+      if (found && String(activeConversation?._id) !== String(queryConvId)) {
+        handleSelectConversation(found);
+      }
+    }
+  }, [queryConvId, conversations, activeConversation?._id, handleSelectConversation]);
 
   // Sync active conversation with socket & URL
   useEffect(() => {
     if (activeConversation?._id) {
-      setActiveConversationId(activeConversation._id);
-      joinConversation(activeConversation._id);
-      setSearchParams({ conv: activeConversation._id }, { replace: true });
+      const convId = String(activeConversation._id);
+      setActiveConversationId(convId);
+      joinConversation(convId);
+      setSearchParams({ conv: convId }, { replace: true });
+    } else if (queryConvId) {
+      setActiveConversationId(queryConvId);
+      joinConversation(queryConvId);
     } else {
       setActiveConversationId(null);
     }
 
     return () => {
       if (activeConversation?._id) {
-        leaveConversation(activeConversation._id);
+        leaveConversation(String(activeConversation._id));
       }
     };
-  }, [activeConversation?._id, setActiveConversationId, joinConversation, leaveConversation, setSearchParams]);
+  }, [activeConversation?._id, queryConvId, setActiveConversationId, joinConversation, leaveConversation, setSearchParams]);
 
   // Real-time socket events for conversation list & typing
   useEffect(() => {
     if (!socket) return;
 
     const handleNewMessage = ({ message, conversationId }) => {
+      const convIdStr = String(conversationId);
+      const activeIdStr = String(activeConversation?._id || queryConvId || '');
+      const isCurrentlyActive = Boolean(activeIdStr && convIdStr === activeIdStr);
+
       setConversations(prev => {
-        const idx = prev.findIndex(c => c._id === conversationId);
+        const idx = prev.findIndex(c => String(c._id) === convIdStr);
         if (idx !== -1) {
           const updated = [...prev];
           const conv = { ...updated[idx] };
           conv.lastMessage = message;
           conv.lastMessageAt = message.createdAt;
 
-          // Increment unread if not currently active
-          if (activeConversation?._id !== conversationId) {
+          // Increment unread ONLY if not currently active
+          if (!isCurrentlyActive) {
             conv.unreadCount = (conv.unreadCount || 0) + 1;
+          } else {
+            conv.unreadCount = 0;
           }
 
           // Move to top
@@ -135,6 +204,33 @@ const ChatPage = () => {
           return prev;
         }
       });
+    };
+
+    const handleMessageDeleted = ({ messageId, conversationId }) => {
+      setConversations(prev => prev.map(c => {
+        if (String(c._id) === String(conversationId)) {
+          if (c.lastMessage?._id === messageId || String(c.lastMessage?._id) === String(messageId)) {
+            return {
+              ...c,
+              lastMessage: {
+                ...c.lastMessage,
+                content: 'This message was deleted',
+                isDeleted: true
+              }
+            };
+          }
+        }
+        return c;
+      }));
+    };
+
+    const handleUnreadCleared = ({ conversationId } = {}) => {
+      if (conversationId) {
+        setConversations(prev => prev.map(c => 
+          String(c._id) === String(conversationId) ? { ...c, unreadCount: 0 } : c
+        ));
+      }
+      fetchTotalUnread();
     };
 
     const handleGroupCreated = (newGroup) => {
@@ -157,17 +253,21 @@ const ChatPage = () => {
     };
 
     socket.on('message:new', handleNewMessage);
+    socket.on('message:deleted', handleMessageDeleted);
+    socket.on('conversation:unread_cleared', handleUnreadCleared);
     socket.on('group:created', handleGroupCreated);
     socket.on('typing:start', handleTypingStart);
     socket.on('typing:stop', handleTypingStop);
 
     return () => {
       socket.off('message:new', handleNewMessage);
+      socket.off('message:deleted', handleMessageDeleted);
+      socket.off('conversation:unread_cleared', handleUnreadCleared);
       socket.off('group:created', handleGroupCreated);
       socket.off('typing:start', handleTypingStart);
       socket.off('typing:stop', handleTypingStop);
     };
-  }, [socket, activeConversation?._id, fetchConversations]);
+  }, [socket, activeConversation?._id, queryConvId, fetchConversations, fetchTotalUnread]);
 
   // Selecting a contact initiates or opens a private conversation
   const handleSelectContact = async (contact) => {
@@ -266,11 +366,7 @@ const ChatPage = () => {
             conversations={conversations}
             loading={loadingConversations}
             activeConversation={activeConversation}
-            onSelectConversation={(conv) => {
-              setActiveConversation(conv);
-              // Clear unread on select
-              setConversations(prev => prev.map(c => c._id === conv._id ? { ...c, unreadCount: 0 } : c));
-            }}
+            onSelectConversation={handleSelectConversation}
             onCreateGroupClick={() => setShowCreateGroup(true)}
             userRole={userRole}
             currentUserId={currentUserId}
