@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { FaSearch, FaMoon, FaSun, FaCloudDownloadAlt, FaChevronDown, FaBars, FaUser, FaCog, FaSignOutAlt } from 'react-icons/fa';
+import { FaSearch, FaMoon, FaSun, FaCloudDownloadAlt, FaChevronDown, FaBars, FaUser, FaCog, FaSignOutAlt, FaComments } from 'react-icons/fa';
 import { toTitleCase } from '../../utils/formatters';
 import { useTheme } from '../../context/ThemeContext';
+import { useSocket } from '../../context/SocketContext';
 import NotificationDropdown from '../NotificationDropdown';
 
 const TopNav = ({ user, stats, handleLogout, toggleSidebar }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const { theme, toggleTheme } = useTheme();
+  const { totalUnread } = useSocket();
 
   // Close dropdown if clicked outside
   useEffect(() => {
@@ -58,6 +60,22 @@ const TopNav = ({ user, stats, handleLogout, toggleSidebar }) => {
           >
              {theme === 'dark' ? <FaSun className="text-warning fs-5" /> : <FaMoon className="fs-5" />}
           </button>
+
+          {/* Chat Messages Button */}
+          <Link 
+            to="/student/messages"
+            className="btn btn-light rounded-circle shadow-sm border p-2 text-muted theme-btn-icon d-flex align-items-center justify-content-center position-relative"
+            style={{ width: 40, height: 40 }}
+            title="Messages"
+            aria-label="Messages"
+          >
+            <FaComments className="fs-6" />
+            {totalUnread > 0 && (
+              <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" style={{ fontSize: '0.65rem' }}>
+                {totalUnread > 9 ? '9+' : totalUnread}
+              </span>
+            )}
+          </Link>
 
           {/* Responsive Notification Center */}
           <NotificationDropdown role="student" />

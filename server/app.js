@@ -9,7 +9,9 @@ const app = express();
 app.set('trust proxy', 1);
 
 // Middleware
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 app.use(cors({
   origin: process.env.FRONTEND_URL || '*',
   credentials: true
@@ -32,6 +34,7 @@ app.use('/api/student', require('./routes/studentRoutes'));
 app.use('/api/staff', require('./routes/staffRoutes'));
 app.use('/api/config', require('./routes/configRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
+app.use('/api/chat', require('./routes/chatRoutes'));
 
 // Basic generic error handler - do not expose internal server errors
 app.use((err, req, res, next) => {

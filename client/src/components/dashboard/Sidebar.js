@@ -1,8 +1,11 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaChartPie, FaBook, FaTrophy, FaMedal, FaChartLine, FaUser, FaCog, FaRocket, FaTimes } from 'react-icons/fa';
+import { FaChartPie, FaBook, FaTrophy, FaMedal, FaChartLine, FaUser, FaCog, FaRocket, FaTimes, FaComments } from 'react-icons/fa';
+import { useSocket } from '../../context/SocketContext';
 
 const Sidebar = ({ handleLogout, mobileOpen, closeSidebar }) => {
+  const { totalUnread } = useSocket();
+
   return (
     <div className={`sidebar shadow-sm ${mobileOpen ? 'mobile-open' : ''}`}>
       <div className="sidebar-header d-flex align-items-center justify-content-between">
@@ -21,6 +24,16 @@ const Sidebar = ({ handleLogout, mobileOpen, closeSidebar }) => {
       <div className="sidebar-nav" onClick={closeSidebar}>
          <NavLink to="/student/dashboard" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`} end>
             <FaChartPie className="icon" /> Dashboard
+         </NavLink>
+         <NavLink to="/student/messages" className={({ isActive }) => `sidebar-link d-flex align-items-center justify-content-between ${isActive ? 'active' : ''}`}>
+            <span className="d-flex align-items-center">
+              <FaComments className="icon me-2" /> Messages
+            </span>
+            {totalUnread > 0 && (
+              <span className="badge bg-danger rounded-pill px-2 py-1 small">
+                {totalUnread > 99 ? '99+' : totalUnread}
+              </span>
+            )}
          </NavLink>
          <NavLink to="/student/leaderboard" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
             <FaTrophy className="icon" /> Leaderboard

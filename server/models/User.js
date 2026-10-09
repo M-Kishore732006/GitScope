@@ -84,6 +84,14 @@ const userSchema = new mongoose.Schema({
   mustChangePassword: {
     type: Boolean,
     default: false
+  },
+  isOnline: {
+    type: Boolean,
+    default: false
+  },
+  lastSeen: {
+    type: Date,
+    default: Date.now
   }
 }, {
   timestamps: true

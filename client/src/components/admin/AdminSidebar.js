@@ -14,10 +14,14 @@ import {
   FaCog,
   FaSignOutAlt,
   FaTimes,
-  FaRocket
+  FaRocket,
+  FaComments
 } from 'react-icons/fa';
+import { useSocket } from '../../context/SocketContext';
 
 const AdminSidebar = ({ mobileOpen, closeSidebar }) => {
+  const { totalUnread } = useSocket();
+
   const handleLogout = () => {
     localStorage.removeItem('userInfo');
     window.location.href = '/login';
@@ -47,6 +51,17 @@ const AdminSidebar = ({ mobileOpen, closeSidebar }) => {
         
         <NavLink to="/admin/dashboard" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`} end>
           <FaChartPie className="icon" /> Dashboard
+        </NavLink>
+
+        <NavLink to="/admin/messages" className={({ isActive }) => `sidebar-link d-flex align-items-center justify-content-between ${isActive ? 'active' : ''}`}>
+          <span className="d-flex align-items-center">
+            <FaComments className="icon me-2" /> Messages
+          </span>
+          {totalUnread > 0 && (
+            <span className="badge bg-danger rounded-pill px-2 py-1 small">
+              {totalUnread > 99 ? '99+' : totalUnread}
+            </span>
+          )}
         </NavLink>
 
         <div className="text-muted small text-uppercase fw-bold mt-3 mb-2 ms-3" style={{ fontSize: '0.65rem', letterSpacing: '1px' }}>

@@ -62,16 +62,23 @@ import AdminReports from './pages/admin/AdminReports';
 import AuditLogs from './pages/admin/AuditLogs';
 import AdminSettings from './pages/admin/AdminSettings';
 
+// Chat Module
+import { SocketProvider } from './context/SocketContext';
+import ChatToastNotification from './components/chat/ChatToastNotification';
+import ChatPage from './pages/chat/ChatPage';
+
 function App() {
   return (
-    <Router>
-      <Routes>
+    <SocketProvider>
+      <Router>
+        <ChatToastNotification />
+        <Routes>
 
-        <Route element={<PublicRoute />}>
-          <Route path="/" element={<Landing />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-        </Route>
+          <Route element={<PublicRoute />}>
+            <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+          </Route>
 
         <Route path="/portfolio/:username" element={<PublicPortfolio />} />
 
@@ -122,6 +129,11 @@ function App() {
               element={<RepositoryDetails />}
             />
 
+            <Route
+              path="/student/messages"
+              element={<ChatPage />}
+            />
+
           </Route>
 
           <Route
@@ -138,6 +150,7 @@ function App() {
           <Route element={<StaffLayout />}>
             <Route path="/staff/dashboard" element={<StaffDashboard />} />
             <Route path="/staff/students" element={<MyStudents />} />
+            <Route path="/staff/messages" element={<ChatPage />} />
             <Route path="/staff/activity" element={<StaffGithubActivity />} />
             <Route path="/staff/open-source" element={<StaffOpenSource />} />
             <Route path="/staff/monitoring" element={<StaffActivityMonitoring />} />
@@ -162,6 +175,7 @@ function App() {
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/staff" element={<StaffManagement />} />
             <Route path="/admin/students" element={<StudentManagement />} />
+            <Route path="/admin/messages" element={<ChatPage />} />
             <Route path="/admin/github-accounts" element={<GithubAccounts />} />
             <Route path="/admin/analytics" element={<GithubAnalytics />} />
             <Route path="/admin/rankings" element={<StudentRankings />} />
@@ -184,6 +198,7 @@ function App() {
 
       </Routes>
     </Router>
+  </SocketProvider>
   );
 }
 

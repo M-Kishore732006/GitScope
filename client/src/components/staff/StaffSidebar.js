@@ -14,10 +14,14 @@ import {
   FaUser, 
   FaSignOutAlt,
   FaTimes,
-  FaRocket
+  FaRocket,
+  FaComments
 } from 'react-icons/fa';
+import { useSocket } from '../../context/SocketContext';
 
 const StaffSidebar = ({ mobileOpen, closeSidebar }) => {
+  const { totalUnread } = useSocket();
+
   const handleLogout = () => {
     localStorage.removeItem('userInfo');
     window.location.href = '/login';
@@ -51,6 +55,17 @@ const StaffSidebar = ({ mobileOpen, closeSidebar }) => {
 
         <NavLink to="/staff/students" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
           <FaUserGraduate className="icon" /> My Students
+        </NavLink>
+
+        <NavLink to="/staff/messages" className={({ isActive }) => `sidebar-link d-flex align-items-center justify-content-between ${isActive ? 'active' : ''}`}>
+          <span className="d-flex align-items-center">
+            <FaComments className="icon me-2" /> Messages
+          </span>
+          {totalUnread > 0 && (
+            <span className="badge bg-danger rounded-pill px-2 py-1 small">
+              {totalUnread > 99 ? '99+' : totalUnread}
+            </span>
+          )}
         </NavLink>
 
         <div className="text-muted small text-uppercase fw-bold mt-3 mb-2 ms-3" style={{ fontSize: '0.65rem', letterSpacing: '1px' }}>
