@@ -407,7 +407,7 @@ const StudentProfile = () => {
 
             {/* Password Change Modal */}
             {activeModal === 'password' && (
-                <div className="modal d-block" tabIndex="-1" style={{ zIndex: 1050, marginTop: '10vh' }}>
+                <div className="modal d-block" tabIndex="-1" style={{ zIndex: 1050 }}>
                     <div className="modal-dialog modal-dialog-centered">
                         <div className="modal-content border-0 shadow-lg rounded-4">
                             <div className="modal-header border-0 pb-0">
@@ -453,7 +453,7 @@ const StudentProfile = () => {
 
             {/* Unsync GitHub Confirmation Modal */}
             {activeModal === 'unsync' && (
-                <div className="modal d-block" tabIndex="-1" style={{ zIndex: 1050, marginTop: '10vh' }}>
+                <div className="modal d-block" tabIndex="-1" style={{ zIndex: 1050 }}>
                     <div className="modal-dialog modal-dialog-centered">
                         <div className="modal-content border-0 shadow-lg border-top border-warning border-4 rounded-4">
                             <div className="modal-header border-0 pb-0">
@@ -484,7 +484,7 @@ const StudentProfile = () => {
 
             {/* Permanent Deletion Modal */}
             {activeModal === 'delete' && (
-                <div className="modal d-block" tabIndex="-1" style={{ zIndex: 1050, marginTop: '10vh' }}>
+                <div className="modal d-block" tabIndex="-1" style={{ zIndex: 1050 }}>
                     <div className="modal-dialog modal-dialog-centered">
                         <div className="modal-content border-0 shadow-lg border-top border-danger border-4 rounded-4">
                             <div className="modal-header border-0 pb-0">

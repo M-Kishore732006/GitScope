@@ -290,4 +290,36 @@ body.dark-mode .custom-checkbox input[type="checkbox"],
 [data-theme="dark"] .custom-checkbox input[type="checkbox"] {
   background-color: #0F172A !important;
   border-color: #475569 !important;
+}
+
+/* =========================================================
+   RESPONSIVE MEDIA QUERIES FOR AUTH PAGES
+========================================================= */
+@media (max-width: 576px) {
+  .auth-layout {
+    padding: 1rem 0.75rem;
+  }
+  .solid-card {
+    padding: 1.5rem 1.25rem !important;
+    border-radius: 12px !important;
+  }
+  .auth-title {
+    font-size: 1.4rem !important;
+  }
+  .auth-subtitle {
+    font-size: 0.85rem !important;
+    margin-bottom: 1.25rem !important;
+  }
+  .auth-input {
+    padding: 0.75rem 0.875rem 0.75rem 2.6rem !important;
+    font-size: 0.9rem !important;
+  }
+  .auth-input-icon {
+    left: 0.85rem !important;
+    font-size: 0.95rem !important;
+  }
+  .btn-primary-solid {
+    padding: 0.75rem !important;
+    font-size: 0.95rem !important;
+  }
 }

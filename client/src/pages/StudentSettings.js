@@ -146,7 +146,7 @@ const StudentSettings = () => {
           {/* Sidebar Tabs Navigation */}
           <div className="col-12 col-lg-3">
             <div className="saas-card p-2">
-              <div className="nav flex-column nav-pills gap-1">
+              <div className="nav flex-row flex-lg-column nav-pills gap-1 settings-nav-pills">
                 {[
                   { id: 'account', label: 'Account Profile', icon: FaUser },
                   { id: 'github', label: 'GitHub Connection', icon: FaGithub },
@@ -159,7 +159,7 @@ const StudentSettings = () => {
                   return (
                     <button
                       key={tab.id}
-                      className={`nav-link text-start d-flex align-items-center gap-3 py-3 px-3 rounded-3 fw-semibold border-0 ${
+                      className={`nav-link text-start text-nowrap d-flex align-items-center gap-2 gap-lg-3 py-2 py-lg-3 px-3 rounded-3 fw-semibold border-0 ${
                         isActive 
                           ? tab.isDanger ? 'bg-danger text-white' : 'bg-primary text-white shadow-sm' 
                           : tab.isDanger ? 'text-danger hover-bg-danger' : 'text-dark hover-bg-light'

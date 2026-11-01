@@ -472,7 +472,7 @@ const StaffManagement = () => {
 
       {/* 2. Edit Staff Modal */}
       {activeModal === 'edit' && selectedStaff && (
-        <div className="modal d-block" tabIndex="-1" style={{ zIndex: 1050, marginTop: '10vh' }}>
+        <div className="modal d-block" tabIndex="-1" style={{ zIndex: 1050 }}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '1rem' }}>
               <div className="modal-header border-0 pb-0">
@@ -525,7 +525,7 @@ const StaffManagement = () => {
 
       {/* 3. Assign Students Modal */}
       {activeModal === 'assign' && selectedStaff && (
-        <div className="modal d-block" tabIndex="-1" style={{ zIndex: 1050, marginTop: '5vh' }}>
+        <div className="modal d-block" tabIndex="-1" style={{ zIndex: 1050 }}>
           <div className="modal-dialog modal-dialog-centered modal-lg">
             <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '1rem' }}>
               <div className="modal-header border-0 pb-0">
@@ -595,7 +595,7 @@ const StaffManagement = () => {
 
       {/* 4. Reset Password Modal */}
       {activeModal === 'resetPwd' && selectedStaff && (
-        <div className="modal d-block" tabIndex="-1" style={{ zIndex: 1050, marginTop: '10vh' }}>
+        <div className="modal d-block" tabIndex="-1" style={{ zIndex: 1050 }}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '1rem' }}>
               <div className="modal-header border-0 pb-0">
@@ -631,7 +631,7 @@ const StaffManagement = () => {
 
       {/* 5. Delete Staff Modal */}
       {activeModal === 'delete' && selectedStaff && (
-        <div className="modal d-block" tabIndex="-1" style={{ zIndex: 1050, marginTop: '10vh' }}>
+        <div className="modal d-block" tabIndex="-1" style={{ zIndex: 1050 }}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content border-0 shadow-lg border-top border-danger border-4" style={{ borderRadius: '1rem' }}>
               <div className="modal-header border-0 pb-0">

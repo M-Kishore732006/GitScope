@@ -27,24 +27,26 @@ const ContributionHeatmap = ({ calendar }) => {
   }
 
   return (
-    <div className="d-flex justify-content-center" style={{ overflowX: 'auto', gap: '4px', paddingBottom: '10px' }}>
-      {weeks.map((week, wIdx) => (
-        <div key={wIdx} className="d-flex flex-column" style={{ gap: '4px' }}>
-          {week.map((day, dIdx) => (
-            <div
-              key={dIdx}
-              title={`${new Date(day.date).toDateString()}: ${day.count} contributions`}
-              style={{
-                width: '14px',
-                height: '14px',
-                backgroundColor: getColor(day.count),
-                borderRadius: '3px',
-                cursor: 'pointer'
-              }}
-            ></div>
-          ))}
-        </div>
-      ))}
+    <div className="heatmap-scroll-container">
+      <div className="d-flex heatmap-inner" style={{ gap: '4px' }}>
+        {weeks.map((week, wIdx) => (
+          <div key={wIdx} className="d-flex flex-column" style={{ gap: '4px' }}>
+            {week.map((day, dIdx) => (
+              <div
+                key={dIdx}
+                title={`${new Date(day.date).toDateString()}: ${day.count} contributions`}
+                style={{
+                  width: '14px',
+                  height: '14px',
+                  backgroundColor: getColor(day.count),
+                  borderRadius: '3px',
+                  cursor: 'pointer'
+                }}
+              ></div>
+            ))}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
@@ -189,16 +191,16 @@ const StudentDashboard = () => {
                        )}
                     </div>
                     
-                    <div className="d-flex gap-4 mt-4 mt-lg-0">
-                       <div className="text-center px-4 border-end">
+                    <div className="d-flex flex-wrap justify-content-around justify-content-lg-end gap-2 gap-sm-4 mt-3 mt-lg-0">
+                       <div className="text-center px-2 px-sm-3 px-md-4 border-end">
                           <p className="text-muted small fw-bold text-uppercase mb-1">Score</p>
                           <h3 className="fw-bold text-primary mb-0">{stats?.contributionScore || 0}</h3>
                        </div>
-                       <div className="text-center px-4 border-end">
+                       <div className="text-center px-2 px-sm-3 px-md-4 border-end">
                           <p className="text-muted small fw-bold text-uppercase mb-1">Rank</p>
                           <h3 className="fw-bold text-dark mb-0">#{stats?.overallRank > 0 ? stats.overallRank : '-'}</h3>
                        </div>
-                       <div className="text-center px-4">
+                       <div className="text-center px-2 px-sm-3 px-md-4">
                           <p className="text-muted small fw-bold text-uppercase mb-1">Level</p>
                           <h3 className="fw-bold text-warning mb-0">{stats?.level || 'Bronze'}</h3>
                        </div>

@@ -30,24 +30,26 @@ const ContributionHeatmap = ({ calendar }) => {
   }
 
   return (
-    <div className="d-flex justify-content-center" style={{ overflowX: 'auto', gap: '4px', paddingBottom: '10px' }}>
-      {weeks.map((week, wIdx) => (
-        <div key={wIdx} className="d-flex flex-column" style={{ gap: '4px' }}>
-          {week.map((day, dIdx) => (
-            <div
-              key={dIdx}
-              title={`${new Date(day.date).toDateString()}: ${day.count} contributions`}
-              style={{
-                width: '14px',
-                height: '14px',
-                backgroundColor: getColor(day.count),
-                borderRadius: '3px',
-                cursor: 'pointer'
-              }}
-            ></div>
-          ))}
-        </div>
-      ))}
+    <div className="heatmap-scroll-container">
+      <div className="d-flex heatmap-inner" style={{ gap: '4px' }}>
+        {weeks.map((week, wIdx) => (
+          <div key={wIdx} className="d-flex flex-column" style={{ gap: '4px' }}>
+            {week.map((day, dIdx) => (
+              <div
+                key={dIdx}
+                title={`${new Date(day.date).toDateString()}: ${day.count} contributions`}
+                style={{
+                  width: '14px',
+                  height: '14px',
+                  backgroundColor: getColor(day.count),
+                  borderRadius: '3px',
+                  cursor: 'pointer'
+                }}
+              ></div>
+            ))}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

@@ -81,7 +81,7 @@ const StaffDashboard = () => {
       {/* KPI Cards Grid (Requirement 2: 10 Cards) */}
       <div className="row g-3 mb-4">
         {/* Card 1: Total Assigned */}
-        <div className="col-12 col-sm-6 col-lg-4 col-xl-2.4">
+        <div className="col-12 col-sm-6 col-md-4 col-xl">
           <div className="saas-card h-100">
             <div className="d-flex align-items-center justify-content-between mb-2">
               <span className="text-muted small fw-semibold">Assigned Students</span>
@@ -95,7 +95,7 @@ const StaffDashboard = () => {
         </div>
 
         {/* Card 2: GitHub Connected */}
-        <div className="col-12 col-sm-6 col-lg-4 col-xl-2.4">
+        <div className="col-12 col-sm-6 col-md-4 col-xl">
           <div className="saas-card h-100">
             <div className="d-flex align-items-center justify-content-between mb-2">
               <span className="text-muted small fw-semibold">Connected</span>
@@ -109,7 +109,7 @@ const StaffDashboard = () => {
         </div>
 
         {/* Card 3: GitHub Not Connected */}
-        <div className="col-12 col-sm-6 col-lg-4 col-xl-2.4">
+        <div className="col-12 col-sm-6 col-md-4 col-xl">
           <div className="saas-card h-100">
             <div className="d-flex align-items-center justify-content-between mb-2">
               <span className="text-muted small fw-semibold">Not Connected</span>
@@ -123,7 +123,7 @@ const StaffDashboard = () => {
         </div>
 
         {/* Card 4: Active Students */}
-        <div className="col-12 col-sm-6 col-lg-4 col-xl-2.4">
+        <div className="col-12 col-sm-6 col-md-4 col-xl">
           <div className="saas-card h-100">
             <div className="d-flex align-items-center justify-content-between mb-2">
               <span className="text-muted small fw-semibold">Active Students</span>
@@ -137,7 +137,7 @@ const StaffDashboard = () => {
         </div>
 
         {/* Card 5: Inactive Students */}
-        <div className="col-12 col-sm-6 col-lg-4 col-xl-2.4">
+        <div className="col-12 col-sm-6 col-md-4 col-xl">
           <div className="saas-card h-100">
             <div className="d-flex align-items-center justify-content-between mb-2">
               <span className="text-muted small fw-semibold">Inactive Students</span>

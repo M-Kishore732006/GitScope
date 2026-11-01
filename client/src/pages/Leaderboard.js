@@ -55,10 +55,10 @@ const Leaderboard = () => {
                     <h2 className="fw-bold mb-1"><FaTrophy className="text-warning me-2"/> Global Leaderboard</h2>
                     <p className="text-muted mb-3 mb-md-0">See how you rank among other developers in the university.</p>
                 </div>
-                <div className="btn-group shadow-sm bg-white rounded-3">
-                   <button className={`btn  ${filter === 'overall' ? 'btn-primary' : 'btn-light border'} px-4 py-2`} onClick={() => setFilter('overall')}>Overall</button>
-                   <button className={`btn  ${filter === 'department' ? 'btn-primary' : 'btn-light border'} px-4 py-2`} onClick={() => setFilter('department')}>Department</button>
-                   <button className={`btn  ${filter === 'year' ? 'btn-primary' : 'btn-light border'} px-4 py-2`} onClick={() => setFilter('year')}>By Year</button>
+                <div className="btn-group shadow-sm bg-white rounded-3 flex-wrap flex-sm-nowrap w-100 w-sm-auto mt-2 mt-md-0">
+                   <button className={`btn btn-sm ${filter === 'overall' ? 'btn-primary' : 'btn-light border'} px-3 px-md-4 py-2 flex-grow-1 flex-sm-grow-0`} onClick={() => setFilter('overall')}>Overall</button>
+                   <button className={`btn btn-sm ${filter === 'department' ? 'btn-primary' : 'btn-light border'} px-3 px-md-4 py-2 flex-grow-1 flex-sm-grow-0`} onClick={() => setFilter('department')}>Department</button>
+                   <button className={`btn btn-sm ${filter === 'year' ? 'btn-primary' : 'btn-light border'} px-3 px-md-4 py-2 flex-grow-1 flex-sm-grow-0`} onClick={() => setFilter('year')}>By Year</button>
                 </div>
             </div>
 

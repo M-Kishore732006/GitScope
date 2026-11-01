@@ -327,7 +327,7 @@ const StaffAtRiskAnalytics = () => {
       {/* Summary Metric Cards */}
       <div className="row g-3 mb-4">
         {/* Total Assigned */}
-        <div className="col-12 col-sm-6 col-xl">
+        <div className="col-12 col-sm-6 col-md-4 col-xl">
           <div className="saas-card h-100">
             <div className="d-flex align-items-center justify-content-between">
               <div>
@@ -343,7 +343,7 @@ const StaffAtRiskAnalytics = () => {
         </div>
 
         {/* High Risk */}
-        <div className="col-12 col-sm-6 col-xl">
+        <div className="col-12 col-sm-6 col-md-4 col-xl">
           <div className="saas-card h-100">
             <div className="d-flex align-items-center justify-content-between">
               <div>
@@ -359,7 +359,7 @@ const StaffAtRiskAnalytics = () => {
         </div>
 
         {/* Moderate Risk */}
-        <div className="col-12 col-sm-6 col-xl">
+        <div className="col-12 col-sm-6 col-md-4 col-xl">
           <div className="saas-card h-100">
             <div className="d-flex align-items-center justify-content-between">
               <div>
@@ -375,7 +375,7 @@ const StaffAtRiskAnalytics = () => {
         </div>
 
         {/* Healthy Activity */}
-        <div className="col-12 col-sm-6 col-xl">
+        <div className="col-12 col-sm-6 col-md-4 col-xl">
           <div className="saas-card h-100">
             <div className="d-flex align-items-center justify-content-between">
               <div>
@@ -391,7 +391,7 @@ const StaffAtRiskAnalytics = () => {
         </div>
 
         {/* Missing GitHub Link */}
-        <div className="col-12 col-sm-6 col-xl">
+        <div className="col-12 col-sm-6 col-md-4 col-xl">
           <div className="saas-card h-100">
             <div className="d-flex align-items-center justify-content-between">
               <div>

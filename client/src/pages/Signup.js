@@ -117,7 +117,7 @@ const Signup = () => {
       {errorMsg && <div className="alert alert-danger p-2 text-center" style={{fontSize: '0.875rem'}}>{errorMsg}</div>}
       <form onSubmit={handleSubmit}>
         
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0 1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '0 1rem' }}>
           <AuthInput
             icon={FaUser}
             type="text"
@@ -157,7 +157,7 @@ const Signup = () => {
   onChange={handleChange}
 />
         
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0 1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '0 1rem' }}>
           <AuthSelect
             icon={FaBuilding}
             name="department"
@@ -189,7 +189,7 @@ const Signup = () => {
           />
         </div>
         
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0 1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '0 1rem' }}>
           <AuthInput
             icon={FaLock}
             type="password"

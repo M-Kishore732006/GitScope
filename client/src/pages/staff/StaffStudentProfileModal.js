@@ -79,25 +79,25 @@ const StaffStudentProfileModal = ({ studentId, onClose }) => {
           </div>
 
           {/* Navigation Tabs */}
-          <div className="bg-light border-bottom px-4 pt-2">
-            <ul className="nav nav-tabs border-0 gap-2">
+          <div className="bg-light border-bottom px-3 px-md-4 pt-2">
+            <ul className="nav nav-tabs border-0 gap-1 gap-md-2 flex-nowrap overflow-x-auto pb-1" style={{ WebkitOverflowScrolling: 'touch' }}>
               <li className="nav-item">
-                <button className={`nav-link border-0 fw-semibold ${activeTab === 'overview' ? 'active border-bottom border-primary border-3 text-primary' : 'text-muted'}`} onClick={() => setActiveTab('overview')}>
+                <button className={`nav-link text-nowrap border-0 fw-semibold ${activeTab === 'overview' ? 'active border-bottom border-primary border-3 text-primary' : 'text-muted'}`} onClick={() => setActiveTab('overview')}>
                   <FaUser className="me-2" /> Overview
                 </button>
               </li>
               <li className="nav-item">
-                <button className={`nav-link border-0 fw-semibold ${activeTab === 'activity' ? 'active border-bottom border-primary border-3 text-primary' : 'text-muted'}`} onClick={() => setActiveTab('activity')}>
+                <button className={`nav-link text-nowrap border-0 fw-semibold ${activeTab === 'activity' ? 'active border-bottom border-primary border-3 text-primary' : 'text-muted'}`} onClick={() => setActiveTab('activity')}>
                   <FaHistory className="me-2" /> Activity Timeline
                 </button>
               </li>
               <li className="nav-item">
-                <button className={`nav-link border-0 fw-semibold ${activeTab === 'repositories' ? 'active border-bottom border-primary border-3 text-primary' : 'text-muted'}`} onClick={() => setActiveTab('repositories')}>
+                <button className={`nav-link text-nowrap border-0 fw-semibold ${activeTab === 'repositories' ? 'active border-bottom border-primary border-3 text-primary' : 'text-muted'}`} onClick={() => setActiveTab('repositories')}>
                   <FaBook className="me-2" /> Repositories ({repos.length})
                 </button>
               </li>
               <li className="nav-item">
-                <button className={`nav-link border-0 fw-semibold ${activeTab === 'opensource' ? 'active border-bottom border-primary border-3 text-primary' : 'text-muted'}`} onClick={() => setActiveTab('opensource')}>
+                <button className={`nav-link text-nowrap border-0 fw-semibold ${activeTab === 'opensource' ? 'active border-bottom border-primary border-3 text-primary' : 'text-muted'}`} onClick={() => setActiveTab('opensource')}>
                   <FaGlobe className="me-2" /> Open-Source Contributions
                 </button>
               </li>

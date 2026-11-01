@@ -113,11 +113,11 @@ const SkillRadar = ({ stats, repositories = [] }) => {
 
       <div className="row align-items-center g-4">
         {/* Radar Chart Column */}
-        <div className="col-12 col-lg-7" style={{ minHeight: '340px', height: '340px' }}>
+        <div className="col-12 col-lg-7" style={{ minHeight: '320px', height: '340px' }}>
           <ResponsiveContainer width="100%" height="100%">
-            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
+            <RadarChart cx="50%" cy="50%" outerRadius="68%" data={chartData}>
               <PolarGrid stroke="var(--border-color, #E5E7EB)" />
-              <PolarAngleAxis dataKey="subject" tick={{ fill: 'var(--text-main, #1F2937)', fontSize: 13, fontWeight: 600 }} />
+              <PolarAngleAxis dataKey="subject" tick={{ fill: 'var(--text-main, #1F2937)', fontSize: 11, fontWeight: 600 }} />
               <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="var(--text-muted, #6B7280)" />
               <Radar name="Real AI Telemetry" dataKey="score" stroke="#818CF8" fill="#818CF8" fillOpacity={0.5} />
               <Tooltip 

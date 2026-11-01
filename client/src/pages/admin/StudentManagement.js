@@ -610,7 +610,7 @@ const StudentManagement = () => {
 
       {/* 3. Reset Password Modal */}
       {activeModal === 'resetPwd' && selectedStudent && (
-        <div className="modal d-block" tabIndex="-1" style={{ zIndex: 1050, marginTop: '10vh' }}>
+        <div className="modal d-block" tabIndex="-1" style={{ zIndex: 1050 }}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '1rem' }}>
               <div className="modal-header border-0 pb-0">
@@ -646,7 +646,7 @@ const StudentManagement = () => {
 
       {/* 4. Delete Student Modal */}
       {activeModal === 'delete' && selectedStudent && (
-        <div className="modal d-block" tabIndex="-1" style={{ zIndex: 1050, marginTop: '10vh' }}>
+        <div className="modal d-block" tabIndex="-1" style={{ zIndex: 1050 }}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content border-0 shadow-lg border-top border-danger border-4" style={{ borderRadius: '1rem' }}>
               <div className="modal-header border-0 pb-0">
