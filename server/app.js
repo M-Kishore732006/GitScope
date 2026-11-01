@@ -28,6 +28,24 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
+// Root Endpoint - Health and Status
+app.get('/', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Backend API is running successfully',
+    status: 'OK'
+  });
+});
+
+// Base API Endpoint
+app.get('/api', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'GitScope Backend API is running successfully',
+    status: 'OK'
+  });
+});
+
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/student', require('./routes/studentRoutes'));
@@ -37,10 +55,22 @@ app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/chat', require('./routes/chatRoutes'));
 app.use('/api/notifications', require('./routes/staffRoutes'));
 
+// 404 Handler for undefined API routes and requests
+app.use((req, res, next) => {
+  res.status(404).json({
+    success: false,
+    message: `Cannot ${req.method} ${req.originalUrl}`,
+    status: 'NOT_FOUND'
+  });
+});
+
 // Basic generic error handler - do not expose internal server errors
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Internal Server Error' });
+  console.error(err.stack || err.message || err);
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || 'Internal Server Error'
+  });
 });
 
 module.exports = app;

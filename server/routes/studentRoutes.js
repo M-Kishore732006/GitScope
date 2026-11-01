@@ -14,8 +14,12 @@ const {
   getRepositoryById,
   getAchievements,
   getLeaderboards,
-  getAICodeHealth
+  getAICodeHealth,
+  getPublicPortfolio
 } = require('../controllers/studentController');
+
+// Public developer portfolio endpoint
+router.get('/public/:username', getPublicPortfolio);
 
 router.put('/profile', protect, authorize('student'), updateProfile);
 router.put('/password', protect, authorize('student'), changePassword);

@@ -362,6 +362,39 @@ const getAICodeHealth = async (req, res) => {
     }
 };
 
+// @desc    Get Public Developer Portfolio
+// @route   GET /api/student/public/:username
+// @access  Public
+const getPublicPortfolio = async (req, res) => {
+  try {
+    const { username } = req.params;
+    const user = await User.findOne({
+      $or: [
+        { username: new RegExp(`^${username}$`, 'i') },
+        { githubUsername: new RegExp(`^${username}$`, 'i') },
+        { rollNumber: new RegExp(`^${username}$`, 'i') }
+      ]
+    }).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Student profile not found' });
+    }
+
+    const stats = await GithubStats.findOne({ user: user._id });
+
+    res.json({
+      success: true,
+      student: user,
+      stats: stats || {},
+      repositories: stats?.repositoriesList || [],
+      achievements: stats?.achievements || []
+    });
+  } catch (error) {
+    console.error('getPublicPortfolio Error:', error);
+    res.status(500).json({ success: false, message: 'Error fetching public portfolio' });
+  }
+};
+
 module.exports = {
   updateProfile,
   changePassword,
@@ -375,5 +408,6 @@ module.exports = {
   getRepositoryById,
   getAchievements,
   getLeaderboards,
-  getAICodeHealth
+  getAICodeHealth,
+  getPublicPortfolio
 };
