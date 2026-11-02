@@ -58,11 +58,11 @@ const ChatToastNotification = () => {
       </div>
 
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div className="d-flex align-items-center justify-content-between mb-1">
-          <span className="fw-bold text-main small text-truncate" style={{ maxWidth: '190px' }}>
+        <div className="d-flex align-items-center justify-content-between mb-1 gap-2">
+          <span className="fw-bold text-main small text-truncate flex-grow-1" style={{ minWidth: 0 }}>
             {toastNotification.conversationName}
           </span>
-          <span className="text-muted" style={{ fontSize: '0.7rem' }}>
+          <span className="text-muted flex-shrink-0" style={{ fontSize: '0.7rem' }}>
             Just now
           </span>
         </div>

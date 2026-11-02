@@ -53,7 +53,7 @@ const ConversationList = ({
     } else if (c.type === 'group') {
       return (c.name || '').toLowerCase().includes(q);
     } else {
-      const other = c.participants?.find(p => p._id !== currentUserId) || {};
+      const other = c.participants?.find(p => String(p?._id || p) !== String(currentUserId)) || {};
       return (
         (other.fullName || other.username || '').toLowerCase().includes(q) ||
         (other.rollNumber || '').toLowerCase().includes(q) ||
@@ -140,7 +140,7 @@ const ConversationList = ({
           </div>
         ) : filteredConversations.length > 0 ? (
           filteredConversations.map(conv => {
-            const isActive = activeConversation?._id === conv._id;
+            const isActive = String(activeConversation?._id || '') === String(conv._id || '');
             const isGroup = conv.type === 'group';
             const isGlobal = conv.type === 'global';
 
@@ -148,16 +148,17 @@ const ConversationList = ({
             let otherParticipant = null;
 
             if (!isGroup && !isGlobal) {
-              otherParticipant = conv.participants?.find(p => p._id !== currentUserId) || {};
+              otherParticipant = conv.participants?.find(p => String(p?._id || p) !== String(currentUserId)) || {};
               title = otherParticipant.fullName || otherParticipant.username || 'Direct Chat';
             } else if (isGlobal) {
               title = conv.name || 'Chat to All';
             }
 
-            const presence = otherParticipant ? onlineUsers[otherParticipant._id] : null;
+            const otherId = String(otherParticipant?._id || otherParticipant || '');
+            const presence = otherId ? onlineUsers[otherId] : null;
             const isOnline = presence ? presence.isOnline : otherParticipant?.isOnline;
 
-            const isTyping = typingStatusMap && typingStatusMap[conv._id];
+            const isTyping = typingStatusMap && typingStatusMap[String(conv._id)];
 
             return (
               <div 
@@ -192,8 +193,8 @@ const ConversationList = ({
 
                 {/* Conversation Body */}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div className="d-flex align-items-center justify-content-between mb-1">
-                    <div className="d-flex align-items-center gap-1 overflow-hidden" style={{ maxWidth: '170px' }}>
+                  <div className="d-flex align-items-center justify-content-between mb-1 gap-2">
+                    <div className="d-flex align-items-center gap-1 overflow-hidden flex-grow-1" style={{ minWidth: 0 }}>
                       <span className="fw-bold text-main small text-truncate">
                         {title}
                       </span>
@@ -207,13 +208,13 @@ const ConversationList = ({
                       )}
                     </div>
 
-                    <span className="text-muted" style={{ fontSize: '0.7rem' }}>
+                    <span className="text-muted text-nowrap flex-shrink-0" style={{ fontSize: '0.7rem' }}>
                       {formatTimestamp(conv.lastMessageAt || conv.updatedAt)}
                     </span>
                   </div>
 
-                  <div className="d-flex align-items-center justify-content-between">
-                    <div className="text-truncate small" style={{ fontSize: '0.8rem', maxWidth: '210px' }}>
+                  <div className="d-flex align-items-center justify-content-between gap-2">
+                    <div className="text-truncate small flex-grow-1" style={{ fontSize: '0.8rem', minWidth: 0 }}>
                       {isTyping ? (
                         <span className="text-primary fw-semibold fst-italic">
                           {isTyping} is typing...

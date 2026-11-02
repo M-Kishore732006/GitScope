@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { FaSearch, FaMoon, FaSun, FaCloudDownloadAlt, FaChevronDown, FaBars, FaUser, FaCog, FaSignOutAlt, FaComments } from 'react-icons/fa';
 import { toTitleCase } from '../../utils/formatters';
 import { useTheme } from '../../context/ThemeContext';
@@ -7,6 +7,7 @@ import { useSocket } from '../../context/SocketContext';
 import NotificationDropdown from '../NotificationDropdown';
 
 const TopNav = ({ user, stats, handleLogout, toggleSidebar, sidebarCollapsed }) => {
+  const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const { theme, toggleTheme } = useTheme();
@@ -64,7 +65,7 @@ const TopNav = ({ user, stats, handleLogout, toggleSidebar, sidebarCollapsed }) 
           {/* Chat Messages Button */}
           <Link 
             to="/student/messages"
-            className="btn btn-light rounded-circle shadow-sm border p-2 text-muted theme-btn-icon d-flex align-items-center justify-content-center position-relative"
+            className={`btn btn-light rounded-circle shadow-sm border p-2 text-muted theme-btn-icon d-flex align-items-center justify-content-center position-relative ${location.pathname.includes('/messages') ? 'active bg-primary-subtle text-primary border-primary' : ''}`}
             style={{ width: 40, height: 40 }}
             title="Messages"
             aria-label="Messages"

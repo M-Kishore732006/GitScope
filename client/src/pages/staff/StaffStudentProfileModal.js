@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { 
   FaTimes, 
@@ -13,11 +14,13 @@ import {
   FaSync,
   FaCheckCircle,
   FaStar,
-  FaCode
+  FaCode,
+  FaComments
 } from 'react-icons/fa';
 import { toTitleCase } from '../../utils/formatters';
 
 const StaffStudentProfileModal = ({ studentId, onClose }) => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [profileData, setProfileData] = useState(null);
   const [activityTimeline, setActivityTimeline] = useState([]);
@@ -75,7 +78,21 @@ const StaffStudentProfileModal = ({ studentId, onClose }) => {
                 </small>
               </div>
             </div>
-            <button type="button" className="btn-close btn-close-white" onClick={onClose}></button>
+
+            <div className="d-flex align-items-center gap-2">
+              <button 
+                type="button" 
+                className="btn btn-sm btn-outline-light rounded-pill px-3 py-1 d-flex align-items-center gap-1 shadow-sm"
+                onClick={() => {
+                  onClose();
+                  navigate(`/staff/messages?userId=${student?._id}`);
+                }}
+                title="Open Direct Message Thread"
+              >
+                <FaComments /> <span className="d-none d-sm-inline">Message</span>
+              </button>
+              <button type="button" className="btn-close btn-close-white" onClick={onClose}></button>
+            </div>
           </div>
 
           {/* Navigation Tabs */}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, Outlet } from 'react-router-dom';
+import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import AdminSidebar from './AdminSidebar';
 import AdminTopNav from './AdminTopNav';
@@ -7,6 +7,8 @@ import '../../styles/dashboard.css';
 
 const AdminLayout = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isMessagesPage = location.pathname.includes('/messages');
   const [adminUser, setAdminUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -68,14 +70,14 @@ const AdminLayout = () => {
         toggleSidebar={toggleSidebar} 
       />
       {sidebarOpen && <div className="sidebar-backdrop d-lg-none" onClick={closeSidebar}></div>}
-      <div className={`main-content ${sidebarCollapsed ? 'expanded-full' : ''}`}>
+      <div className={`main-content ${sidebarCollapsed ? 'expanded-full' : ''} ${isMessagesPage ? 'main-content-chat' : ''}`}>
         <AdminTopNav 
           user={adminUser} 
           handleLogout={handleLogout} 
           toggleSidebar={toggleSidebar} 
           sidebarCollapsed={sidebarCollapsed}
         />
-        <main className="p-3 p-md-4 p-lg-5">
+        <main className={isMessagesPage ? "chat-page-main" : "p-3 p-md-4 p-lg-5"}>
           <Outlet context={{ user: adminUser }} />
         </main>
       </div>

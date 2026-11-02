@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
-import { FaSearch, FaChevronDown, FaShieldAlt, FaUserGraduate, FaUserTie, FaGithub, FaBars, FaSun, FaMoon, FaCog, FaSignOutAlt } from 'react-icons/fa';
+import { FaSearch, FaChevronDown, FaShieldAlt, FaUserGraduate, FaUserTie, FaGithub, FaBars, FaSun, FaMoon, FaCog, FaSignOutAlt, FaComments } from 'react-icons/fa';
 import { toTitleCase } from '../../utils/formatters';
 import { useTheme } from '../../context/ThemeContext';
+import { useSocket } from '../../context/SocketContext';
 import NotificationDropdown from '../NotificationDropdown';
 
 const AdminTopNav = ({ user, handleLogout, toggleSidebar, sidebarCollapsed }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { totalUnread } = useSocket();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState(null);
@@ -169,6 +172,22 @@ const AdminTopNav = ({ user, handleLogout, toggleSidebar, sidebarCollapsed }) =>
         >
            {theme === 'dark' ? <FaSun className="text-warning fs-5" /> : <FaMoon className="fs-5" />}
         </button>
+
+        {/* Chat Messages Button */}
+        <Link 
+          to="/admin/messages"
+          className={`btn btn-light rounded-circle shadow-sm border p-2 text-muted theme-btn-icon d-flex align-items-center justify-content-center position-relative ${location.pathname.includes('/messages') ? 'active bg-primary-subtle text-primary border-primary' : ''}`}
+          style={{ width: 40, height: 40 }}
+          title="Messages & Communication"
+          aria-label="Messages"
+        >
+          <FaComments className="fs-6" />
+          {totalUnread > 0 && (
+            <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" style={{ fontSize: '0.65rem' }}>
+              {totalUnread > 9 ? '9+' : totalUnread}
+            </span>
+          )}
+        </Link>
 
         {/* Responsive Admin Notification Center */}
         <NotificationDropdown role="admin" />

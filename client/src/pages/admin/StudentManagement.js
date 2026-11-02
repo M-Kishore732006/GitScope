@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { 
   FaUserGraduate, 
@@ -15,12 +16,14 @@ import {
   FaBook,
   FaCodeBranch,
   FaStar,
-  FaTimes
+  FaTimes,
+  FaComments
 } from 'react-icons/fa';
 import { toTitleCase } from '../../utils/formatters';
 import '../../styles/dashboard.css';
 
 const StudentManagement = () => {
+  const navigate = useNavigate();
   const [students, setStudents] = useState([]);
   const [staffList, setStaffList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -315,6 +318,15 @@ const StudentManagement = () => {
 
                       <td className="text-end px-4">
                         <div className="d-flex justify-content-end gap-2">
+                          <button 
+                            className="btn btn-sm btn-light border text-primary d-inline-flex align-items-center justify-content-center rounded-2" 
+                            style={{ width: '32px', height: '32px' }}
+                            title="Direct Message Student"
+                            onClick={() => navigate(`/admin/messages?userId=${st._id}`)}
+                          >
+                            <FaComments />
+                          </button>
+
                           <button 
                             className="btn btn-sm btn-light border text-secondary d-inline-flex align-items-center justify-content-center rounded-2" 
                             style={{ width: '32px', height: '32px' }}

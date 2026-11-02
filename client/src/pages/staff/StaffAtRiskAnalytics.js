@@ -638,9 +638,9 @@ const StaffAtRiskAnalytics = () => {
 
                           {/* Instant Chat */}
                           <button
-                            onClick={() => navigate('/staff/messages')}
+                            onClick={() => navigate(`/staff/messages?userId=${student._id}`)}
                             className="btn btn-xs btn-light border rounded-circle p-2 text-primary shadow-sm"
-                            title="Direct Message in Chat"
+                            title={`Direct Message ${student.fullName || student.username} in Chat`}
                           >
                             <FaComments style={{ fontSize: '0.75rem' }} />
                           </button>

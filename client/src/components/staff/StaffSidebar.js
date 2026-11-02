@@ -71,7 +71,7 @@ const StaffSidebar = ({ mobileOpen, closeSidebar, collapsed, toggleSidebar }) =>
 
         <NavLink to="/staff/messages" className={({ isActive }) => `sidebar-link d-flex align-items-center justify-content-between ${isActive ? 'active' : ''}`}>
           <span className="d-flex align-items-center">
-            <FaComments className="icon me-2" /> Messages
+            <FaComments className="icon" /> Messages
           </span>
           {totalUnread > 0 && (
             <span className="badge bg-danger rounded-pill px-2 py-1 small">

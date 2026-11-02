@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, Outlet } from 'react-router-dom';
+import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import StaffSidebar from './StaffSidebar';
 import StaffTopNav from './StaffTopNav';
 import '../../styles/dashboard.css';
 
 const StaffLayout = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isMessagesPage = location.pathname.includes('/messages');
   const [staffUser, setStaffUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [inactiveError, setInactiveError] = useState(false);
@@ -103,14 +105,14 @@ const StaffLayout = () => {
         toggleSidebar={toggleSidebar} 
       />
       {sidebarOpen && <div className="sidebar-backdrop d-lg-none" onClick={closeSidebar}></div>}
-      <div className={`main-content ${sidebarCollapsed ? 'expanded-full' : ''}`}>
+      <div className={`main-content ${sidebarCollapsed ? 'expanded-full' : ''} ${isMessagesPage ? 'main-content-chat' : ''}`}>
         <StaffTopNav 
           user={staffUser} 
           handleLogout={handleLogout} 
           toggleSidebar={toggleSidebar} 
           sidebarCollapsed={sidebarCollapsed}
         />
-        <main className="p-3 p-md-4 p-lg-5">
+        <main className={isMessagesPage ? "chat-page-main" : "p-3 p-md-4 p-lg-5"}>
           <Outlet context={{ user: staffUser }} />
         </main>
       </div>

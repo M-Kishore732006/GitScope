@@ -73,10 +73,11 @@ const ChatThread = ({
   const isGroup = conversation?.type === 'group';
   const isGlobal = conversation?.type === 'global';
   const otherParticipant = (!isGroup && !isGlobal)
-    ? conversation?.participants?.find(p => String(p._id) !== String(currentUserId)) || {} 
+    ? conversation?.participants?.find(p => String(p?._id || p) !== String(currentUserId)) || {} 
     : null;
 
-  const presence = otherParticipant ? onlineUsers[otherParticipant._id] : null;
+  const otherId = String(otherParticipant?._id || otherParticipant || '');
+  const presence = otherId ? onlineUsers[otherId] : null;
   const isOnline = presence ? presence.isOnline : otherParticipant?.isOnline;
   const lastSeen = presence?.lastSeen || otherParticipant?.lastSeen;
 
@@ -379,11 +380,13 @@ const ChatThread = ({
         <div className="d-flex align-items-center gap-2">
           {/* Back Button on Mobile */}
           <button 
-            className="btn btn-sm text-muted d-md-none p-1 border-0" 
+            className="btn btn-sm btn-light border rounded-circle p-2 text-primary d-md-none me-1 shadow-sm d-flex align-items-center justify-content-center" 
+            style={{ width: 34, height: 34 }}
             onClick={onBack}
+            title="Back to conversations list"
             aria-label="Back to conversations"
           >
-            <FaArrowLeft />
+            <FaArrowLeft style={{ fontSize: '0.85rem' }} />
           </button>
 
           <div className="avatar-wrapper">

@@ -60,7 +60,8 @@ const ContactSelection = ({
           </div>
         ) : filteredContacts.length > 0 ? (
           filteredContacts.map(contact => {
-            const presence = onlineUsers[contact._id];
+            const contactIdStr = String(contact._id);
+            const presence = onlineUsers[contactIdStr] || onlineUsers[contact._id];
             const isOnline = presence ? presence.isOnline : contact.isOnline;
 
             return (
@@ -79,8 +80,8 @@ const ContactSelection = ({
 
                 {/* Details */}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div className="d-flex align-items-center justify-content-between mb-1">
-                    <span className="fw-bold text-main small text-truncate" style={{ maxWidth: '170px' }}>
+                  <div className="d-flex align-items-center justify-content-between mb-1 gap-2">
+                    <span className="fw-bold text-main small text-truncate flex-grow-1" style={{ minWidth: 0 }}>
                       {contact.fullName || contact.username}
                     </span>
 

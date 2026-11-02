@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { FaSearch, FaChevronDown, FaBars, FaSignOutAlt, FaUser, FaSun, FaMoon, FaComments } from 'react-icons/fa';
 import { toTitleCase } from '../../utils/formatters';
 import { useTheme } from '../../context/ThemeContext';
@@ -8,6 +8,7 @@ import NotificationDropdown from '../NotificationDropdown';
 
 const StaffTopNav = ({ user, handleLogout, toggleSidebar, sidebarCollapsed }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef(null);
@@ -75,7 +76,7 @@ const StaffTopNav = ({ user, handleLogout, toggleSidebar, sidebarCollapsed }) =>
         {/* Chat Messages Button */}
         <Link 
           to="/staff/messages"
-          className="btn btn-light rounded-circle shadow-sm border p-2 text-muted theme-btn-icon d-flex align-items-center justify-content-center position-relative"
+          className={`btn btn-light rounded-circle shadow-sm border p-2 text-muted theme-btn-icon d-flex align-items-center justify-content-center position-relative ${location.pathname.includes('/messages') ? 'active bg-primary-subtle text-primary border-primary' : ''}`}
           style={{ width: 40, height: 40 }}
           title="Messages"
           aria-label="Messages"

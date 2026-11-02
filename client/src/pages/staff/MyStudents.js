@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { 
   FaSearch, 
@@ -10,12 +10,14 @@ import {
   FaUserGraduate, 
   FaSync,
   FaEye,
-  FaLayerGroup
+  FaLayerGroup,
+  FaComments
 } from 'react-icons/fa';
 import StaffStudentProfileModal from './StaffStudentProfileModal';
 import { toTitleCase } from '../../utils/formatters';
 
 const MyStudents = () => {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -250,8 +252,18 @@ const MyStudents = () => {
                       <span className="badge bg-primary px-2 py-1">{st.contributionScore} pts</span>
                     </td>
                     <td className="text-end">
+                      <button 
+                        className="btn btn-sm btn-light me-1 border text-primary" 
+                        title="Direct Message in Chat" 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/staff/messages?userId=${st._id}`);
+                        }}
+                      >
+                        <FaComments />
+                      </button>
                       <button className="btn btn-sm btn-light me-1 border" title="View Student Telemetry" onClick={() => setSelectedStudentId(st._id)}>
-                        <FaEye className="text-primary" />
+                        <FaEye className="text-secondary" />
                       </button>
                       {st.githubLinked && (
                         <button className="btn btn-sm btn-outline-primary border" title="Sync GitHub Data" onClick={(e) => handleSyncStudent(st._id, e)}>

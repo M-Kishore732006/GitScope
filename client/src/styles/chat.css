@@ -2,10 +2,39 @@
    GITSCOPE REAL-TIME CHAT & COLLABORATION STYLES
    ========================================================= */
 
+/* Layout helper classes for dashboard integration */
+.chat-page-main {
+  flex: 1;
+  min-height: 0;
+  height: calc(100vh - 70px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100%;
+}
+
+.main-content-chat {
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden !important;
+}
+
+.theme-btn-icon.active {
+  background-color: rgba(109, 94, 245, 0.15) !important;
+  color: var(--primary) !important;
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 2px rgba(109, 94, 245, 0.25) !important;
+}
+
 .chat-container {
   display: flex;
-  height: calc(100vh - 75px);
-  max-height: calc(100vh - 75px);
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  width: 100%;
+  max-width: 100%;
   background-color: var(--bg-color);
   overflow: hidden;
   position: relative;
@@ -486,23 +515,62 @@
 }
 
 /* ---------------------------------------------------------
-   RESPONSIVE MOBILE ADAPTATION
+   RESPONSIVE MOBILE & TABLET ADAPTATION
    --------------------------------------------------------- */
 @media (max-width: 768px) {
+  .chat-page-main {
+    height: calc(100dvh - 65px);
+  }
+
   .chat-sidebar {
-    width: 100%;
-    max-width: 100%;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    border-right: none;
   }
 
   .chat-sidebar.chat-sidebar-hidden {
-    display: none;
+    display: none !important;
   }
 
   .chat-main.chat-main-hidden {
-    display: none;
+    display: none !important;
+  }
+
+  .chat-main {
+    width: 100% !important;
+    min-width: 100% !important;
   }
 
   .message-bubble {
-    max-width: 82%;
+    max-width: 88%;
+    font-size: 0.875rem;
+  }
+
+  .chat-messages-area {
+    padding: 0.75rem 0.5rem;
+    gap: 0.5rem;
+  }
+
+  .chat-input-bar {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .chat-textarea {
+    min-height: 38px;
+    font-size: 0.85rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .btn-chat-action {
+    width: 38px;
+    height: 38px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .chat-sidebar {
+    width: 310px;
+    min-width: 280px;
   }
 }

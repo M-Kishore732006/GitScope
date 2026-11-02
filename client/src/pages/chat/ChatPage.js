@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { FaComments, FaUserGraduate, FaPlus, FaGlobe } from 'react-icons/fa';
@@ -13,6 +13,7 @@ import '../../styles/chat.css';
 const ChatPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const queryConvId = searchParams.get('conv');
+  const targetUserId = searchParams.get('userId') || searchParams.get('studentId') || searchParams.get('user');
 
   const { 
     socket, 
@@ -34,6 +35,11 @@ const ChatPage = () => {
   const [showGroupMembers, setShowGroupMembers] = useState(false);
   const [typingStatusMap, setTypingStatusMap] = useState({}); // { [convId]: userName }
 
+  // Lifecycle refs to prevent race conditions & selection locking
+  const activeConversationRef = useRef(null);
+  const initialHandledRef = useRef(false);
+  const processedTargetUserRef = useRef(null);
+
   // Current User Info
   const userInfo = useMemo(() => {
     try {
@@ -46,20 +52,29 @@ const ChatPage = () => {
   const currentUserId = userInfo._id || userInfo.id;
   const userRole = userInfo.role;
 
-  // Immediate sync of queryConvId with SocketContext
+  // Keep activeConversationRef in sync with state
   useEffect(() => {
-    if (queryConvId) {
-      setActiveConversationId(queryConvId);
-    }
-  }, [queryConvId, setActiveConversationId]);
+    activeConversationRef.current = activeConversation;
+  }, [activeConversation]);
 
-  // Handle selecting a conversation
+  // Handle selecting a conversation cleanly
   const handleSelectConversation = useCallback((conv) => {
-    if (!conv) return;
+    if (!conv || !conv._id) return;
     const convId = String(conv._id);
+
+    // Leave previous conversation room if switching
+    if (activeConversationRef.current && String(activeConversationRef.current._id) !== convId) {
+      leaveConversation(String(activeConversationRef.current._id));
+    }
+
     setActiveConversation(conv);
+    activeConversationRef.current = conv;
     setActiveConversationId(convId);
+    joinConversation(convId);
     clearUnreadForConversation(convId);
+
+    // Synchronously update URL search params so the active conv is reflected without snapping back
+    setSearchParams({ conv: convId }, { replace: true });
 
     // Clear unread on select locally
     setConversations(prev => prev.map(c => 
@@ -78,7 +93,7 @@ const ChatPage = () => {
     if (socket) {
       socket.emit('message:read', { conversationId: convId });
     }
-  }, [userInfo?.token, setActiveConversationId, clearUnreadForConversation, fetchTotalUnread, socket]);
+  }, [userInfo?.token, leaveConversation, setActiveConversationId, joinConversation, clearUnreadForConversation, setSearchParams, fetchTotalUnread, socket]);
 
   // 1. Fetch Conversations
   const fetchConversations = useCallback(async () => {
@@ -89,33 +104,12 @@ const ChatPage = () => {
         headers: { Authorization: `Bearer ${userInfo.token}` }
       });
       setConversations(res.data);
-
-      // If queryConvId present, select it and mark as read
-      if (queryConvId) {
-        const found = res.data.find(c => String(c._id) === String(queryConvId));
-        if (found) {
-          const clearedFound = { ...found, unreadCount: 0 };
-          setActiveConversation(clearedFound);
-          setActiveConversationId(queryConvId);
-          clearUnreadForConversation(queryConvId);
-
-          axios.post(`/api/chat/conversations/${queryConvId}/read`, {}, {
-            headers: { Authorization: `Bearer ${userInfo.token}` }
-          }).then(() => {
-            fetchTotalUnread();
-          }).catch(() => {});
-
-          if (socket) {
-            socket.emit('message:read', { conversationId: queryConvId });
-          }
-        }
-      }
     } catch (err) {
       console.error('Failed to load conversations:', err);
     } finally {
       setLoadingConversations(false);
     }
-  }, [userInfo?.token, queryConvId, socket, setActiveConversationId, clearUnreadForConversation, fetchTotalUnread]);
+  }, [userInfo?.token]);
 
   // 2. Fetch Eligible Contacts
   const fetchContacts = useCallback(async () => {
@@ -139,36 +133,77 @@ const ChatPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userInfo?.token]);
 
-  // Sync route query change if conversations already loaded
+  // Back to conversations handler for mobile and desktop
+  const handleBackToConversations = useCallback(() => {
+    if (activeConversationRef.current?._id) {
+      leaveConversation(String(activeConversationRef.current._id));
+    }
+    setActiveConversation(null);
+    activeConversationRef.current = null;
+    setActiveConversationId(null);
+    setSearchParams({}, { replace: true });
+  }, [leaveConversation, setActiveConversationId, setSearchParams]);
+
+  // Handle direct message navigation with target user ID (from student/staff lists)
   useEffect(() => {
-    if (queryConvId && conversations.length > 0) {
+    if (!targetUserId || !userInfo?.token || loadingConversations) return;
+    if (processedTargetUserRef.current === targetUserId) return;
+
+    processedTargetUserRef.current = targetUserId;
+
+    const openChatWithUser = async () => {
+      // First check if private conversation already exists in loaded conversations
+      const existing = conversations.find(c => 
+        c.type === 'private' && c.participants?.some(p => String(p?._id || p) === String(targetUserId))
+      );
+
+      if (existing) {
+        initialHandledRef.current = true;
+        handleSelectConversation(existing);
+        return;
+      }
+
+      // If not yet in list, create or fetch via backend
+      try {
+        const res = await axios.post('/api/chat/conversations/private', {
+          recipientId: targetUserId
+        }, {
+          headers: { Authorization: `Bearer ${userInfo.token}` }
+        });
+        const conv = res.data;
+        setConversations(prev => [conv, ...prev.filter(c => String(c._id) !== String(conv._id))]);
+        initialHandledRef.current = true;
+        handleSelectConversation(conv);
+      } catch (err) {
+        console.error('Failed to open private chat with user:', err);
+      }
+    };
+
+    openChatWithUser();
+  }, [targetUserId, userInfo?.token, loadingConversations, conversations, handleSelectConversation]);
+
+  // Initial load selection for deep linked conv parameter (Runs ONCE when conversations load)
+  useEffect(() => {
+    if (loadingConversations || conversations.length === 0) return;
+    if (targetUserId) return; // targetUserId takes precedence
+
+    if (queryConvId && !initialHandledRef.current) {
       const found = conversations.find(c => String(c._id) === String(queryConvId));
-      if (found && String(activeConversation?._id) !== String(queryConvId)) {
+      if (found) {
+        initialHandledRef.current = true;
         handleSelectConversation(found);
       }
     }
-  }, [queryConvId, conversations, activeConversation?._id, handleSelectConversation]);
+  }, [loadingConversations, conversations, queryConvId, targetUserId, handleSelectConversation]);
 
-  // Sync active conversation with socket & URL
+  // Leave active room on complete unmount
   useEffect(() => {
-    if (activeConversation?._id) {
-      const convId = String(activeConversation._id);
-      setActiveConversationId(convId);
-      joinConversation(convId);
-      setSearchParams({ conv: convId }, { replace: true });
-    } else if (queryConvId) {
-      setActiveConversationId(queryConvId);
-      joinConversation(queryConvId);
-    } else {
-      setActiveConversationId(null);
-    }
-
     return () => {
-      if (activeConversation?._id) {
-        leaveConversation(String(activeConversation._id));
+      if (activeConversationRef.current?._id) {
+        leaveConversation(String(activeConversationRef.current._id));
       }
     };
-  }, [activeConversation?._id, queryConvId, setActiveConversationId, joinConversation, leaveConversation, setSearchParams]);
+  }, [leaveConversation]);
 
   // Real-time socket events for conversation list & typing
   useEffect(() => {
@@ -176,7 +211,7 @@ const ChatPage = () => {
 
     const handleNewMessage = ({ message, conversationId }) => {
       const convIdStr = String(conversationId);
-      const activeIdStr = String(activeConversation?._id || queryConvId || '');
+      const activeIdStr = String(activeConversationRef.current?._id || '');
       const isCurrentlyActive = Boolean(activeIdStr && convIdStr === activeIdStr);
 
       setConversations(prev => {
@@ -233,7 +268,7 @@ const ChatPage = () => {
     };
 
     const handleGroupCreated = (newGroup) => {
-      setConversations(prev => [newGroup, ...prev.filter(c => c._id !== newGroup._id)]);
+      setConversations(prev => [newGroup, ...prev.filter(c => String(c._id) !== String(newGroup._id))]);
     };
 
     const handleTypingStart = ({ conversationId, userName }) => {
@@ -266,19 +301,24 @@ const ChatPage = () => {
       socket.off('typing:start', handleTypingStart);
       socket.off('typing:stop', handleTypingStop);
     };
-  }, [socket, activeConversation?._id, queryConvId, fetchConversations, fetchTotalUnread]);
+  }, [socket, fetchConversations, fetchTotalUnread]);
 
-  // Selecting a contact initiates or opens a private conversation
+  // Selecting a contact initiates or opens a private conversation cleanly
   const handleSelectContact = async (contact) => {
+    if (!contact || !contact._id) return;
     try {
-      // If contact already has conversationId, open it
-      if (contact.conversationId) {
-        const existing = conversations.find(c => c._id === contact.conversationId);
-        if (existing) {
-          setActiveConversation(existing);
-          setActiveTab('CONVERSATIONS');
-          return;
-        }
+      const contactIdStr = String(contact._id);
+
+      // Check if conversation already exists in loaded conversations
+      const existing = conversations.find(c => 
+        (contact.conversationId && String(c._id) === String(contact.conversationId)) ||
+        (c.type === 'private' && c.participants?.some(p => String(p?._id || p) === contactIdStr))
+      );
+
+      if (existing) {
+        handleSelectConversation(existing);
+        setActiveTab('CONVERSATIONS');
+        return;
       }
 
       // Otherwise create/fetch private conversation via backend
@@ -289,8 +329,8 @@ const ChatPage = () => {
       });
 
       const conv = res.data;
-      setConversations(prev => [conv, ...prev.filter(c => c._id !== conv._id)]);
-      setActiveConversation(conv);
+      setConversations(prev => [conv, ...prev.filter(c => String(c._id) !== String(conv._id))]);
+      handleSelectConversation(conv);
       setActiveTab('CONVERSATIONS');
       fetchTotalUnread();
     } catch (err) {
@@ -299,16 +339,17 @@ const ChatPage = () => {
   };
 
   const handleGroupCreated = (newGroup) => {
-    setConversations(prev => [newGroup, ...prev.filter(c => c._id !== newGroup._id)]);
-    setActiveConversation(newGroup);
+    setConversations(prev => [newGroup, ...prev.filter(c => String(c._id) !== String(newGroup._id))]);
+    handleSelectConversation(newGroup);
     setActiveTab('CONVERSATIONS');
     fetchTotalUnread();
   };
 
   const handleLeftGroup = (groupId) => {
-    setConversations(prev => prev.filter(c => c._id !== groupId));
-    if (activeConversation?._id === groupId) {
-      setActiveConversation(null);
+    const groupIdStr = String(groupId);
+    setConversations(prev => prev.filter(c => String(c._id) !== groupIdStr));
+    if (String(activeConversationRef.current?._id) === groupIdStr) {
+      handleBackToConversations();
     }
     fetchTotalUnread();
   };
@@ -420,13 +461,14 @@ const ChatPage = () => {
       <div className={`chat-main ${!activeConversation ? 'chat-main-hidden d-none d-md-flex' : 'd-flex'}`}>
         {activeConversation ? (
           <ChatThread 
+            key={String(activeConversation._id)}
             conversation={activeConversation}
             currentUserId={currentUserId}
-            onBack={() => setActiveConversation(null)}
+            onBack={handleBackToConversations}
             onOpenGroupMembers={() => setShowGroupMembers(true)}
             onlineUsers={onlineUsers}
             socket={socket}
-            typingUser={typingStatusMap[activeConversation._id]}
+            typingUser={typingStatusMap[String(activeConversation._id)]}
           />
         ) : (
           <div className="d-flex flex-column align-items-center justify-content-center h-100 text-muted p-4">

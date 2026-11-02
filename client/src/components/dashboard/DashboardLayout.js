@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate, Outlet } from 'react-router-dom';
+import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import TopNav from './TopNav';
 import '../../styles/dashboard.css';
 
 const DashboardLayout = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isMessagesPage = location.pathname.includes('/messages');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [clientId, setClientId] = useState('');
@@ -79,7 +81,7 @@ const DashboardLayout = () => {
        />
        {sidebarOpen && <div className="sidebar-backdrop d-lg-none" onClick={closeSidebar}></div>}
        
-       <div className={`main-content ${sidebarCollapsed ? 'expanded-full' : ''}`}>
+       <div className={`main-content ${sidebarCollapsed ? 'expanded-full' : ''} ${isMessagesPage ? 'main-content-chat' : ''}`}>
           <TopNav 
             user={user} 
             stats={stats} 
@@ -88,7 +90,9 @@ const DashboardLayout = () => {
             sidebarCollapsed={sidebarCollapsed}
           />
           
-          <Outlet context={{ user, stats, clientId, fetchDashboardData }} />
+          <div className={isMessagesPage ? "chat-page-main" : ""}>
+            <Outlet context={{ user, stats, clientId, fetchDashboardData }} />
+          </div>
        </div>
     </div>
   );
